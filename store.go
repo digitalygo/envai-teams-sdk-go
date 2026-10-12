@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer"
 )
 
 type CallState string
@@ -28,9 +30,19 @@ type CallIdentity struct {
 	ToolName  string `json:"tool_name"`
 }
 type CallStore interface {
+	// Claim must atomically reserve absent identities and never reclaim existing
+	// or corrupt records. Record must reject corrupt data without overwriting it.
 	Claim(context.Context, CallIdentity) (bool, error)
 	Record(context.Context, CallIdentity, CallState) error
 	State(context.Context, CallIdentity) (CallState, bool, error)
+}
+
+func validCallState(state CallState) bool {
+	switch state {
+	case CallStarted, CallSubmitted, CallResolved, CallAmbiguous:
+		return true
+	}
+	return false
 }
 
 func identityKey(id CallIdentity) string {
@@ -52,7 +64,10 @@ func (s *MemoryCallStore) Claim(ctx context.Context, id CallIdentity) (bool, err
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	key := identityKey(id)
-	if _, ok := s.calls[key]; ok {
+	if state, ok := s.calls[key]; ok {
+		if !validCallState(state) {
+			return false, errors.New("envai: corrupt call state; reconciliation required")
+		}
 		return false, nil
 	}
 	s.calls[key] = CallStarted
@@ -62,11 +77,18 @@ func (s *MemoryCallStore) Record(ctx context.Context, id CallIdentity, state Cal
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	if !validCallState(state) {
+		return errors.New("envai: invalid call state")
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	key := identityKey(id)
-	if _, ok := s.calls[key]; !ok {
+	old, ok := s.calls[key]
+	if !ok {
 		return errors.New("envai: cannot update unclaimed call")
+	}
+	if !validCallState(old) {
+		return errors.New("envai: corrupt call state; reconciliation required")
 	}
 	s.calls[key] = state
 	return nil
@@ -124,6 +146,9 @@ func (s *FileCallStore) Record(ctx context.Context, id CallIdentity, state CallS
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	if !validCallState(state) {
+		return errors.New("envai: invalid call state")
+	}
 	dir := filepath.Join(s.root, identityKey(id))
 	info, err := os.Lstat(dir)
 	if err != nil {
@@ -132,7 +157,12 @@ func (s *FileCallStore) Record(ctx context.Context, id CallIdentity, state CallS
 	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 		return errors.New("envai: invalid call record directory")
 	}
-	return s.write(dir, id, state)
+	record, err := readCallRecord(dir, id)
+	if err != nil {
+		return err
+	}
+	// Outcome events may omit the tool name; preserve the recorded identity.
+	return s.write(dir, record.Identity, state)
 }
 func (s *FileCallStore) write(dir string, id CallIdentity, state CallState) error {
 	b, err := json.Marshal(callRecord{id, state})
@@ -174,6 +204,9 @@ func (s *MemoryCallStore) State(ctx context.Context, id CallIdentity) (CallState
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	state, ok := s.calls[identityKey(id)]
+	if ok && !validCallState(state) {
+		return "", true, errors.New("envai: corrupt call state; reconciliation required")
+	}
 	return state, ok, nil
 }
 func (s *FileCallStore) State(ctx context.Context, id CallIdentity) (CallState, bool, error) {
@@ -191,23 +224,60 @@ func (s *FileCallStore) State(ctx context.Context, id CallIdentity) (CallState, 
 	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
 		return "", true, errors.New("envai: invalid call state directory")
 	}
-	b, err := os.ReadFile(filepath.Join(dir, "state.json"))
+	record, err := readCallRecord(dir, id)
 	if errors.Is(err, os.ErrNotExist) {
 		return CallAmbiguous, true, nil
 	}
 	if err != nil {
 		return "", true, err
 	}
+	return record.State, true, nil
+}
+
+// Decode the persisted shape explicitly: encoding/json alone accepts null and
+// silently fills missing fields with zero values. Never repair these on a write.
+func readCallRecord(dir string, expected CallIdentity) (callRecord, error) {
 	var record callRecord
-	if err = json.Unmarshal(b, &record); err != nil {
-		return "", true, errors.New("envai: corrupt call state; reconciliation required")
+	path := filepath.Join(dir, "state.json")
+	info, err := os.Lstat(path)
+	if err != nil {
+		return record, err
 	}
-	if identityKey(record.Identity) != identityKey(id) {
-		return "", true, errors.New("envai: mismatched call state")
+	if !info.Mode().IsRegular() {
+		return record, errors.New("envai: invalid call state file")
 	}
-	switch record.State {
-	case CallStarted, CallSubmitted, CallResolved, CallAmbiguous:
-		return record.State, true, nil
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return record, err
 	}
-	return "", true, errors.New("envai: invalid call state")
+	corrupt := errors.New("envai: corrupt call state; reconciliation required")
+	// Canonical parsing also rejects duplicate keys and invalid Unicode.
+	if _, err = jsoncanonicalizer.Transform(b); err != nil {
+		return record, corrupt
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(b, &fields) != nil || len(fields) != 2 {
+		return record, corrupt
+	}
+	var state *CallState
+	if json.Unmarshal(fields["state"], &state) != nil || state == nil || !validCallState(*state) {
+		return record, corrupt
+	}
+	var identity map[string]json.RawMessage
+	if json.Unmarshal(fields["identity"], &identity) != nil || len(identity) != 5 {
+		return record, corrupt
+	}
+	for _, name := range []string{"namespace", "chat_id", "call_id", "turn_id", "tool_name"} {
+		var value *string
+		if json.Unmarshal(identity[name], &value) != nil || value == nil {
+			return record, corrupt
+		}
+	}
+	if json.Unmarshal(b, &record) != nil || !validCallState(record.State) {
+		return record, corrupt
+	}
+	if identityKey(record.Identity) != identityKey(expected) || (expected.TurnID != "" && record.Identity.TurnID != expected.TurnID) || (expected.ToolName != "" && record.Identity.ToolName != expected.ToolName) {
+		return record, errors.New("envai: mismatched call state")
+	}
+	return record, nil
 }
