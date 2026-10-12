@@ -1,0 +1,1090 @@
+[
+  {
+    "id": "sendChatMessage",
+    "go_name": "SendChatMessage",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "message": "Summarize the last week of traffic"
+    },
+    "status": 202,
+    "response": {
+      "status": "accepted",
+      "turn_id": "cmpl_01j5abcdefghjkmnpqrstvwxyz"
+    }
+  },
+  {
+    "id": "streamChatEvents",
+    "go_name": "StreamChatEvents",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "After": 42
+    },
+    "body": null,
+    "status": 200,
+    "response": null
+  },
+  {
+    "id": "cancelChatTurn",
+    "go_name": "CancelChatTurn",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 202,
+    "response": {
+      "turn_id": "cmpl_01j5abcdefghjkmnpqrstvwxyz"
+    }
+  },
+  {
+    "id": "steerChatTurn",
+    "go_name": "SteerChatTurn",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "text": "Prefer the cheaper provider for this turn",
+      "target_agent_id": "ag_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "status": 202,
+    "response": {
+      "turn_id": "cmpl_01j5abcdefghjkmnpqrstvwxyz"
+    }
+  },
+  {
+    "id": "resolveChatTool",
+    "go_name": "ResolveChatTool",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "call_id": "tc_01j5abcdefghjkmnpqrstvwxyz",
+      "output": "{\"order_id\": \"ord_123\", \"total_cents\": 4900}",
+      "is_error": false
+    },
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "resolveChatApproval",
+    "go_name": "ResolveChatApproval",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "approval_id": "appr_01j5abcdefghjkmnpqrstvwxyz",
+      "approve": true,
+      "reason": "Approved, keep the budget under 10 dollars"
+    },
+    "status": 409,
+    "response": {
+      "error": {
+        "type": "conflict",
+        "message": "approval unavailable"
+      }
+    }
+  },
+  {
+    "id": "forkChat",
+    "go_name": "ForkChat",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "destination_chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "status": 200,
+    "response": {
+      "source_chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "destination_chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    }
+  },
+  {
+    "id": "restoreChat",
+    "go_name": "RestoreChat",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "orchestrator_context": [
+        {
+          "kind": "compacted",
+          "content": "Compattazione del contesto fino al turno cmpl_01j5abcdefghjkmnpqrstvwxyz."
+        },
+        {
+          "kind": "assistant",
+          "turn_id": "cmpl_01j5abcdefghjkmnpqrstvwxyz",
+          "content": "Ecco l'analisi del traffico: 12k visitatori, +8% rispetto alla scorsa settimana."
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "status": "restored",
+      "turn_id": null
+    }
+  },
+  {
+    "id": "getCapabilities",
+    "go_name": "GetCapabilities",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "protocol_version": 2,
+      "families": [],
+      "event_types": [
+        "ping",
+        "turn.started",
+        "turn.completed",
+        "turn.cancelled",
+        "turn.failed",
+        "turn.steered",
+        "agent.started",
+        "agent.text.delta",
+        "agent.text.done",
+        "agent.delegated",
+        "agent.tool.start",
+        "agent.tool.complete",
+        "agent.tool.request",
+        "agent.tool.result",
+        "agent.context.compacting",
+        "agent.context.compacted",
+        "agent.done"
+      ],
+      "tool_kinds": [],
+      "features": []
+    }
+  },
+  {
+    "id": "healthCheck",
+    "go_name": "HealthCheck",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "status": "up",
+        "timestamp": "2026-03-01T12:00:00+00:00",
+        "app": "Laravel",
+        "env": "local"
+      }
+    }
+  },
+  {
+    "id": "getJwks",
+    "go_name": "GetJWKS",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "keys": []
+    }
+  },
+  {
+    "id": "createWorkspace",
+    "go_name": "CreateWorkspace",
+    "parameters": {},
+    "body": {
+      "name": "Product analytics",
+      "metadata": {}
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "Product analytics",
+        "metadata": {},
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "listWorkspaces",
+    "go_name": "ListWorkspaces",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "getWorkspace",
+    "go_name": "GetWorkspace",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "Product analytics",
+        "metadata": {},
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "updateWorkspace",
+    "go_name": "UpdateWorkspace",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "name": "Product analytics",
+      "metadata": {}
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "Product analytics",
+        "metadata": {},
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "createUserTool",
+    "go_name": "CreateUserTool",
+    "parameters": {},
+    "body": {
+      "name": "send_email",
+      "kind": "client",
+      "description": "Send an email through the client SMTP server",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient email"
+          }
+        },
+        "required": [
+          "to"
+        ]
+      },
+      "timeout_seconds": 120
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "twl_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "send_email",
+        "kind": "client",
+        "description": "Send an email through the client SMTP server",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "string",
+              "description": "Recipient email"
+            }
+          },
+          "required": [
+            "to"
+          ]
+        },
+        "timeout_seconds": 120,
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "listUserTools",
+    "go_name": "ListUserTools",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "getUserTool",
+    "go_name": "GetUserTool",
+    "parameters": {
+      "Name": "send_email"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "twl_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "send_email",
+        "kind": "client",
+        "description": "Send an email through the client SMTP server",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "string",
+              "description": "Recipient email"
+            }
+          },
+          "required": [
+            "to"
+          ]
+        },
+        "timeout_seconds": 120,
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "updateUserTool",
+    "go_name": "UpdateUserTool",
+    "parameters": {
+      "Name": "send_email"
+    },
+    "body": {
+      "description": "fixture",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "description": "Recipient email"
+          }
+        },
+        "required": [
+          "to"
+        ]
+      },
+      "timeout_seconds": 1
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "twl_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "send_email",
+        "kind": "client",
+        "description": "Send an email through the client SMTP server",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "type": "string",
+              "description": "Recipient email"
+            }
+          },
+          "required": [
+            "to"
+          ]
+        },
+        "timeout_seconds": 120,
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "deleteUserTool",
+    "go_name": "DeleteUserTool",
+    "parameters": {
+      "Name": "send_email"
+    },
+    "body": null,
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "createChat",
+    "go_name": "CreateChat",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "team_id": "team_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "listChats",
+    "go_name": "ListChats",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "getChat",
+    "go_name": "GetChat",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "listCompletions",
+    "go_name": "ListCompletions",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "Status": "running",
+      "ModelOrchestrator": "fixture",
+      "StartedAtFrom": "fixture",
+      "StartedAtTo": "fixture",
+      "PerPage": 1
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": [],
+      "links": {
+        "first": "fixture",
+        "last": "fixture",
+        "prev": "fixture",
+        "next": "fixture"
+      },
+      "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 1,
+        "to": 1,
+        "total": 1
+      }
+    }
+  },
+  {
+    "id": "getCompletion",
+    "go_name": "GetCompletion",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "CompletionID": "cmpl_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "cmpl_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "model_orchestrator": "anthropic/claude-sonnet-4",
+        "models_subagents": [
+          "openai/gpt-4o"
+        ],
+        "started_at": "fixture",
+        "finished_at": "fixture",
+        "duration_ms": 1,
+        "usage": {
+          "prompt_tokens": 1,
+          "completion_tokens": 1,
+          "sprite_cpu_ms": 1,
+          "sprite_ram_gb_ms": 1
+        },
+        "cost_usd": 1,
+        "status": "running",
+        "finish_reason": "stop",
+        "content_hash": "fixture",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "indexWorkspaceFiles",
+    "go_name": "IndexWorkspaceFiles",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "Path": "/wiki/guide.md"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "path": "wiki/guide.md",
+        "name": "guide.md",
+        "type": "file",
+        "size": 2048,
+        "modified_at": "2026-08-17T14:01:00+00:00",
+        "mime_type": "text/markdown",
+        "content": "# Guide",
+        "entries": []
+      }
+    }
+  },
+  {
+    "id": "createWorkspaceFile",
+    "go_name": "CreateWorkspaceFile",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "path": "/wiki/guide.md",
+      "content": "# Guide"
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "path": "wiki/guide.md",
+        "name": "guide.md",
+        "type": "file",
+        "size": 2048,
+        "modified_at": "2026-08-17T14:01:00+00:00",
+        "mime_type": "text/markdown",
+        "content": "# Guide",
+        "entries": []
+      }
+    }
+  },
+  {
+    "id": "updateWorkspaceFile",
+    "go_name": "UpdateWorkspaceFile",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "path": "/wiki/guide.md",
+      "content": "# Guide"
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "path": "wiki/guide.md",
+        "name": "guide.md",
+        "type": "file",
+        "size": 2048,
+        "modified_at": "2026-08-17T14:01:00+00:00",
+        "mime_type": "text/markdown",
+        "content": "# Guide",
+        "entries": []
+      }
+    }
+  },
+  {
+    "id": "deleteWorkspaceFile",
+    "go_name": "DeleteWorkspaceFile",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "Path": "/wiki/guide.md",
+      "Recursive": true
+    },
+    "body": null,
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "downloadWorkspaceFile",
+    "go_name": "DownloadWorkspaceFile",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "Path": "/wiki/guide.md"
+    },
+    "body": null,
+    "status": 200,
+    "response": null
+  },
+  {
+    "id": "convertWorkspaceFileToPdf",
+    "go_name": "ConvertWorkspaceFileToPDF",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "path": "/wiki/guide.md"
+    },
+    "status": 200,
+    "response": null
+  },
+  {
+    "id": "createAgent",
+    "go_name": "CreateAgent",
+    "parameters": {},
+    "body": {
+      "name": "researcher",
+      "description": "fixture",
+      "system_prompt": "fixture",
+      "model": "anthropic/claude-sonnet-4-5",
+      "mode": "primary",
+      "tools_enabled": [],
+      "external_tools_enabled": [],
+      "permissions": {},
+      "can_write_knowledge": true,
+      "can_write_skills": true,
+      "config": {}
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "researcher",
+        "description": "Research specialist",
+        "system_prompt": "fixture",
+        "model": "anthropic/claude-sonnet-4-5",
+        "mode": "primary",
+        "tools_enabled": [],
+        "external_tools_enabled": [],
+        "permissions": {},
+        "can_write_knowledge": true,
+        "can_write_skills": true,
+        "config": {},
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "listAgents",
+    "go_name": "ListAgents",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "getAgent",
+    "go_name": "GetAgent",
+    "parameters": {
+      "AgentID": "agt_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "researcher",
+        "description": "Research specialist",
+        "system_prompt": "fixture",
+        "model": "anthropic/claude-sonnet-4-5",
+        "mode": "primary",
+        "tools_enabled": [],
+        "external_tools_enabled": [],
+        "permissions": {},
+        "can_write_knowledge": true,
+        "can_write_skills": true,
+        "config": {},
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "updateAgent",
+    "go_name": "UpdateAgent",
+    "parameters": {
+      "AgentID": "agt_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "name": "researcher",
+      "description": "fixture",
+      "system_prompt": "fixture",
+      "model": "anthropic/claude-sonnet-4-5",
+      "mode": "primary",
+      "tools_enabled": [],
+      "external_tools_enabled": [],
+      "permissions": {},
+      "can_write_knowledge": true,
+      "can_write_skills": true,
+      "config": {}
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "researcher",
+        "description": "Research specialist",
+        "system_prompt": "fixture",
+        "model": "anthropic/claude-sonnet-4-5",
+        "mode": "primary",
+        "tools_enabled": [],
+        "external_tools_enabled": [],
+        "permissions": {},
+        "can_write_knowledge": true,
+        "can_write_skills": true,
+        "config": {},
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "deleteAgent",
+    "go_name": "DeleteAgent",
+    "parameters": {
+      "AgentID": "agt_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "createTeam",
+    "go_name": "CreateTeam",
+    "parameters": {},
+    "body": {
+      "name": "Research team",
+      "description": "fixture",
+      "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+      "members": []
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "Research team",
+        "description": "fixture",
+        "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+        "members": [],
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "listTeams",
+    "go_name": "ListTeams",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "getTeam",
+    "go_name": "GetTeam",
+    "parameters": {
+      "TeamID": "team_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "Research team",
+        "description": "fixture",
+        "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+        "members": [],
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "updateTeam",
+    "go_name": "UpdateTeam",
+    "parameters": {
+      "TeamID": "team_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "name": "Research team",
+      "description": "fixture",
+      "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+      "members": []
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "Research team",
+        "description": "fixture",
+        "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+        "members": [],
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "deleteTeam",
+    "go_name": "DeleteTeam",
+    "parameters": {
+      "TeamID": "team_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "listModels",
+    "go_name": "ListModels",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "object": "list",
+      "data": [],
+      "defaults": {
+        "orchestrator": "anthropic/claude-sonnet-4-5",
+        "subagent": "openai/gpt-5-mini"
+      }
+    }
+  },
+  {
+    "id": "createApiKey",
+    "go_name": "CreateAPIKey",
+    "parameters": {},
+    "body": {
+      "name": "ci-deploy",
+      "scopes": [],
+      "expires_at": "30d"
+    },
+    "status": 201,
+    "response": {
+      "data": {}
+    }
+  },
+  {
+    "id": "listApiKeys",
+    "go_name": "ListAPIKeys",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "deleteApiKey",
+    "go_name": "DeleteAPIKey",
+    "parameters": {
+      "KeyID": "key_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "testGenerateImage",
+    "go_name": "TestGenerateImage",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "status": "received",
+        "prompt": "A beautiful sunset over the mountains",
+        "model_code": "google/nano-banana-2",
+        "files_count": 2,
+        "files": [],
+        "received_at": "2026-08-11T10:00:00+00:00"
+      }
+    }
+  },
+  {
+    "id": "createImageGeneration",
+    "go_name": "CreateImageGeneration",
+    "parameters": {},
+    "body": {
+      "model": "google/nano-banana-2",
+      "prompt": "A beautiful sunset over the mountains",
+      "webhook_url": "https://example.com/webhook",
+      "input_images": [],
+      "input_image": {
+        "type": "url",
+        "payload": "fixture",
+        "reference": "style_ref",
+        "mime_type": "image/png"
+      },
+      "mask_image": {
+        "type": "url",
+        "payload": "fixture",
+        "reference": "style_ref",
+        "mime_type": "image/png"
+      },
+      "objects_image": {
+        "type": "url",
+        "payload": "fixture",
+        "reference": "style_ref",
+        "mime_type": "image/png"
+      },
+      "resolution": "0.5k",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "aspect_ratio": "1:1",
+      "format": "png",
+      "quality": 90,
+      "model_settings": {
+        "safety_tolerance": 2,
+        "seed": 42
+      },
+      "providers": []
+    },
+    "status": 202,
+    "response": {
+      "data": {
+        "id": "igr_01j5abcdefghjkmnpqrstvwxyz",
+        "status": "accepted",
+        "provider": "replicate",
+        "initial_provider": "replicate",
+        "routed": false,
+        "model": "google/nano-banana-2",
+        "webhook_url": "https://example.com/webhook",
+        "status_url": "http://localhost:8111/api/v1/images/generations/igr_01j5abcdefghjkmnpqrstvwxyz",
+        "created_at": "2026-08-11T10:00:00+00:00",
+        "expires_at": "2026-08-11T12:00:00+00:00"
+      }
+    }
+  },
+  {
+    "id": "getImageGeneration",
+    "go_name": "GetImageGeneration",
+    "parameters": {
+      "Record": "igr_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "igr_01j5abcdefghjkmnpqrstvwxyz",
+        "status": "accepted",
+        "provider": "replicate",
+        "initial_provider": "replicate",
+        "routed": false,
+        "model": "google/nano-banana-2",
+        "created_at": "fixture",
+        "submitted_at": "fixture",
+        "completed_at": "fixture",
+        "expires_at": "fixture",
+        "result": {
+          "model": "fixture",
+          "provider": "fixture",
+          "prompt": "fixture",
+          "images": [],
+          "dimensions": {
+            "width": 1,
+            "height": 1
+          },
+          "aspect_ratio": "16:9",
+          "format": "jpeg",
+          "quality": 1,
+          "warnings": {}
+        },
+        "error": {
+          "code": "fixture",
+          "message": "fixture",
+          "meta": {}
+        },
+        "files": [],
+        "price": {
+          "amount": "0.067000",
+          "currency": "USD",
+          "source": "calculated"
+        },
+        "usage": {
+          "schema_version": 1,
+          "attempts_total": 1,
+          "attempts_priced": 1
+        },
+        "cost_usd": 0.067,
+        "duration_ms": 1542
+      }
+    }
+  },
+  {
+    "id": "uploadImage",
+    "go_name": "UploadImage",
+    "parameters": {},
+    "body": null,
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "upl_01j5abcdefghjkmnpqrstvwxyz",
+        "mime_type": "image/png",
+        "size": 24576,
+        "original_filename": "test.png",
+        "expires_at": "2026-08-12T10:00:00+00:00",
+        "created_at": "2026-08-11T10:00:00+00:00"
+      }
+    }
+  },
+  {
+    "id": "listImageModels",
+    "go_name": "ListImageModels",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "downloadArtifact",
+    "go_name": "DownloadArtifact",
+    "parameters": {
+      "Generation": "igr_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "Artifact": "art_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "Expires": 1786320000,
+      "Signature": "6f8d2c4a9b1e5f7a3c8d0e2b4a6c8e0f"
+    },
+    "body": null,
+    "status": 200,
+    "response": null
+  },
+  {
+    "id": "handleProviderWebhook",
+    "go_name": "HandleProviderWebhook",
+    "parameters": {
+      "Provider": "replicate",
+      "CallbackToken": "0192f3a4-6b1c-4a3e-8f2d-5c9b1a2d3e4f",
+      "WebhookID": "msg_01j5abcdefghjkmnpqrstvwxyz",
+      "WebhookTimestamp": "1786320000",
+      "WebhookSignature": "v1,abc123def456ghi789",
+      "XFalWebhookRequestID": "req_01j5abcdefghjkmnpqrstvwxyz",
+      "XFalWebhookUserID": "usr_01j5abcdefghjkmnpqrstvwxyz",
+      "XFalWebhookTimestamp": "1786320000",
+      "XFalWebhookSignature": "abc123def456",
+      "XBFLSignature": "abc123def456"
+    },
+    "body": {
+      "id": "job-matched",
+      "status": "processing"
+    },
+    "status": 200,
+    "response": {
+      "status": "ok"
+    }
+  }
+]

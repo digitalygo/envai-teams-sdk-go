@@ -1,0 +1,31 @@
+name: SDK CI
+on:
+  push:
+    branches: [alpha]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.24.x', '1.26.x', '1.27.x']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+          cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/requirements.txt
+      - run: python scripts/check_contracts.py
+      - run: python scripts/generate.py && gofmt -w models_generated.go operations_generated.go events_generated.go && git diff --exit-code
+      - run: go mod download
+      - run: go vet ./...
+      - run: go test -race -coverprofile=coverage.out ./...
+      - run: python scripts/check_coverage.py coverage.out
+      - if: matrix.go == '1.27.x'
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
