@@ -194,3 +194,55 @@ func TestFileRecordPreservesIdentityOnObservedOutcome(t *testing.T) {
 		t.Fatal(state, exists, err)
 	}
 }
+
+// Local state disappearing after a side effect cannot justify sending an
+// unrecorded output. This is failure injection, not a remote attack model.
+func TestSignedRunnerMissingClaimBeforeDelivery(t *testing.T) {
+	for _, kind := range []string{"memory", "file_state", "file_directory"} {
+		t.Run(kind, func(t *testing.T) {
+			var runner *ToolRunner
+			var effects atomic.Int32
+			var store CallStore
+			if kind == "memory" {
+				store = NewMemoryCallStore()
+			} else {
+				var err error
+				store, err = NewFileCallStore(t.TempDir())
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			handler := func(ctx context.Context, inv ToolInvocation) (ToolResult, error) {
+				effects.Add(1)
+				id := CallIdentity{Namespace: runner.options.Namespace, ChatID: inv.ChatID, CallID: inv.CallID, TurnID: inv.TurnID, ToolName: "fixture_echo"}
+				switch s := store.(type) {
+				case *MemoryCallStore:
+					s.mu.Lock()
+					delete(s.calls, identityKey(id))
+					s.mu.Unlock()
+				case *FileCallStore:
+					dir := filepath.Join(s.root, identityKey(id))
+					if err := os.Remove(filepath.Join(dir, "state.json")); err != nil {
+						return ToolResult{}, err
+					}
+					if kind == "file_directory" {
+						if err := os.Remove(dir); err != nil {
+							return ToolResult{}, err
+						}
+					}
+				}
+				return ToolResult{Output: "ok"}, nil
+			}
+			var submissions *atomic.Int32
+			runner, submissions, _ = toolHarness(t, handler, `{"type":"object"}`, 204)
+			runner.store = store
+			event := signedEvent(t, `{}`)
+			if err := runner.Handle(context.Background(), event, event.ChatID); err == nil {
+				t.Fatal("missing claim did not block delivery")
+			}
+			if effects.Load() != 1 || submissions.Load() != 0 {
+				t.Fatalf("effects=%d submissions=%d", effects.Load(), submissions.Load())
+			}
+		})
+	}
+}
