@@ -1,10 +1,13 @@
 name: SDK CI
 on:
   push:
-    branches: [alpha]
+    branches: [dev, alpha, beta, main]
   pull_request:
 permissions:
   contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -13,6 +16,8 @@ jobs:
         go: ['1.24.x', '1.26.x', '1.27.x']
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
@@ -30,3 +35,29 @@ jobs:
       - run: python scripts/check_coverage.py coverage.out
       - if: matrix.go == '1.27.x'
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
+  release-checks:
+    name: Release tooling
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts --prefix .github/release-tools
+      - run: node .github/release-tools/patch-semantic-release.mjs
+      - run: npm test --prefix .github/release-tools
+      - run: npm audit --audit-level=high --prefix .github/release-tools
+
+  release:
+    needs: [test, release-checks]
+    if: github.event_name == 'push' && contains(fromJSON('["dev", "alpha", "beta", "main"]'), github.ref_name)
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release.yml
+    secrets:
+      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      KCHAT_WEBHOOK_URL: ${{ secrets.KCHAT_WEBHOOK_URL }}
