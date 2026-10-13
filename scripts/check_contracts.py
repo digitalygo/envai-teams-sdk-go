@@ -9,7 +9,6 @@ def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())
     sources = provenance['sources']
     expected_paths = {
-        'envai-api-sdk-foundation.md': 'docs/envai-api-sdk-foundation.md',
         'openapi.yaml': 'packages/contracts/openapi.yaml',
         'events.json': 'packages/contracts/events.json',
     }
@@ -44,4 +43,4 @@ def verify(root):
 
 if __name__ == '__main__':
     verify(pathlib.Path(__file__).resolve().parent.parent)
-    print('All 3 raw source snapshots, 8 SDK fixtures and 52-operation inventory verified')
+    print('All 2 raw source snapshots, 8 SDK fixtures and 52-operation inventory verified')

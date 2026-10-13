@@ -1,14 +1,26 @@
 # Envai Teams Go SDK
 
-Typed Go client for the Envai HTTP API and ATP v2 event stream. Language compatibility: Go 1.24+. For production use a currently supported Go release with all security patches (validated with Go 1.26.9).
+Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v2). Requires Go 1.24 or newer. Use a supported, security-patched Go release in production.
 
 This is a **pre-release source implementation** on the `alpha` branch. Installing from source does not imply a published release, and this SDK does not deploy the server. Pin a reviewed commit for reproducible use.
 
-The implementation is pinned to `digitalygo/envai-teams@55275860c9a950eaad8e39e9d2b728149084779c`. `contract/openapi.yaml` and `contract/events.json` are the byte-exact source snapshots. All 52 operation IDs have named typed methods. Examples use explicit application-owned handlers; there are no built-in filesystem or shell tools.
+Includes named, typed methods for all **52 HTTP operations**, **28 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+
+- [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
+- [HTTP API reference](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/api-reference.md)
+- [Streaming, recovery, and errors](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/streaming.md)
+- [Client-tool safety and deployment](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/client-tools.md)
+- [Runnable quickstart](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/quickstart/main.go) and [echo handler](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/echo/main.go)
 
 ## Use
 
-In an authorized checkout, run `go test -race ./...`. Consumers can pin a reviewed commit with `go get github.com/digitalygo/envai-teams-sdk-go@<commit>` using their normal GitHub private-module credentials. Do not put credentials in URLs or source control. No release tag exists yet.
+Install from the public source branch inside your application module:
+
+```sh
+go get github.com/digitalygo/envai-teams-sdk-go@alpha
+```
+
+Go records the resolved pseudo-version in `go.mod`/`go.sum`. For repeatable updates, use a reviewed commit SHA instead of `alpha`. This source-install path does not require a registry release. Configure `ENVAI_BASE_URL`, `ENVAI_API_KEY`, and an existing `ENVAI_TEAM_ID` before using the complete [quickstart](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/quickstart/main.go). It creates a workspace and chat and starts a billable turn. The following is a fragment inside a function with a `ctx`, an `envai` import, and an `os` import:
 
 ```go
 client, err := envai.New(envai.Config{
@@ -23,7 +35,7 @@ workspace, err := client.CreateWorkspace(ctx, envai.CreateWorkspaceParams{
 if err != nil { return err }
 chat, err := client.CreateChat(ctx, envai.CreateChatParams{
     WorkspaceID: workspace.ID,
-    Body: envai.ChatCreateRequest{TeamID: "team_YOUR_EXISTING_TEAM_ID"},
+    Body: envai.ChatCreateRequest{TeamID: os.Getenv("ENVAI_TEAM_ID")},
 })
 ```
 
@@ -87,16 +99,18 @@ A valid signature authenticates `call_id`, tool name, and arguments. It does **n
 
 Bounded handlers receive a cancellable context. The local deadline includes signature verification and authorization time and reserves a submission margin. Terminal/tool-result events cancel matching active handlers and persist duplicate-prevention records even when observed before the request. Low-level callers must check errors from `Observe` / `ObserveContext`; a failed persistent write requires reconciliation. Go cannot forcibly stop a handler that ignores its context; such a handler retains its concurrency slot until it returns. For consequential effects, application-level idempotency keyed by `CallID`, transactions, or reconciliation is still required. No exactly-once guarantee is made.
 
-The server output limit is 128 KiB UTF-8. Strings are sent unchanged; `JSONResult` serializes structured values once. Unknown tools, denied authorization, schema violations, handler failures, busy slots, invalid UTF-8, empty or oversized output produce sanitized controlled errors. Although the schema lacks `minLength`, the current gateway rejects empty output; the runner emits `empty_output` rather than an invalid submission. Ambiguous network delivery is recorded and never blindly retried. A 409 `tool_already_resolved` records resolved state but is still surfaced as the HTTP error; it does not prove which client supplied the accepted output.
+The server output limit is 128 KiB UTF-8. Strings are sent unchanged; `JSONResult` serializes structured values once. Unknown tools, denied authorization, schema violations, handler failures, busy slots, invalid UTF-8, empty or oversized output produce sanitized controlled errors. Although the schema lacks `minLength`, the current API rejects empty output; the runner emits `empty_output` rather than an invalid submission. Ambiguous network delivery is recorded and never blindly retried. A 409 `tool_already_resolved` records resolved state but is still surfaced as the HTTP error; it does not prove which client supplied the accepted output.
 
 ## Known server limitations
 
-- Replay is in memory; sequences reset after restart/eviction and no epoch/cursor-expired signal exists. Durable/lossless resume cannot be promised. Reset/reconciliation policy belongs to the application.
+- Replay is best-effort within the same resident chat session. Sequences can reset after a restart or eviction, with no epoch/cursor-expired signal. Some lost events are not detectable from sequence gaps. Durable, lossless resume cannot be promised; reconcile before reusing a cursor after a known reset.
 - Replay and subscription are not atomic. Waiting for `ping` before a new message reduces that race, but does not fix every existing-turn attach case.
 - There is no device-claim/session-routing protocol. All subscribers receive a chat's events. Use one executor or a shared atomic call store.
-- Approval is a 409 stub; the low-level method preserves that error. Steer records guidance but does not currently change the LLM loop.
+- Approval resolution currently returns HTTP 409 and is unavailable as a completed workflow. A successful steer acknowledgement does not guarantee changed execution. Both low-level methods preserve the API response.
 - Remote context persistence is best-effort. A restore acknowledgement does not establish durability.
-- Signed artifact downloads use `artifact`, optional `expires`, `generation`, then `signature`; the old PHP `path` contract is not used.
+- Signed artifact downloads require opaque `artifact` and `generation` identifiers, optional `expires`, and `signature`. Preserve these server-supplied values and do not log signed URLs. Legacy `path` parameters are unsupported.
+- Capabilities are positive feature discovery, not an event-type allowlist. A valid unknown event remains accessible through its raw data.
+- Completion responses contain pagination metadata, but this contract does not declare a `page` request parameter; the Go SDK does not invent page traversal.
 
 No automatic mutation retries occur. Optional GET retries apply only to JSON operations and retryable statuses, with exponential jitter and `Retry-After`. Stream/binary partial reads are never retried as ordinary GETs. Errors expose status, type, code, details, request ID and retry delay; their string representation and client/config formatting redact sensitive information. `Observer` receives only operation/status/attempt/duration.
 
@@ -112,7 +126,7 @@ go vet ./...
 python3 scripts/check_coverage.py coverage.out
 ```
 
-The generator creates models, named operations and event payloads; transport, replay and tool execution are handwritten. CI verifies generated outputs are reproducible and the pinned contract hashes are unchanged, then runs unit/integration mocks, the race detector, static checks and a coverage floor. Shared test vectors are identical to the TypeScript/Python/PHP compatibility suite.
+The generator creates models, named operations and event payloads; transport, replay and tool execution are handwritten. CI verifies generated outputs are reproducible and the pinned contract hashes are unchanged, then runs unit/integration mocks, the race detector, static checks and a coverage floor. The shared event, SSE, and signature fixtures test cross-language wire compatibility. Language-specific helpers and storage adapters differ; use this repository’s API reference for Go behavior.
 
 ## License
 
@@ -120,4 +134,4 @@ MIT, Copyright (c) 2026 DigItalyGo. The original repository license is preserved
 
 ### Source provenance
 
-`contract/provenance.json` separates three exact upstream source snapshots from SDK-authored/generated fixtures. Source entries include the pinned repository path, local snapshot path, byte count, SHA-256 and Git blob identity. The foundation document is copied byte-for-byte, without newline normalization. `python scripts/check_contracts.py` verifies every entry; `python scripts/test_check_contracts.py` checks that drift in each snapshot is rejected.
+`contract/provenance.json` records the two byte-exact HTTP and event contract snapshots separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.

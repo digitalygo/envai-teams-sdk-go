@@ -36,7 +36,7 @@ class ProvenanceTests(unittest.TestCase):
             shutil.copytree(root / 'testdata', copy / 'testdata')
             path = copy / 'contract/provenance.json'
             provenance = json.loads(path.read_text())
-            provenance['sources']['envai-api-sdk-foundation.md']['git_blob_sha'] = '0' * 40
+            provenance['sources']['openapi.yaml']['git_blob_sha'] = '0' * 40
             path.write_text(json.dumps(provenance))
             with self.assertRaises(AssertionError):
                 verify(copy)
