@@ -10,15 +10,17 @@ Requires Go 1.24 or newer. Use a supported, security-patched toolchain.
 mkdir envai-example
 cd envai-example
 go mod init example.com/envai-example
-go get github.com/digitalygo/envai-teams-sdk-go@alpha
+go get github.com/digitalygo/envai-teams-sdk-go@v1.0.0-alpha.1
 ```
 
-The public GitHub repository is the source distribution. A Go module download resolves the branch to a pseudo-version; commit `go.mod` and `go.sum`. Pin a reviewed commit SHA for an explicit, reproducible upgrade. The module path is `github.com/digitalygo/envai-teams-sdk-go` and its package name is `envai`.
+[`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1) is a published prerelease available through the public Go module proxy. The explicit version opts into the alpha release; its APIs may change. Commit `go.mod` and `go.sum` and review upgrades deliberately. The module path is `github.com/digitalygo/envai-teams-sdk-go` and its package name is `envai`.
+
+For unreleased changes, use a reviewed commit SHA or `@alpha`; a branch/commit download resolves to a pseudo-version. Prefer the tagged version for repeatable application installs.
 
 To inspect and build all examples instead:
 
 ```sh
-git clone --branch alpha https://github.com/digitalygo/envai-teams-sdk-go.git
+git clone --branch v1.0.0-alpha.1 https://github.com/digitalygo/envai-teams-sdk-go.git
 cd envai-teams-sdk-go
 go test ./...
 go build ./examples/...
@@ -64,3 +66,4 @@ Start with turn helpers for new messages. Use low-level streams when you need a 
 ## Offline checks
 
 Tests use mocks and public signature vectors; they require no Envai credentials. `go test ./...` compiles examples and executes the quickstart against a local mock server. The README includes the full generator, provenance, race, vet, and coverage commands. Passing these checks demonstrates client behavior against the bundled contracts, not availability or configuration of your API deployment.
+

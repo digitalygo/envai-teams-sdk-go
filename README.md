@@ -2,7 +2,7 @@
 
 Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v2). Requires Go 1.24 or newer. Use a supported, security-patched Go release in production.
 
-This is a **pre-release source implementation** on the `alpha` branch. Installing from source does not imply a published release, and this SDK does not deploy the server. Pin a reviewed commit for reproducible use.
+The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
 Includes named, typed methods for all **52 HTTP operations**, **28 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
 
@@ -14,13 +14,13 @@ Includes named, typed methods for all **52 HTTP operations**, **28 typed ATP eve
 
 ## Use
 
-Install from the public source branch inside your application module:
+Install the published Go module inside your application module:
 
 ```sh
-go get github.com/digitalygo/envai-teams-sdk-go@alpha
+go get github.com/digitalygo/envai-teams-sdk-go@v1.0.0-alpha.1
 ```
 
-Go records the resolved pseudo-version in `go.mod`/`go.sum`. For repeatable updates, use a reviewed commit SHA instead of `alpha`. This source-install path does not require a registry release. Configure `ENVAI_BASE_URL`, `ENVAI_API_KEY`, and an existing `ENVAI_TEAM_ID` before using the complete [quickstart](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/quickstart/main.go). It creates a workspace and chat and starts a billable turn. The following is a fragment inside a function with a `ctx`, an `envai` import, and an `os` import:
+The tagged module is available through the public Go module proxy. Commit `go.mod` and `go.sum` to preserve the selected version. For unreleased changes, explicitly select a reviewed commit SHA or the moving `alpha` branch instead. Configure `ENVAI_BASE_URL`, `ENVAI_API_KEY`, and an existing `ENVAI_TEAM_ID` before using the complete [quickstart](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/quickstart/main.go). It creates a workspace and chat and starts a billable turn. The following is a fragment inside a function with a `ctx`, an `envai` import, and an `os` import:
 
 ```go
 client, err := envai.New(envai.Config{
@@ -135,3 +135,4 @@ MIT, Copyright (c) 2026 DigItalyGo. The original repository license is preserved
 ### Source provenance
 
 `contract/provenance.json` records the two byte-exact HTTP and event contract snapshots separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
+
