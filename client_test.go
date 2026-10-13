@@ -31,7 +31,12 @@ func fixture[T any](t *testing.T, name string) T {
 }
 func testClient(t *testing.T, fn http.HandlerFunc) *Client {
 	t.Helper()
-	srv := httptest.NewServer(fn)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get(ContractHeader) != "" {
+			w.Header().Set(ContractHeader, r.Header.Get(ContractHeader))
+		}
+		fn(w, r)
+	}))
 	t.Cleanup(srv.Close)
 	c, err := New(Config{BaseURL: srv.URL, APIKey: "fixture-key", AllowHTTP: true, RetryDelay: time.Millisecond})
 	if err != nil {
@@ -54,7 +59,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 		Path          string `json:"path"`
 		Authenticated bool   `json:"authenticated"`
 	}](t, "operations.json")
-	if len(cases) != 52 || len(inventory) != 52 {
+	if len(cases) != 65 || len(inventory) != 65 {
 		t.Fatal("contract inventory changed")
 	}
 	for _, tc := range cases {
@@ -62,6 +67,10 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			calls := 0
 			var client *Client
 			client = testClient(t, func(w http.ResponseWriter, r *http.Request) {
+				if strings.HasSuffix(r.URL.Path, "/capabilities") && tc.ID != "getCapabilities" && tc.ID != "getCapabilitiesLegacy" {
+					writeCapabilities(w)
+					return
+				}
 				calls++
 				op := client.operations[tc.ID]
 				if r.Method != op.Method {
@@ -124,7 +133,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 				if !field.IsValid() {
 					t.Fatalf("missing parameter %s", key)
 				}
-				if tc.ID == "streamChatEvents" && key == "ChatID" {
+				if strings.HasPrefix(tc.ID, "streamChatEvents") && key == "ChatID" {
 					value = "cht_01ARZ3NDEKTSV4RRFFQ69G5FAV"
 				}
 				raw, _ := json.Marshal(value)
@@ -155,7 +164,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			} else if !last.IsNil() {
 				t.Fatal(last.Interface(), string(tc.Response))
 			}
-			if tc.ID == "streamChatEvents" && !results[0].IsNil() {
+			if strings.HasPrefix(tc.ID, "streamChatEvents") && !results[0].IsNil() {
 				stream := results[0].Interface().(*EventStream)
 				defer stream.Close()
 				event, err := stream.Next()
@@ -287,7 +296,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(c.OperationIDs()) != 52 {
+	if len(c.OperationIDs()) != 65 {
 		t.Fatal("inventory")
 	}
 	if _, err = c.requestURL(c.operations["getUserTool"], map[string]any{"name": "../x"}); err == nil {
@@ -323,7 +332,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 
 func TestSecretRepresentationsAndObservation(t *testing.T) {
 	var observed RequestObservation
-	c := testClient(t, func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, `{"protocol_version":2}`) })
+	c := testClient(t, func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, testCapabilities) })
 	c.config.Observer = func(o RequestObservation) { observed = o }
 	for _, format := range []string{"%v", "%+v", "%#v"} {
 		for _, value := range []any{c, c.config, &c.config} {
@@ -339,4 +348,21 @@ func TestSecretRepresentationsAndObservation(t *testing.T) {
 	if observed.Operation != "getCapabilities" || observed.Status != 200 {
 		t.Fatal(observed)
 	}
+}
+
+const testCapabilities = `{"protocol_version":3,"contract_version":3,"supported_contract_versions":[2,3],"legacy_v2_mode":"historical_reads_replay_only","families":[],"event_types":[],"tool_kinds":[],"features":[]}`
+
+func writeCapabilities(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(ContractHeader, "3")
+	io.WriteString(w, testCapabilities)
+}
+func negotiatedTestClient(t *testing.T, fn http.HandlerFunc) *Client {
+	return testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/capabilities") {
+			writeCapabilities(w)
+			return
+		}
+		fn(w, r)
+	})
 }

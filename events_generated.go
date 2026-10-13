@@ -11,18 +11,24 @@ type ATPAgent struct {
 }
 
 type ATPUsage struct {
-	InputTokens   int64           `json:"input_tokens"`
-	OutputTokens  int64           `json:"output_tokens"`
-	CostUSD       float64         `json:"cost_usd"`
-	DurationMs    int64           `json:"duration_ms"`
-	SpriteMs      Optional[int64] `json:"sprite_ms,omitzero"`
-	SpriteRamGbMs Optional[int64] `json:"sprite_ram_gb_ms,omitzero"`
-	ToolCalls     Optional[int64] `json:"tool_calls,omitzero"`
+	InputTokens   int64                     `json:"input_tokens"`
+	OutputTokens  int64                     `json:"output_tokens"`
+	CostUSD       *float64                  `json:"cost_usd"`
+	DurationMs    int64                     `json:"duration_ms"`
+	SpriteMs      Optional[int64]           `json:"sprite_ms,omitzero"`
+	SpriteRamGbMs Optional[int64]           `json:"sprite_ram_gb_ms,omitzero"`
+	ToolCalls     Optional[int64]           `json:"tool_calls,omitzero"`
+	Billing       Optional[ATPBillingState] `json:"billing,omitzero"`
+	UsageCost     Optional[ATPUsageCost]    `json:"usage_cost,omitzero"`
 }
 
 type ATPToolKind string
 
 type ATPPing map[string]json.RawMessage
+
+type ATPChatTitleUpdated struct {
+	Title string `json:"title"`
+}
 
 type ATPTurnStarted struct {
 	TurnID string `json:"turn_id"`
@@ -30,31 +36,37 @@ type ATPTurnStarted struct {
 }
 
 type ATPTurnCompleted struct {
-	TurnID       string   `json:"turn_id"`
-	Usage        ATPUsage `json:"usage"`
-	Cost         float64  `json:"cost"`
-	ChatUsage    ATPUsage `json:"chat_usage"`
-	ChatCost     float64  `json:"chat_cost"`
-	FinishReason string   `json:"finish_reason"`
+	TurnID       string                    `json:"turn_id"`
+	Usage        ATPUsage                  `json:"usage"`
+	Cost         *float64                  `json:"cost"`
+	ChatUsage    ATPUsage                  `json:"chat_usage"`
+	ChatCost     *float64                  `json:"chat_cost"`
+	FinishReason string                    `json:"finish_reason"`
+	Billing      Optional[ATPBillingState] `json:"billing,omitzero"`
+	UsageCost    Optional[ATPUsageCost]    `json:"usage_cost,omitzero"`
 }
 
 type ATPTurnCancelled struct {
-	TurnID    string   `json:"turn_id"`
-	Reason    string   `json:"reason"`
-	Usage     ATPUsage `json:"usage"`
-	Cost      float64  `json:"cost"`
-	ChatUsage ATPUsage `json:"chat_usage"`
-	ChatCost  float64  `json:"chat_cost"`
+	TurnID    string                    `json:"turn_id"`
+	Reason    string                    `json:"reason"`
+	Usage     ATPUsage                  `json:"usage"`
+	Cost      *float64                  `json:"cost"`
+	ChatUsage ATPUsage                  `json:"chat_usage"`
+	ChatCost  *float64                  `json:"chat_cost"`
+	Billing   Optional[ATPBillingState] `json:"billing,omitzero"`
+	UsageCost Optional[ATPUsageCost]    `json:"usage_cost,omitzero"`
 }
 
 type ATPTurnFailed struct {
-	TurnID    string   `json:"turn_id"`
-	Code      string   `json:"code"`
-	Message   string   `json:"message"`
-	Usage     ATPUsage `json:"usage"`
-	Cost      float64  `json:"cost"`
-	ChatUsage ATPUsage `json:"chat_usage"`
-	ChatCost  float64  `json:"chat_cost"`
+	TurnID    string                    `json:"turn_id"`
+	Code      string                    `json:"code"`
+	Message   string                    `json:"message"`
+	Usage     ATPUsage                  `json:"usage"`
+	Cost      *float64                  `json:"cost"`
+	ChatUsage ATPUsage                  `json:"chat_usage"`
+	ChatCost  *float64                  `json:"chat_cost"`
+	Billing   Optional[ATPBillingState] `json:"billing,omitzero"`
+	UsageCost Optional[ATPUsageCost]    `json:"usage_cost,omitzero"`
 }
 
 type ATPTurnSteered struct {
@@ -198,6 +210,96 @@ type ATPApprovalExpire struct {
 	ApprovalID string `json:"approval_id"`
 }
 
+type ATPBillingState struct {
+	Status string                     `json:"status"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPBillingState) UnmarshalJSON(b []byte) error {
+	if err := validateDefinition("wiki.json", "BillingState", b); err != nil {
+		return err
+	}
+	type plain ATPBillingState
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPBillingState(out)
+	return nil
+}
+func (v ATPBillingState) MarshalJSON() ([]byte, error) {
+	type plain ATPBillingState
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPCurrencyAmount struct {
+	Currency string                     `json:"currency"`
+	Amount   string                     `json:"amount"`
+	Extra    map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPCurrencyAmount) UnmarshalJSON(b []byte) error {
+	if err := validateDefinition("wiki.json", "CurrencyAmount", b); err != nil {
+		return err
+	}
+	type plain ATPCurrencyAmount
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"currency", "amount"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPCurrencyAmount(out)
+	return nil
+}
+func (v ATPCurrencyAmount) MarshalJSON() ([]byte, error) {
+	type plain ATPCurrencyAmount
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPUsageCost struct {
+	Status                 string                     `json:"status"`
+	Basis                  string                     `json:"basis"`
+	ScopeStatus            string                     `json:"scope_status"`
+	Revision               int64                      `json:"revision"`
+	AsOf                   string                     `json:"as_of"`
+	InvocationCount        int64                      `json:"invocation_count"`
+	PendingInvocationCount int64                      `json:"pending_invocation_count"`
+	Totals                 []ATPCurrencyAmount        `json:"totals"`
+	PricedSubtotals        []ATPCurrencyAmount        `json:"priced_subtotals"`
+	Extra                  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPUsageCost) UnmarshalJSON(b []byte) error {
+	if err := validateDefinition("wiki.json", "UsageCost", b); err != nil {
+		return err
+	}
+	type plain ATPUsageCost
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "basis", "scope_status", "revision", "as_of", "invocation_count", "pending_invocation_count", "totals", "priced_subtotals"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPUsageCost(out)
+	return nil
+}
+func (v ATPUsageCost) MarshalJSON() ([]byte, error) {
+	type plain ATPUsageCost
+	return marshalUnknown(plain(v), v.Extra)
+}
+
 type ATPAgentToolRequestSignature struct {
 	Alg string `json:"alg"`
 	Kid string `json:"kid"`
@@ -208,6 +310,10 @@ func (e Event) TypedPayload() (any, error) {
 	switch e.Type {
 	case "ping":
 		var value ATPPing
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "chat.title.updated":
+		var value ATPChatTitleUpdated
 		err := json.Unmarshal(e.Data, &value)
 		return value, err
 	case "turn.started":

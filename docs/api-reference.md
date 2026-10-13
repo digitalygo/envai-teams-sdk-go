@@ -79,4 +79,8 @@ See [configuration](getting-started.md#configuration) for defaults and [error ha
 
 ## Event payloads
 
-`DecodeEvent` validates ATP v2 envelopes and known payloads. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 28 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
+`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 29 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
+
+## Wiki and negotiated contracts
+
+See [Wiki lifecycle and durable webhook intake](wiki.md) for all source, operation, catalog and JWKS methods, and [contract 3 migration](contract3-migration.md) for default selection, strict legacy reads, nullable costs and compatibility errors.

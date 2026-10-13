@@ -18,7 +18,7 @@ class ProvenanceTests(unittest.TestCase):
             shutil.copytree(root / 'testdata', copy / 'testdata')
             verify(copy)
             provenance = json.loads((copy / 'contract/provenance.json').read_text())
-            for section in ('sources', 'generated_fixtures'):
+            for section in ('sources', 'generated_fixtures', 'shared_fixtures'):
                 for name, entry in provenance[section].items():
                     with self.subTest(section=section, name=name):
                         path = copy / entry['snapshot_path']

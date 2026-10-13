@@ -51,7 +51,7 @@ func signedEvent(t *testing.T, args string) Event {
 func TestSharedSignaturesAndStrictVerification(t *testing.T) {
 	f := fixture[signatureFixtures](t, "signatures.json")
 	var calls atomic.Int32
-	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+	c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "" {
 			t.Error("JWKS leaked auth")
 		}
@@ -127,7 +127,7 @@ func toolHarness(t *testing.T, handler func(context.Context, ToolInvocation) (To
 	f := fixture[signatureFixtures](t, "signatures.json")
 	calls := &atomic.Int32{}
 	output := &ToolOutputRequest{}
-	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+	c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/.well-known/jwks.json" {
 			json.NewEncoder(w).Encode(f.JWKS)
 			return
@@ -358,7 +358,7 @@ func TestDurableAndMemoryCallStores(t *testing.T) {
 	}
 }
 func TestRunnerConfiguration(t *testing.T) {
-	c := testClient(t, func(http.ResponseWriter, *http.Request) {})
+	c := negotiatedTestClient(t, func(http.ResponseWriter, *http.Request) {})
 	r, _ := NewRegistry()
 	for _, o := range []RunnerOptions{{}, {Namespace: "scope", MaxConcurrent: -1}, {Namespace: "scope", SubmissionMargin: -1}} {
 		if _, err := NewToolRunner(c, r, NewMemoryCallStore(), o); err == nil {

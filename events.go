@@ -2,14 +2,10 @@ package envai
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"io"
 	"strings"
-	"sync"
 	"unicode/utf8"
-
-	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 type EventAgent struct {
@@ -37,45 +33,33 @@ func (e Event) Terminal() bool {
 }
 func Payload[T any](e Event) (T, error) { var v T; err := json.Unmarshal(e.Data, &v); return v, err }
 
-var eventSchemaOnce sync.Once
-var eventSchema *jsonschema.Schema
-var eventSchemaErr error
-
+// DecodeEvent validates before hydration. A v3 stream can replay untouched numeric v2
+// records, but null-bearing v2 events always fail the immutable legacy schema.
 func DecodeEvent(b []byte) (Event, error) {
 	if !utf8.Valid(b) {
 		return Event{}, &ProtocolError{"event bytes are not valid UTF-8"}
 	}
-	eventSchemaOnce.Do(func() {
-		raw, _ := contracts.ReadFile("contract/events.json")
-		doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(raw))
-		if err != nil {
-			eventSchemaErr = err
-			return
-		}
-		c := jsonschema.NewCompiler()
-		c.AssertFormat()
-		if err = c.AddResource("https://sdk.invalid/events.json", doc); err != nil {
-			eventSchemaErr = err
-			return
-		}
-		eventSchema, eventSchemaErr = c.Compile("https://sdk.invalid/events.json#/$defs/Event")
-	})
-	if eventSchemaErr != nil {
-		return Event{}, eventSchemaErr
+	var envelope struct {
+		V int `json:"v"`
 	}
-	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(b))
-	if err != nil {
+	if json.Unmarshal(b, &envelope) != nil {
 		return Event{}, &ProtocolError{"invalid event JSON"}
 	}
-	if err = eventSchema.Validate(doc); err != nil {
-		return Event{}, &ProtocolError{"event does not conform to ATP v2"}
+	file := "events.json"
+	if envelope.V == 2 {
+		file = "events-v2.json"
+	} else if envelope.V != 3 {
+		return Event{}, &ProtocolError{"unsupported event version"}
 	}
-	var e Event
-	if err = json.Unmarshal(b, &e); err != nil {
-		return e, &ProtocolError{"invalid event envelope"}
+	if err := validateDefinition(file, "Event", b); err != nil {
+		return Event{}, err
 	}
-	e.Raw = append(json.RawMessage(nil), b...)
-	return e, nil
+	var event Event
+	if err := json.Unmarshal(b, &event); err != nil {
+		return Event{}, &ProtocolError{"invalid event envelope"}
+	}
+	event.Raw = append(json.RawMessage(nil), b...)
+	return event, nil
 }
 
 type SSEDecoder struct {

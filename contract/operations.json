@@ -2,7 +2,7 @@
   {
     "id": "sendChatMessage",
     "method": "POST",
-    "path": "/chats/{chat_id}/messages",
+    "path": "/atp/v3/chats/{chat_id}/messages",
     "authenticated": true,
     "kind": "json",
     "body": "json",
@@ -18,7 +18,7 @@
   {
     "id": "streamChatEvents",
     "method": "GET",
-    "path": "/chats/{chat_id}/events",
+    "path": "/atp/v3/chats/{chat_id}/events",
     "authenticated": true,
     "kind": "sse",
     "body": "",
@@ -39,7 +39,7 @@
   {
     "id": "cancelChatTurn",
     "method": "POST",
-    "path": "/chats/{chat_id}/cancel",
+    "path": "/atp/v3/chats/{chat_id}/cancel",
     "authenticated": true,
     "kind": "json",
     "body": "",
@@ -55,7 +55,7 @@
   {
     "id": "steerChatTurn",
     "method": "POST",
-    "path": "/chats/{chat_id}/steer",
+    "path": "/atp/v3/chats/{chat_id}/steer",
     "authenticated": true,
     "kind": "json",
     "body": "json",
@@ -71,7 +71,7 @@
   {
     "id": "resolveChatTool",
     "method": "POST",
-    "path": "/chats/{chat_id}/tool-output",
+    "path": "/atp/v3/chats/{chat_id}/tool-output",
     "authenticated": true,
     "kind": "empty",
     "body": "json",
@@ -87,7 +87,7 @@
   {
     "id": "resolveChatApproval",
     "method": "POST",
-    "path": "/chats/{chat_id}/approval",
+    "path": "/atp/v3/chats/{chat_id}/approval",
     "authenticated": true,
     "kind": "empty",
     "body": "json",
@@ -103,7 +103,7 @@
   {
     "id": "forkChat",
     "method": "POST",
-    "path": "/chats/{chat_id}/fork",
+    "path": "/atp/v3/chats/{chat_id}/fork",
     "authenticated": true,
     "kind": "json",
     "body": "json",
@@ -119,7 +119,7 @@
   {
     "id": "restoreChat",
     "method": "POST",
-    "path": "/chats/{chat_id}/restore",
+    "path": "/atp/v3/chats/{chat_id}/restore",
     "authenticated": true,
     "kind": "json",
     "body": "json",
@@ -135,7 +135,7 @@
   {
     "id": "getCapabilities",
     "method": "GET",
-    "path": "/capabilities",
+    "path": "/atp/v3/capabilities",
     "authenticated": true,
     "kind": "json",
     "body": "",
@@ -852,5 +852,271 @@
         "required": false
       }
     ]
+  },
+  {
+    "id": "uploadWikiSource",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/files/sources",
+    "authenticated": true,
+    "kind": "json",
+    "body": "multipart",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "getWikiSource",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/files/sources/{file_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "file_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "downloadWikiSource",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/files/sources/{file_id}/download",
+    "authenticated": true,
+    "kind": "binary",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "file_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "withdrawWikiSource",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/wiki/outbox/files",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "createWikiInboxRun",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/wiki/inbox/runs",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "createWikiOutboxRun",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/wiki/outbox/runs",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "createWikiSyncRun",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/wiki/syncs",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "getWikiOperation",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/wiki/operations/{operation_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "operation_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "listWikiCategories",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/wiki/categories",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "getWikiCategoryIndex",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/wiki/categories/{category_id}/index",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "category_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "from",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "to",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "all",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "type",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "catalog_revision",
+        "in": "query",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "getWikiWebhookJwks",
+    "method": "GET",
+    "path": "/.well-known/wiki-webhook-jwks.json",
+    "authenticated": false,
+    "kind": "json",
+    "body": "",
+    "unwrap": false,
+    "parameters": []
+  },
+  {
+    "id": "streamChatEventsLegacy",
+    "method": "GET",
+    "path": "/chats/{chat_id}/events",
+    "authenticated": true,
+    "kind": "sse",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "after",
+        "in": "query",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "getCapabilitiesLegacy",
+    "method": "GET",
+    "path": "/capabilities",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": false,
+    "parameters": []
   }
 ]

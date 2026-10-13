@@ -692,3 +692,193 @@ func (c *Client) HandleProviderWebhook(ctx context.Context, req HandleProviderWe
 	err := c.call(ctx, "handleProviderWebhook", p, req.Body, &out)
 	return out, err
 }
+
+type UploadWikiSourceParams struct {
+	WorkspaceID    string
+	IdempotencyKey string
+	Body           []MultipartPart
+}
+
+func (c *Client) UploadWikiSource(ctx context.Context, req UploadWikiSourceParams) (WikiSource, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["Idempotency-Key"] = req.IdempotencyKey
+	var out WikiSource
+	err := c.call(ctx, "uploadWikiSource", p, req.Body, &out)
+	return out, err
+}
+
+type GetWikiSourceParams struct {
+	WorkspaceID string
+	FileID      string
+}
+
+func (c *Client) GetWikiSource(ctx context.Context, req GetWikiSourceParams) (WikiSource, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["file_id"] = req.FileID
+	var out WikiSource
+	err := c.call(ctx, "getWikiSource", p, nil, &out)
+	return out, err
+}
+
+type DownloadWikiSourceParams struct {
+	WorkspaceID string
+	FileID      string
+}
+
+func (c *Client) DownloadWikiSource(ctx context.Context, req DownloadWikiSourceParams) (*Download, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["file_id"] = req.FileID
+	return c.download(ctx, "downloadWikiSource", p, nil)
+}
+
+type WithdrawWikiSourceParams struct {
+	WorkspaceID string
+	Body        WithdrawWikiSourceBody
+}
+
+func (c *Client) WithdrawWikiSource(ctx context.Context, req WithdrawWikiSourceParams) (WikiSource, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	var out WikiSource
+	err := c.call(ctx, "withdrawWikiSource", p, req.Body, &out)
+	return out, err
+}
+
+type CreateWikiInboxRunParams struct {
+	WorkspaceID    string
+	IdempotencyKey string
+	Body           CreateWikiInboxRunBody
+}
+
+func (c *Client) CreateWikiInboxRun(ctx context.Context, req CreateWikiInboxRunParams) (WikiOperation, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["Idempotency-Key"] = req.IdempotencyKey
+	var out WikiOperation
+	err := c.call(ctx, "createWikiInboxRun", p, req.Body, &out)
+	return out, err
+}
+
+type CreateWikiOutboxRunParams struct {
+	WorkspaceID    string
+	IdempotencyKey string
+	Body           CreateWikiOutboxRunBody
+}
+
+func (c *Client) CreateWikiOutboxRun(ctx context.Context, req CreateWikiOutboxRunParams) (WikiOperation, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["Idempotency-Key"] = req.IdempotencyKey
+	var out WikiOperation
+	err := c.call(ctx, "createWikiOutboxRun", p, req.Body, &out)
+	return out, err
+}
+
+type CreateWikiSyncRunParams struct {
+	WorkspaceID    string
+	IdempotencyKey string
+	Body           CreateWikiSyncRunBody
+}
+
+func (c *Client) CreateWikiSyncRun(ctx context.Context, req CreateWikiSyncRunParams) (WikiOperation, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["Idempotency-Key"] = req.IdempotencyKey
+	var out WikiOperation
+	err := c.call(ctx, "createWikiSyncRun", p, req.Body, &out)
+	return out, err
+}
+
+type GetWikiOperationParams struct {
+	WorkspaceID string
+	OperationID string
+}
+
+func (c *Client) GetWikiOperation(ctx context.Context, req GetWikiOperationParams) (WikiOperation, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["operation_id"] = req.OperationID
+	var out WikiOperation
+	err := c.call(ctx, "getWikiOperation", p, nil, &out)
+	return out, err
+}
+
+type ListWikiCategoriesParams struct {
+	WorkspaceID string
+}
+
+func (c *Client) ListWikiCategories(ctx context.Context, req ListWikiCategoriesParams) (Categories, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	var out Categories
+	err := c.call(ctx, "listWikiCategories", p, nil, &out)
+	return out, err
+}
+
+type GetWikiCategoryIndexParams struct {
+	WorkspaceID     string
+	CategoryID      string
+	From            Optional[int64]
+	To              Optional[int64]
+	All             Optional[bool]
+	Type            Optional[string]
+	CatalogRevision Optional[int64]
+}
+
+func (c *Client) GetWikiCategoryIndex(ctx context.Context, req GetWikiCategoryIndexParams) (CategoryIndex, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["category_id"] = req.CategoryID
+	if req.From.Set {
+		p["from"] = req.From.Value
+	}
+	if req.To.Set {
+		p["to"] = req.To.Value
+	}
+	if req.All.Set {
+		p["all"] = req.All.Value
+	}
+	if req.Type.Set {
+		p["type"] = req.Type.Value
+	}
+	if req.CatalogRevision.Set {
+		p["catalog_revision"] = req.CatalogRevision.Value
+	}
+	var out CategoryIndex
+	err := c.call(ctx, "getWikiCategoryIndex", p, nil, &out)
+	return out, err
+}
+
+type GetWikiWebhookJWKSParams struct {
+}
+
+func (c *Client) GetWikiWebhookJWKS(ctx context.Context, req GetWikiWebhookJWKSParams) (JWKSDocument, error) {
+	p := map[string]any{}
+
+	var out JWKSDocument
+	err := c.call(ctx, "getWikiWebhookJwks", p, nil, &out)
+	return out, err
+}
+
+type StreamChatEventsLegacyParams struct {
+	ChatID string
+	After  Optional[int64]
+}
+
+func (c *Client) StreamChatEventsLegacy(ctx context.Context, req StreamChatEventsLegacyParams) (*EventStream, error) {
+	return c.LegacyEvents(ctx, req.ChatID, StreamOptions{After: req.After.Value})
+}
+
+type GetCapabilitiesLegacyParams struct {
+}
+
+func (c *Client) GetCapabilitiesLegacy(ctx context.Context, req GetCapabilitiesLegacyParams) (CapabilitiesLegacy, error) {
+	p := map[string]any{}
+
+	var out CapabilitiesLegacy
+	err := c.call(ctx, "getCapabilitiesLegacy", p, nil, &out)
+	return out, err
+}

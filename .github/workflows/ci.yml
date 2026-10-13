@@ -11,6 +11,19 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: envai
+          POSTGRES_PASSWORD: envai-test-only
+          POSTGRES_DB: envai_sdk_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U envai -d envai_sdk_test"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      ENVAI_TEST_POSTGRES_DSN: postgres://envai:envai-test-only@localhost:5432/envai_sdk_test?sslmode=disable
     strategy:
       matrix:
         go: ['1.24.x', '1.26.x', '1.27.x']

@@ -1,3 +1,5 @@
+> The new Wiki/contract 3 APIs require a compatible server and a release containing this migration. The older published alpha tag below predates these APIs; see [migration](contract3-migration.md).
+
 # Getting started
 
 [README](../README.md) · [API reference](api-reference.md) · [Streaming](streaming.md) · [Client tools](client-tools.md)
@@ -65,5 +67,5 @@ Start with turn helpers for new messages. Use low-level streams when you need a 
 
 ## Offline checks
 
-Tests use mocks and public signature vectors; they require no Envai credentials. `go test ./...` compiles examples and executes the quickstart against a local mock server. The README includes the full generator, provenance, race, vet, and coverage commands. Passing these checks demonstrates client behavior against the bundled contracts, not availability or configuration of your API deployment.
+Tests use mocks and public signature vectors; they require no Envai credentials. Durable receipt/outbox integration tests additionally use a disposable PostgreSQL database selected by `ENVAI_TEST_POSTGRES_DSN`; CI provisions it automatically. `go test ./...` compiles examples and executes the quickstart against a local mock server. The README includes the full generator, provenance, race, vet, and coverage commands. Passing these checks demonstrates client behavior against the bundled contracts, not availability or configuration of your API deployment.
 

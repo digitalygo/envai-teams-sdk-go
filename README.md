@@ -1,10 +1,12 @@
+> Contract 3 migration: ATP and Wiki/source requests now negotiate version 3 automatically. Cost fields are nullable pointers; old-server mutations fail closed. See [migration](docs/contract3-migration.md) and [Wiki lifecycle and durable webhooks](docs/wiki.md).
+
 # Envai Teams Go SDK
 
-Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v2). Requires Go 1.24 or newer. Use a supported, security-patched Go release in production.
+Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v3, with strict historical v2 replay). Requires Go 1.24 or newer. Use a supported, security-patched Go release in production.
 
 The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
-Includes named, typed methods for all **52 HTTP operations**, **28 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+Includes named, typed methods for all **65 HTTP operations**, **29 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
 
 - [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
 - [HTTP API reference](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/api-reference.md)
@@ -134,5 +136,5 @@ MIT, Copyright (c) 2026 DigItalyGo. The original repository license is preserved
 
 ### Source provenance
 
-`contract/provenance.json` records the two byte-exact HTTP and event contract snapshots separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
+`contract/provenance.json` records the five byte-exact HTTP, current/legacy event, Wiki and terminal snapshot contracts separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
 

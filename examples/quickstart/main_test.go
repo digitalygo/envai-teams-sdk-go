@@ -52,6 +52,12 @@ func TestQuickstartOffline(t *testing.T) {
 	responses["createChat"], _ = json.Marshal(chatEnvelope)
 	sent := make(chan struct{})
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Envai-Contract-Version", "3")
+		if strings.HasSuffix(r.URL.Path, "/capabilities") {
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprint(w, `{"protocol_version":3,"contract_version":3,"supported_contract_versions":[2,3],"legacy_v2_mode":"historical_reads_replay_only"}`)
+			return
+		}
 		if r.Header.Get("Authorization") != "Bearer fixture-only" {
 			t.Error("missing authentication")
 		}

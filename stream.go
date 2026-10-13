@@ -132,6 +132,9 @@ func (s *EventStream) Next() (Event, error) {
 			if errors.As(err, &p) {
 				return Event{}, err
 			}
+			if s.client.config.LegacyReadOnly && errors.Is(err, io.EOF) {
+				return Event{}, io.EOF
+			}
 			if err = s.reconnect(); err != nil {
 				return Event{}, err
 			}
@@ -140,6 +143,9 @@ func (s *EventStream) Next() (Event, error) {
 		e, err := DecodeEvent([]byte(data))
 		if err != nil {
 			return Event{}, err
+		}
+		if s.client.config.LegacyReadOnly && e.V != 2 {
+			return Event{}, &ProtocolError{"legacy replay contains non-v2 event"}
 		}
 		if e.ChatID != s.chatID {
 			return Event{}, &ProtocolError{"event chat does not match stream"}
@@ -203,6 +209,9 @@ type TurnOptions struct {
 }
 
 func (c *Client) RunTurn(ctx context.Context, chatID, message string, options TurnOptions) (TurnResult, error) {
+	if c.config.LegacyReadOnly {
+		return TurnResult{}, &CompatibilityError{Reason: "legacy mode is read-only"}
+	}
 	s, err := c.Events(ctx, chatID, options.Stream)
 	if err != nil {
 		return TurnResult{}, err
@@ -286,4 +295,11 @@ func (c *Client) RunTurn(ctx context.Context, chatID, message string, options Tu
 			return result, nil
 		}
 	}
+}
+
+// LegacyEvents reads a finite historical numeric-v2 snapshot without live reconnects.
+func (c *Client) LegacyEvents(ctx context.Context, chatID string, options StreamOptions) (*EventStream, error) {
+	clone := *c
+	clone.config.LegacyReadOnly = true
+	return clone.Events(ctx, chatID, options)
 }

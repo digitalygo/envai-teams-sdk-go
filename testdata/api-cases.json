@@ -132,11 +132,12 @@
     "body": null,
     "status": 200,
     "response": {
-      "protocol_version": 2,
+      "protocol_version": 3,
       "families": [],
       "event_types": [
         "ping",
         "turn.started",
+        "chat.title.updated",
         "turn.completed",
         "turn.cancelled",
         "turn.failed",
@@ -154,7 +155,13 @@
         "agent.done"
       ],
       "tool_kinds": [],
-      "features": []
+      "features": [],
+      "contract_version": 3,
+      "supported_contract_versions": [
+        2,
+        3
+      ],
+      "legacy_v2_mode": "historical_reads_replay_only"
     }
   },
   {
@@ -415,6 +422,7 @@
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
         "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "title": "fixture",
         "created_at": "fixture",
         "updated_at": "fixture"
       }
@@ -447,6 +455,7 @@
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
         "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "title": "fixture",
         "created_at": "fixture",
         "updated_at": "fixture"
       }
@@ -1085,6 +1094,508 @@
     "status": 200,
     "response": {
       "status": "ok"
+    }
+  },
+  {
+    "id": "uploadWikiSource",
+    "go_name": "UploadWikiSource",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "IdempotencyKey": "fixture"
+    },
+    "body": null,
+    "status": 202,
+    "response": {
+      "data": {
+        "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "uploaded",
+        "source_revision": 1,
+        "conversion": {
+          "status": "queued"
+        },
+        "indexing": {
+          "status": "pending_conversion"
+        },
+        "canonical_raw_path": "raw/wsrc_01j5abcdefghjkmnpqrstvwxyz.md",
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "none",
+          "scope_status": "open",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": null,
+          "priced_subtotals": []
+        },
+        "status_url": "https://envai.example.com/api/v1/workspaces/wsp_01j5abcdefghjkmnpqrstvwxyz/files/sources/wsrc_01j5abcdefghjkmnpqrstvwxyz"
+      }
+    }
+  },
+  {
+    "id": "getWikiSource",
+    "go_name": "GetWikiSource",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "FileID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "uploaded",
+        "source_revision": 1,
+        "conversion": {
+          "status": "queued"
+        },
+        "indexing": {
+          "status": "pending_conversion"
+        },
+        "canonical_raw_path": "raw/wsrc_01j5abcdefghjkmnpqrstvwxyz.md",
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "none",
+          "scope_status": "open",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": null,
+          "priced_subtotals": []
+        },
+        "status_url": "https://envai.example.com/api/v1/workspaces/wsp_01j5abcdefghjkmnpqrstvwxyz/files/sources/wsrc_01j5abcdefghjkmnpqrstvwxyz"
+      }
+    }
+  },
+  {
+    "id": "downloadWikiSource",
+    "go_name": "DownloadWikiSource",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "FileID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": null
+  },
+  {
+    "id": "withdrawWikiSource",
+    "go_name": "WithdrawWikiSource",
+    "parameters": {
+      "WorkspaceID": "fixture"
+    },
+    "body": {
+      "file_id": "fixture"
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "uploaded",
+        "source_revision": 1,
+        "conversion": {
+          "status": "queued"
+        },
+        "indexing": {
+          "status": "pending_conversion"
+        },
+        "canonical_raw_path": "raw/wsrc_01j5abcdefghjkmnpqrstvwxyz.md",
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "none",
+          "scope_status": "open",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": null,
+          "priced_subtotals": []
+        },
+        "status_url": "https://envai.example.com/api/v1/workspaces/wsp_01j5abcdefghjkmnpqrstvwxyz/files/sources/wsrc_01j5abcdefghjkmnpqrstvwxyz"
+      }
+    }
+  },
+  {
+    "id": "createWikiInboxRun",
+    "go_name": "CreateWikiInboxRun",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "IdempotencyKey": "fixture"
+    },
+    "body": {
+      "webhook_url": "https://receiver.example/wiki"
+    },
+    "status": 202,
+    "response": {
+      "data": {
+        "operation_id": "wop_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "kind": "inbox",
+        "status": "completed",
+        "phase": "inbox",
+        "phases": {
+          "inbox": {
+            "status": "completed",
+            "selected": 1,
+            "succeeded": 1,
+            "withdrawn": 0,
+            "failed": 0,
+            "files": [
+              {
+                "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+                "status": "succeeded",
+                "error_code": null
+              }
+            ]
+          }
+        },
+        "started_at": "2026-10-13T15:59:00Z",
+        "finished_at": "2026-10-13T16:00:00Z",
+        "batch_sizes": {
+          "inbox": 25,
+          "outbox": 10
+        },
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "mixed",
+          "scope_status": "closed",
+          "revision": 3,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 7,
+          "pending_invocation_count": 1,
+          "totals": null,
+          "priced_subtotals": [
+            {
+              "currency": "USD",
+              "amount": "0.01234000"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "createWikiOutboxRun",
+    "go_name": "CreateWikiOutboxRun",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "IdempotencyKey": "fixture"
+    },
+    "body": {
+      "webhook_url": "https://receiver.example/wiki"
+    },
+    "status": 202,
+    "response": {
+      "data": {
+        "operation_id": "wop_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "kind": "inbox",
+        "status": "completed",
+        "phase": "inbox",
+        "phases": {
+          "inbox": {
+            "status": "completed",
+            "selected": 1,
+            "succeeded": 1,
+            "withdrawn": 0,
+            "failed": 0,
+            "files": [
+              {
+                "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+                "status": "succeeded",
+                "error_code": null
+              }
+            ]
+          }
+        },
+        "started_at": "2026-10-13T15:59:00Z",
+        "finished_at": "2026-10-13T16:00:00Z",
+        "batch_sizes": {
+          "inbox": 25,
+          "outbox": 10
+        },
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "mixed",
+          "scope_status": "closed",
+          "revision": 3,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 7,
+          "pending_invocation_count": 1,
+          "totals": null,
+          "priced_subtotals": [
+            {
+              "currency": "USD",
+              "amount": "0.01234000"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "createWikiSyncRun",
+    "go_name": "CreateWikiSyncRun",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "IdempotencyKey": "fixture"
+    },
+    "body": {
+      "webhook_url": "https://receiver.example/wiki"
+    },
+    "status": 202,
+    "response": {
+      "data": {
+        "operation_id": "wop_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "kind": "inbox",
+        "status": "completed",
+        "phase": "inbox",
+        "phases": {
+          "inbox": {
+            "status": "completed",
+            "selected": 1,
+            "succeeded": 1,
+            "withdrawn": 0,
+            "failed": 0,
+            "files": [
+              {
+                "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+                "status": "succeeded",
+                "error_code": null
+              }
+            ]
+          }
+        },
+        "started_at": "2026-10-13T15:59:00Z",
+        "finished_at": "2026-10-13T16:00:00Z",
+        "batch_sizes": {
+          "inbox": 25,
+          "outbox": 10
+        },
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "mixed",
+          "scope_status": "closed",
+          "revision": 3,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 7,
+          "pending_invocation_count": 1,
+          "totals": null,
+          "priced_subtotals": [
+            {
+              "currency": "USD",
+              "amount": "0.01234000"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "getWikiOperation",
+    "go_name": "GetWikiOperation",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "OperationID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "operation_id": "wop_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "kind": "inbox",
+        "status": "completed",
+        "phase": "inbox",
+        "phases": {
+          "inbox": {
+            "status": "completed",
+            "selected": 1,
+            "succeeded": 1,
+            "withdrawn": 0,
+            "failed": 0,
+            "files": [
+              {
+                "file_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+                "status": "succeeded",
+                "error_code": null
+              }
+            ]
+          }
+        },
+        "started_at": "2026-10-13T15:59:00Z",
+        "finished_at": "2026-10-13T16:00:00Z",
+        "batch_sizes": {
+          "inbox": 25,
+          "outbox": 10
+        },
+        "billing": {
+          "status": "inactive"
+        },
+        "usage_cost": {
+          "status": "pending",
+          "basis": "mixed",
+          "scope_status": "closed",
+          "revision": 3,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 7,
+          "pending_invocation_count": 1,
+          "totals": null,
+          "priced_subtotals": [
+            {
+              "currency": "USD",
+              "amount": "0.01234000"
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "id": "listWikiCategories",
+    "go_name": "ListWikiCategories",
+    "parameters": {
+      "WorkspaceID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "categories": [
+          {
+            "category_id": "wcat_01j5abcdefghjkmnpqrstvwxyz",
+            "name": "Project",
+            "description": "Project notes"
+          }
+        ],
+        "catalog_revision": 3
+      }
+    }
+  },
+  {
+    "id": "getWikiCategoryIndex",
+    "go_name": "GetWikiCategoryIndex",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "CategoryID": "fixture",
+      "From": 1,
+      "To": 1,
+      "Type": "raw",
+      "CatalogRevision": 1
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "entries": [
+          {
+            "entry_id": "wce_01j5abcdefghjkmnpqrstvwxyz",
+            "type": "raw",
+            "target_id": "wsrc_01j5abcdefghjkmnpqrstvwxyz",
+            "canonical_path": "raw/wsrc_01j5abcdefghjkmnpqrstvwxyz.md",
+            "description": "Project notes",
+            "inserted_at": "2026-10-13T16:00:00Z"
+          }
+        ],
+        "total_count": 1,
+        "returned_count": 1,
+        "requested_range": {
+          "from": 1,
+          "to": 25
+        },
+        "actual_range": {
+          "from": 1,
+          "to": 1
+        },
+        "catalog_revision": 3,
+        "is_complete": true
+      }
+    }
+  },
+  {
+    "id": "getWikiWebhookJwks",
+    "go_name": "GetWikiWebhookJWKS",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "keys": []
+    }
+  },
+  {
+    "id": "streamChatEventsLegacy",
+    "go_name": "StreamChatEventsLegacy",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "After": 42
+    },
+    "body": null,
+    "status": 200,
+    "response": null
+  },
+  {
+    "id": "getCapabilitiesLegacy",
+    "go_name": "GetCapabilitiesLegacy",
+    "parameters": {},
+    "body": null,
+    "status": 200,
+    "response": {
+      "protocol_version": 2,
+      "families": [],
+      "event_types": [
+        "ping",
+        "turn.started",
+        "chat.title.updated",
+        "turn.completed",
+        "turn.cancelled",
+        "turn.failed",
+        "turn.steered",
+        "agent.started",
+        "agent.text.delta",
+        "agent.text.done",
+        "agent.delegated",
+        "agent.tool.start",
+        "agent.tool.complete",
+        "agent.tool.request",
+        "agent.tool.result",
+        "agent.context.compacting",
+        "agent.context.compacted",
+        "agent.done"
+      ],
+      "tool_kinds": [],
+      "features": []
     }
   }
 ]

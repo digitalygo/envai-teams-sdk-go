@@ -107,7 +107,7 @@ func TestStreamReplayAndFailures(t *testing.T) {
 	chat := ev[0].ChatID
 	t.Run("replay_dedup_ping", func(t *testing.T) {
 		var n atomic.Int32
-		c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/event-stream")
 			if n.Add(1) == 1 {
 				writeEvent(w, ev[0])
@@ -141,7 +141,7 @@ func TestStreamReplayAndFailures(t *testing.T) {
 		}
 	})
 	t.Run("unrecoverable_gap", func(t *testing.T) {
-		c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/event-stream")
 			writeEvent(w, ev[3])
 		})
@@ -157,7 +157,7 @@ func TestStreamReplayAndFailures(t *testing.T) {
 		}
 	})
 	t.Run("wrong_chat", func(t *testing.T) {
-		c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/event-stream")
 			writeEvent(w, ev[0])
 		})
@@ -171,13 +171,13 @@ func TestStreamReplayAndFailures(t *testing.T) {
 		}
 	})
 	t.Run("bad_content_type", func(t *testing.T) {
-		c := testClient(t, func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, "html") })
+		c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, "html") })
 		if _, err := c.Events(context.Background(), chat, StreamOptions{}); err == nil {
 			t.Fatal("html accepted")
 		}
 	})
 	t.Run("close_cancels_read", func(t *testing.T) {
-		c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/event-stream")
 			w.(http.Flusher).Flush()
 			<-r.Context().Done()
@@ -195,7 +195,7 @@ func TestStreamReplayAndFailures(t *testing.T) {
 		}
 	})
 	t.Run("invalid_options", func(t *testing.T) {
-		c := testClient(t, func(http.ResponseWriter, *http.Request) {})
+		c := negotiatedTestClient(t, func(http.ResponseWriter, *http.Request) {})
 		for _, o := range []StreamOptions{{After: -1}, {MaxReconnects: -1}, {ConnectTimeout: -1}} {
 			if _, err := c.Events(context.Background(), chat, o); err == nil {
 				t.Fatal(o)
@@ -210,7 +210,7 @@ func TestRunTurnWaitsLiveAndRequiresTerminal(t *testing.T) {
 		t.Run(fmt.Sprint(terminal), func(t *testing.T) {
 			sent := make(chan struct{})
 			var live atomic.Bool
-			c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+			c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 				if strings.HasSuffix(r.URL.Path, "/messages") {
 					if !live.Load() {
 						t.Error("message preceded live ping")
@@ -254,7 +254,7 @@ func TestRunTurnWaitsLiveAndRequiresTerminal(t *testing.T) {
 func TestRunTurnHandshakeFailureDoesNotSend(t *testing.T) {
 	ev := fixture[[]Event](t, "events-valid.json")
 	calls := 0
-	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+	c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		w.Header().Set("Content-Type", "text/event-stream")
 	})
@@ -298,7 +298,7 @@ func TestTypedEventPayloads(t *testing.T) {
 }
 func TestConcurrentStreamReaderRejectedAndLiveCancellationStable(t *testing.T) {
 	ev := fixture[[]Event](t, "events-valid.json")
-	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+	c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		writeEvent(w, ev[0])
 		w.(http.Flusher).Flush()
@@ -337,7 +337,7 @@ func TestRunTurnWithSignedToolEndToEnd(t *testing.T) {
 	message := make(chan struct{})
 	output := make(chan struct{})
 	var executed atomic.Int32
-	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+	c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.URL.Path == "/.well-known/jwks.json":
 			json.NewEncoder(w).Encode(signatures.JWKS)

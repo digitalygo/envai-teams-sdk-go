@@ -18,10 +18,12 @@ import (
 	"time"
 )
 
-//go:embed contract/operations.json contract/events.json
+//go:embed contract/*.json
 var contracts embed.FS
 
 type Config struct {
+	// LegacyReadOnly selects strict ATP v2 historical reads; all mutations are rejected.
+	LegacyReadOnly   bool
 	BaseURL          string
 	APIKey           string
 	JWKSURL          string
@@ -84,6 +86,9 @@ type MultipartPart struct {
 	Filename    string
 	ContentType string
 	Data        []byte
+	// Reader and Size enable bounded streaming instead of buffering Data.
+	Reader io.Reader
+	Size   int64
 }
 type Download struct {
 	Body   io.ReadCloser
@@ -170,6 +175,12 @@ func (c *Client) OperationIDs() []string {
 }
 func (c *Client) requestURL(op operation, params map[string]any) (string, error) {
 	path := op.Path
+	if atpOperation(op) {
+		path = strings.TrimPrefix(path, "/atp/v3")
+		if !c.config.LegacyReadOnly && !strings.HasSuffix(op.ID, "Legacy") {
+			path = "/atp/v3" + path
+		}
+	}
 	q := url.Values{}
 	allowed := map[string]bool{}
 	for _, p := range op.Parameters {
@@ -197,6 +208,12 @@ func (c *Client) requestURL(op operation, params map[string]any) (string, error)
 		}
 	}
 	u := *c.base
+	if op.ID == "getWikiWebhookJwks" {
+		u.Path = "/.well-known/wiki-webhook-jwks.json"
+		u.RawPath = ""
+		u.RawQuery = ""
+		return u.String(), nil
+	}
 	if op.ID == "getJwks" {
 		return c.config.JWKSURL, nil
 	}
@@ -268,16 +285,50 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	if op.Authenticated && c.config.APIKey == "" {
 		return nil, errors.New("envai: API key is required")
 	}
-	data, ct, err := c.makeBody(op, body)
+	if err = c.validateOperationParams(op, params); err != nil {
+		return nil, err
+	}
+	if err = validateWikiBody(op, body); err != nil {
+		return nil, err
+	}
+	if err = c.checkMutation(ctx, op); err != nil {
+		return nil, err
+	}
+	var data []byte
+	var ct string
+	var streaming io.Reader
+	if op.Body == "multipart" {
+		if parts, ok := body.([]MultipartPart); ok {
+			streaming, ct, err = multipartReader(parts)
+		} else {
+			err = errors.New("envai: multipart parts required")
+		}
+	} else {
+		data, ct, err = c.makeBody(op, body)
+	}
 	if err != nil {
 		return nil, err
 	}
 	for attempt := 0; ; attempt++ {
-		req, err := http.NewRequestWithContext(ctx, op.Method, uri, bytes.NewReader(data))
+		var reader io.Reader = bytes.NewReader(data)
+		if streaming != nil {
+			reader = streaming
+		}
+		req, err := http.NewRequestWithContext(ctx, op.Method, uri, reader)
 		if err != nil {
 			return nil, err
 		}
 		req.Header.Set("Accept", accept)
+		if negotiated(op) {
+			req.Header.Set(ContractHeader, c.versionFor(op))
+		}
+		for _, p := range op.Parameters {
+			if p.In == "header" {
+				if v, ok := params[p.Name]; ok {
+					req.Header.Set(p.Name, fmt.Sprint(v))
+				}
+			}
+		}
 		req.Header.Set("User-Agent", "envai-go/0.1.0")
 		if ct != "" {
 			req.Header.Set("Content-Type", ct)
@@ -309,7 +360,16 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 			continue
 		}
 		if status < 200 || status >= 300 {
-			return nil, c.apiError(resp)
+			apiErr := c.apiError(resp)
+			var api *APIError
+			if negotiated(op) && errors.As(apiErr, &api) && (status == 426 || (status == 400 && api.Code == "unsupported_contract_version") || (status == 404 && atpOperation(op) && !c.config.LegacyReadOnly)) {
+				return nil, &CompatibilityError{Reason: "selected contract endpoint is unavailable or requires an upgrade", Cause: apiErr}
+			}
+			return nil, apiErr
+		}
+		if err = c.checkAcknowledgment(op, resp); err != nil {
+			resp.Body.Close()
+			return nil, err
 		}
 		return resp, nil
 	}
@@ -388,6 +448,9 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 		if !ok {
 			return &ProtocolError{"response is missing data"}
 		}
+	}
+	if err = c.validateNegotiatedJSON(id, b); err != nil {
+		return err
 	}
 	if err = json.Unmarshal(b, out); err != nil {
 		return &ProtocolError{"invalid JSON response shape"}

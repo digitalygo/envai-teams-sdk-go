@@ -1,0 +1,20 @@
+# Migration to contract 3 (breaking)
+
+New clients automatically send `X-Envai-Contract-Version: 3` for ATP, completion reads, and authenticated Wiki/source operations, and require a matching successful-response acknowledgment. ATP paths are under `/api/v1/atp/v3`; keep the same configured base URL ending in `/api/v1`. Unrelated CRUD and public JWKS remain unnegotiated.
+
+Before mutations on those surfaces, the SDK verifies versioned capabilities: protocol/contract version 3, supported version 3, and the declared historical-only v2 mode. An old server's missing route, ignored header or unsupported capability response fails closed before a mutation wherever preflight can detect it. The versioned mutation route also protects an old-server switch after preflight. `CompatibilityError` carries a cause where available. No fallback or automatically repeated mutation is performed, even if a success lacks its acknowledgment and the mutation may already have happened. Reconcile an ambiguous result with the backend before deciding whether to replay the same idempotency key and original payload.
+
+For historical reads, construct `Config{LegacyReadOnly: true}`. It rejects every mutation, including general CRUD; it does not let old servers start paid tracked-cost work. Explicit `GetCapabilitiesLegacy` and `LegacyEvents`/`StreamChatEventsLegacy` are also available. Legacy events are finite snapshots ending in EOF, without live reconnects. A legacy replay containing v3 or null-bearing v2 is rejected.
+
+`DecodeEvent` validates version before hydration. V2 is checked against its separately frozen numeric schema. V3 accepts nullable usage/terminal costs. V3 streams accept unchanged valid numeric v2 historical events and current v3 events. Raw event bytes, IDs, sequence numbers and versions are preserved; reconnects retain selected contract 3. Unknown versions are errors.
+
+Update scalar assumptions:
+
+- `Completion.CostUSD`, `ATPUsage.CostUSD` and terminal cost/chat-cost fields change from `float64` to `*float64`. Check nil before dereferencing; do not default nil to zero.
+- Wiki/accounting DTOs expose typed fields and preserve allowed unknown JSON in `Extra`. Currency amounts remain decimal strings.
+- Optional terminal snapshots, billing and usage keep missing/null/value semantics. Snapshot data is metadata, not response text.
+- New operations require explicit idempotency keys where the shared API requires them. Contract selection is automatic and does not add a per-call version argument.
+
+Server-first deployment is required for normal new-client operation. Legacy default server requests can only read truthful original numeric representations; HTTP 426 requires upgrade and cannot be treated as a zero-cost response. A whole completion page may fail if any row cannot be represented truthfully. Existing numeric histories and closed empty known-zero scopes remain valid.
+
+Full Wiki lifecycle, exact reads, webhook verification and atomic PostgreSQL intake are documented in [wiki.md](wiki.md). Provider callbacks and client-tool signatures retain separate signing protocols. No deployment, migration execution, paid provider call or credential provisioning is implied by installing the SDK.
