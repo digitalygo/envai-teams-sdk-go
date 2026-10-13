@@ -3,23 +3,63 @@ package envai
 import "encoding/json"
 
 type ATPAgent struct {
-	InstanceID string           `json:"instance_id"`
-	Name       string           `json:"name"`
-	Role       string           `json:"role"`
-	ParentID   *string          `json:"parent_id"`
-	Model      Optional[string] `json:"model,omitzero"`
+	InstanceID string                     `json:"instance_id"`
+	Name       string                     `json:"name"`
+	Role       string                     `json:"role"`
+	ParentID   *string                    `json:"parent_id"`
+	Model      Optional[string]           `json:"model,omitzero"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPAgent) UnmarshalJSON(b []byte) error {
+	type plain ATPAgent
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"instance_id", "name", "role", "parent_id", "model"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPAgent(out)
+	return nil
+}
+func (v ATPAgent) MarshalJSON() ([]byte, error) {
+	type plain ATPAgent
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ATPUsage struct {
-	InputTokens   int64                     `json:"input_tokens"`
-	OutputTokens  int64                     `json:"output_tokens"`
-	CostUSD       *float64                  `json:"cost_usd"`
-	DurationMs    int64                     `json:"duration_ms"`
-	SpriteMs      Optional[int64]           `json:"sprite_ms,omitzero"`
-	SpriteRamGbMs Optional[int64]           `json:"sprite_ram_gb_ms,omitzero"`
-	ToolCalls     Optional[int64]           `json:"tool_calls,omitzero"`
-	Billing       Optional[ATPBillingState] `json:"billing,omitzero"`
-	UsageCost     Optional[ATPUsageCost]    `json:"usage_cost,omitzero"`
+	InputTokens   int64                      `json:"input_tokens"`
+	OutputTokens  int64                      `json:"output_tokens"`
+	CostUSD       *float64                   `json:"cost_usd"`
+	DurationMs    int64                      `json:"duration_ms"`
+	SpriteMs      Optional[int64]            `json:"sprite_ms,omitzero"`
+	SpriteRamGbMs Optional[int64]            `json:"sprite_ram_gb_ms,omitzero"`
+	ToolCalls     Optional[int64]            `json:"tool_calls,omitzero"`
+	Billing       Optional[ATPBillingState]  `json:"billing,omitzero"`
+	UsageCost     Optional[ATPUsageCost]     `json:"usage_cost,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPUsage) UnmarshalJSON(b []byte) error {
+	type plain ATPUsage
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"input_tokens", "output_tokens", "cost_usd", "duration_ms", "sprite_ms", "sprite_ram_gb_ms", "tool_calls", "billing", "usage_cost"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPUsage(out)
+	return nil
+}
+func (v ATPUsage) MarshalJSON() ([]byte, error) {
+	type plain ATPUsage
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ATPToolKind string

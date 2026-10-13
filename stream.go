@@ -1,6 +1,7 @@
 package envai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -18,6 +19,8 @@ type StreamOptions struct {
 	ReconnectDelay time.Duration
 	MaxEventBytes  int
 	ConnectTimeout time.Duration
+	// MaxLegacySnapshotBytes bounds a complete finite v2 replay before any yield.
+	MaxLegacySnapshotBytes int64
 }
 type ReplayGapError struct {
 	From int64
@@ -27,23 +30,25 @@ type ReplayGapError struct {
 func (e *ReplayGapError) Error() string { return fmt.Sprintf("envai: replay gap %d..%d", e.From, e.To) }
 
 type EventStream struct {
-	client     *Client
-	chatID     string
-	options    StreamOptions
-	ctx        context.Context
-	cancel     context.CancelFunc
-	mu         sync.Mutex
-	body       io.ReadCloser
-	decoder    *SSEDecoder
-	cursor     atomic.Int64
-	readerMu   sync.Mutex
-	reconnects int
-	recovering bool
-	closed     bool
+	client       *Client
+	chatID       string
+	options      StreamOptions
+	ctx          context.Context
+	cancel       context.CancelFunc
+	mu           sync.Mutex
+	body         io.ReadCloser
+	decoder      *SSEDecoder
+	cursor       atomic.Int64
+	readerMu     sync.Mutex
+	reconnects   int
+	recovering   bool
+	closed       bool
+	legacyEvents []Event
+	legacyIndex  int
 }
 
 func (c *Client) Events(ctx context.Context, chatID string, options StreamOptions) (*EventStream, error) {
-	if options.After < 0 || options.MaxReconnects < 0 || options.ReconnectDelay < 0 {
+	if options.After < 0 || options.MaxReconnects < 0 || options.ReconnectDelay < 0 || options.MaxLegacySnapshotBytes < 0 {
 		return nil, errors.New("envai: invalid stream options")
 	}
 	if options.ReconnectDelay == 0 {
@@ -74,6 +79,10 @@ func (s *EventStream) connect() error {
 	if !strings.HasPrefix(strings.ToLower(resp.Header.Get("Content-Type")), "text/event-stream") {
 		resp.Body.Close()
 		return &ProtocolError{"stream response is not text/event-stream"}
+	}
+	if s.client.config.LegacyReadOnly {
+		timer.Stop()
+		return s.bufferLegacy(resp.Body)
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -119,6 +128,20 @@ func (s *EventStream) Next() (Event, error) {
 		return Event{}, errors.New("envai: stream permits only one reader")
 	}
 	defer s.readerMu.Unlock()
+	if s.client.config.LegacyReadOnly {
+		if err := s.ctx.Err(); err != nil {
+			return Event{}, err
+		}
+		if s.legacyIndex >= len(s.legacyEvents) {
+			return Event{}, io.EOF
+		}
+		event := s.legacyEvents[s.legacyIndex]
+		s.legacyIndex++
+		if event.Type != "ping" {
+			s.cursor.Store(event.Seq)
+		}
+		return event, nil
+	}
 	for {
 		if err := s.ctx.Err(); err != nil {
 			return Event{}, err
@@ -302,4 +325,58 @@ func (c *Client) LegacyEvents(ctx context.Context, chatID string, options Stream
 	clone := *c
 	clone.config.LegacyReadOnly = true
 	return clone.Events(ctx, chatID, options)
+}
+
+// bufferLegacy validates the entire finite snapshot before making a prefix
+// visible. Unlike v3, legacy reads cannot reconnect or follow a live stream.
+func (s *EventStream) bufferLegacy(body io.ReadCloser) error {
+	defer body.Close()
+	deadline := time.AfterFunc(s.client.config.RequestTimeout, s.cancel)
+	defer deadline.Stop()
+	limit := s.options.MaxLegacySnapshotBytes
+	if limit == 0 {
+		limit = 64 << 20
+	}
+	raw, err := io.ReadAll(io.LimitReader(body, limit+1))
+	if err != nil {
+		return err
+	}
+	if int64(len(raw)) > limit {
+		return &ProtocolError{"legacy replay exceeds configured snapshot limit"}
+	}
+	decoder := NewSSEDecoder(bytes.NewReader(raw), s.options.MaxEventBytes)
+	decoder.strictEOF = true
+	cursor := s.Cursor()
+	var events []Event
+	for {
+		data, err := decoder.Next()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		event, err := DecodeEvent([]byte(data))
+		if err != nil {
+			return err
+		}
+		if event.V != 2 || event.ChatID != s.chatID {
+			return &ProtocolError{"legacy snapshot version or chat mismatch"}
+		}
+		if event.Type != "ping" {
+			if event.Seq <= cursor {
+				continue
+			}
+			if event.Seq != cursor+1 {
+				return &ReplayGapError{From: cursor + 1, To: event.Seq - 1}
+			}
+			cursor = event.Seq
+		}
+		events = append(events, event)
+	}
+	if err := s.ctx.Err(); err != nil {
+		return err
+	}
+	s.legacyEvents = events
+	return nil
 }

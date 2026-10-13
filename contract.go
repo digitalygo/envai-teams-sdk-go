@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/santhosh-tekuri/jsonschema/v6"
+	"math"
 	"net/http"
 	"strings"
 	"sync"
@@ -101,6 +102,9 @@ func (c *Client) validateNegotiatedJSON(id string, b []byte) error {
 		if id == "getCompletion" {
 			return validateCompletionJSON(b, c.config.LegacyReadOnly)
 		}
+		if data := bytes.TrimSpace(root["data"]); len(data) == 0 || data[0] != '[' {
+			return &ProtocolError{"completion page data must be an array"}
+		}
 		var rows []json.RawMessage
 		if err := json.Unmarshal(root["data"], &rows); err != nil {
 			return &ProtocolError{"invalid completion page"}
@@ -122,22 +126,18 @@ func validateCompletionJSON(b []byte, legacy bool) error {
 	if !ok || (legacy && bytes.Equal(bytes.TrimSpace(cost), []byte("null"))) {
 		return &ProtocolError{"completion cost is missing or not representable in legacy contract"}
 	}
-	if !bytes.Equal(bytes.TrimSpace(cost), []byte("null")) {
-		var n json.Number
-		d := json.NewDecoder(bytes.NewReader(cost))
-		d.UseNumber()
-		var value any
-		if d.Decode(&value) != nil {
-			return &ProtocolError{"invalid completion cost"}
-		}
-		var isNumber bool
-		n, isNumber = value.(json.Number)
-		if !isNumber {
-			return &ProtocolError{"completion cost must be numeric or null"}
-		}
-		_ = n
+	if err := validateCostFields(b, !legacy); err != nil {
+		return err
 	}
+
 	if snapshot := row["terminal_snapshot"]; len(snapshot) > 0 && !bytes.Equal(bytes.TrimSpace(snapshot), []byte("null")) {
+		var snapshotFields map[string]json.RawMessage
+		if json.Unmarshal(snapshot, &snapshotFields) != nil {
+			return &ProtocolError{"invalid terminal snapshot"}
+		}
+		if err := validateCostFields(snapshotFields["data"], !legacy); err != nil {
+			return err
+		}
 		if err := validateDefinition("terminal-snapshot.json", "CompletionTerminalSnapshot", snapshot); err != nil {
 			return err
 		}
@@ -151,6 +151,60 @@ func validateCompletionJSON(b []byte, legacy bool) error {
 		_ = json.Unmarshal(row["id"], &id)
 		if identity.Data.TurnID != id {
 			return &ProtocolError{"terminal snapshot turn does not match completion"}
+		}
+	}
+	return nil
+}
+
+// Validate monetary numeric fields before any float64 hydration. Only contract
+// containers are traversed; unrelated future extension values remain opaque.
+func validateCostFields(b []byte, allowNull bool) error {
+	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder.UseNumber()
+	var value any
+	if decoder.Decode(&value) != nil {
+		return &ProtocolError{"invalid cost-bearing object"}
+	}
+	if _, ok := value.(map[string]any); !ok {
+		return &ProtocolError{"invalid cost-bearing object"}
+	}
+	return walkCostFields(value, allowNull, false)
+}
+func walkCostFields(value any, allowNull, descend bool) error {
+	switch object := value.(type) {
+	case map[string]any:
+		for name, child := range object {
+			switch name {
+			case "cost_usd", "cost", "chat_cost":
+				if child == nil {
+					if allowNull {
+						continue
+					}
+					return &ProtocolError{"legacy cost cannot be null"}
+				}
+				number, ok := child.(json.Number)
+				if !ok {
+					return &ProtocolError{"cost must be numeric or null"}
+				}
+				amount, err := number.Float64()
+				if err != nil || math.IsInf(amount, 0) || math.IsNaN(amount) || amount < 0 {
+					return &ProtocolError{"cost must be finite and nonnegative"}
+				}
+			default:
+				if descend || name == "usage" || name == "chat_usage" {
+					if err := walkCostFields(child, allowNull, true); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	case []any:
+		if descend {
+			for _, child := range object {
+				if err := walkCostFields(child, allowNull, true); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil

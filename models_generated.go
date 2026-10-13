@@ -610,88 +610,408 @@ type WikiWebhookEvent json.RawMessage
 
 type ErrorEnvelope struct {
 	ErrorEnvelope ErrorEnvelopeErrorEnvelope `json:"error"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ErrorEnvelope) UnmarshalJSON(b []byte) error {
+	type plain ErrorEnvelope
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"error"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ErrorEnvelope(out)
+	return nil
+}
+func (v ErrorEnvelope) MarshalJSON() ([]byte, error) {
+	type plain ErrorEnvelope
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ChatMessageRequest struct {
-	Message string `json:"message"`
+	Message string                     `json:"message"`
+	Extra   map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatMessageRequest) UnmarshalJSON(b []byte) error {
+	type plain ChatMessageRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"message"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatMessageRequest(out)
+	return nil
+}
+func (v ChatMessageRequest) MarshalJSON() ([]byte, error) {
+	type plain ChatMessageRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ChatMessageAccepted struct {
-	Status string `json:"status"`
-	TurnID string `json:"turn_id"`
+	Status string                     `json:"status"`
+	TurnID string                     `json:"turn_id"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatMessageAccepted) UnmarshalJSON(b []byte) error {
+	type plain ChatMessageAccepted
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatMessageAccepted(out)
+	return nil
+}
+func (v ChatMessageAccepted) MarshalJSON() ([]byte, error) {
+	type plain ChatMessageAccepted
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TurnAccepted struct {
-	TurnID string `json:"turn_id"`
+	TurnID string                     `json:"turn_id"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TurnAccepted) UnmarshalJSON(b []byte) error {
+	type plain TurnAccepted
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TurnAccepted(out)
+	return nil
+}
+func (v TurnAccepted) MarshalJSON() ([]byte, error) {
+	type plain TurnAccepted
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ToolOutputRequest struct {
-	CallID  string         `json:"call_id"`
-	Output  string         `json:"output"`
-	IsError Optional[bool] `json:"is_error,omitzero"`
+	CallID  string                     `json:"call_id"`
+	Output  string                     `json:"output"`
+	IsError Optional[bool]             `json:"is_error,omitzero"`
+	Extra   map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ToolOutputRequest) UnmarshalJSON(b []byte) error {
+	type plain ToolOutputRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"call_id", "output", "is_error"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ToolOutputRequest(out)
+	return nil
+}
+func (v ToolOutputRequest) MarshalJSON() ([]byte, error) {
+	type plain ToolOutputRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ApprovalRequest struct {
-	ApprovalID string           `json:"approval_id"`
-	Approve    bool             `json:"approve"`
-	Reason     Optional[string] `json:"reason,omitzero"`
+	ApprovalID string                     `json:"approval_id"`
+	Approve    bool                       `json:"approve"`
+	Reason     Optional[string]           `json:"reason,omitzero"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ApprovalRequest) UnmarshalJSON(b []byte) error {
+	type plain ApprovalRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"approval_id", "approve", "reason"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ApprovalRequest(out)
+	return nil
+}
+func (v ApprovalRequest) MarshalJSON() ([]byte, error) {
+	type plain ApprovalRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type SteerRequest struct {
-	Text          string           `json:"text"`
-	TargetAgentID Optional[string] `json:"target_agent_id,omitzero"`
+	Text          string                     `json:"text"`
+	TargetAgentID Optional[string]           `json:"target_agent_id,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *SteerRequest) UnmarshalJSON(b []byte) error {
+	type plain SteerRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"text", "target_agent_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = SteerRequest(out)
+	return nil
+}
+func (v SteerRequest) MarshalJSON() ([]byte, error) {
+	type plain SteerRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ForkChatRequest struct {
-	DestinationChatID string `json:"destination_chat_id"`
+	DestinationChatID string                     `json:"destination_chat_id"`
+	Extra             map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ForkChatRequest) UnmarshalJSON(b []byte) error {
+	type plain ForkChatRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"destination_chat_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ForkChatRequest(out)
+	return nil
+}
+func (v ForkChatRequest) MarshalJSON() ([]byte, error) {
+	type plain ForkChatRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ChatForked struct {
-	SourceChatID      string `json:"source_chat_id"`
-	DestinationChatID string `json:"destination_chat_id"`
+	SourceChatID      string                     `json:"source_chat_id"`
+	DestinationChatID string                     `json:"destination_chat_id"`
+	Extra             map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatForked) UnmarshalJSON(b []byte) error {
+	type plain ChatForked
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"source_chat_id", "destination_chat_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatForked(out)
+	return nil
+}
+func (v ChatForked) MarshalJSON() ([]byte, error) {
+	type plain ChatForked
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type OrchestratorContextItem struct {
-	Kind    string           `json:"kind"`
-	TurnID  Optional[string] `json:"turn_id,omitzero"`
-	Content string           `json:"content"`
+	Kind    string                     `json:"kind"`
+	TurnID  Optional[string]           `json:"turn_id,omitzero"`
+	Content string                     `json:"content"`
+	Extra   map[string]json.RawMessage `json:"-"`
+}
+
+func (v *OrchestratorContextItem) UnmarshalJSON(b []byte) error {
+	type plain OrchestratorContextItem
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"kind", "turn_id", "content"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = OrchestratorContextItem(out)
+	return nil
+}
+func (v OrchestratorContextItem) MarshalJSON() ([]byte, error) {
+	type plain OrchestratorContextItem
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type RestoreChatRequest struct {
-	OrchestratorContext []OrchestratorContextItem `json:"orchestrator_context"`
+	OrchestratorContext []OrchestratorContextItem  `json:"orchestrator_context"`
+	Extra               map[string]json.RawMessage `json:"-"`
+}
+
+func (v *RestoreChatRequest) UnmarshalJSON(b []byte) error {
+	type plain RestoreChatRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"orchestrator_context"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = RestoreChatRequest(out)
+	return nil
+}
+func (v RestoreChatRequest) MarshalJSON() ([]byte, error) {
+	type plain RestoreChatRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type RestoreChatAccepted struct {
-	Status string  `json:"status"`
-	TurnID *string `json:"turn_id"`
+	Status string                     `json:"status"`
+	TurnID *string                    `json:"turn_id"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *RestoreChatAccepted) UnmarshalJSON(b []byte) error {
+	type plain RestoreChatAccepted
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = RestoreChatAccepted(out)
+	return nil
+}
+func (v RestoreChatAccepted) MarshalJSON() ([]byte, error) {
+	type plain RestoreChatAccepted
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type Capabilities struct {
-	ProtocolVersion           int64    `json:"protocol_version"`
-	Families                  []string `json:"families"`
-	EventTypes                []string `json:"event_types"`
-	ToolKinds                 []string `json:"tool_kinds"`
-	Features                  []string `json:"features"`
-	ContractVersion           int64    `json:"contract_version"`
-	SupportedContractVersions []int64  `json:"supported_contract_versions"`
-	LegacyV2Mode              string   `json:"legacy_v2_mode"`
+	ProtocolVersion           int64                      `json:"protocol_version"`
+	Families                  []string                   `json:"families"`
+	EventTypes                []string                   `json:"event_types"`
+	ToolKinds                 []string                   `json:"tool_kinds"`
+	Features                  []string                   `json:"features"`
+	ContractVersion           int64                      `json:"contract_version"`
+	SupportedContractVersions []int64                    `json:"supported_contract_versions"`
+	LegacyV2Mode              string                     `json:"legacy_v2_mode"`
+	Extra                     map[string]json.RawMessage `json:"-"`
+}
+
+func (v *Capabilities) UnmarshalJSON(b []byte) error {
+	type plain Capabilities
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"protocol_version", "families", "event_types", "tool_kinds", "features", "contract_version", "supported_contract_versions", "legacy_v2_mode"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = Capabilities(out)
+	return nil
+}
+func (v Capabilities) MarshalJSON() ([]byte, error) {
+	type plain Capabilities
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type Workspace struct {
-	ID        string            `json:"id"`
-	UserID    string            `json:"user_id"`
-	Name      string            `json:"name"`
-	Metadata  WorkspaceMetadata `json:"metadata"`
-	CreatedAt string            `json:"created_at"`
-	UpdatedAt string            `json:"updated_at"`
+	ID        string                     `json:"id"`
+	UserID    string                     `json:"user_id"`
+	Name      string                     `json:"name"`
+	Metadata  WorkspaceMetadata          `json:"metadata"`
+	CreatedAt string                     `json:"created_at"`
+	UpdatedAt string                     `json:"updated_at"`
+	Extra     map[string]json.RawMessage `json:"-"`
+}
+
+func (v *Workspace) UnmarshalJSON(b []byte) error {
+	type plain Workspace
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "user_id", "name", "metadata", "created_at", "updated_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = Workspace(out)
+	return nil
+}
+func (v Workspace) MarshalJSON() ([]byte, error) {
+	type plain Workspace
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceResource struct {
-	Data Workspace `json:"data"`
+	Data  Workspace                  `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WorkspaceResource) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceResource(out)
+	return nil
+}
+func (v WorkspaceResource) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceCollection struct {
-	Data []Workspace `json:"data"`
+	Data  []Workspace                `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WorkspaceCollection) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceCollection(out)
+	return nil
+}
+func (v WorkspaceCollection) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceMetadata map[string]json.RawMessage
@@ -699,11 +1019,51 @@ type WorkspaceMetadata map[string]json.RawMessage
 type WorkspaceCreateRequest struct {
 	Name     string                      `json:"name"`
 	Metadata Optional[WorkspaceMetadata] `json:"metadata,omitzero"`
+	Extra    map[string]json.RawMessage  `json:"-"`
+}
+
+func (v *WorkspaceCreateRequest) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceCreateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "metadata"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceCreateRequest(out)
+	return nil
+}
+func (v WorkspaceCreateRequest) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceCreateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceUpdateRequest struct {
 	Name     Optional[string]            `json:"name,omitzero"`
 	Metadata Optional[WorkspaceMetadata] `json:"metadata,omitzero"`
+	Extra    map[string]json.RawMessage  `json:"-"`
+}
+
+func (v *WorkspaceUpdateRequest) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceUpdateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "metadata"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceUpdateRequest(out)
+	return nil
+}
+func (v WorkspaceUpdateRequest) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceUpdateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type UserTool struct {
@@ -718,11 +1078,51 @@ type UserTool struct {
 }
 
 type UserToolResource struct {
-	Data UserTool `json:"data"`
+	Data  UserTool                   `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *UserToolResource) UnmarshalJSON(b []byte) error {
+	type plain UserToolResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = UserToolResource(out)
+	return nil
+}
+func (v UserToolResource) MarshalJSON() ([]byte, error) {
+	type plain UserToolResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type UserToolCollection struct {
-	Data []UserTool `json:"data"`
+	Data  []UserTool                 `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *UserToolCollection) UnmarshalJSON(b []byte) error {
+	type plain UserToolCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = UserToolCollection(out)
+	return nil
+}
+func (v UserToolCollection) MarshalJSON() ([]byte, error) {
+	type plain UserToolCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type UserToolCreateRequest struct {
@@ -740,25 +1140,105 @@ type UserToolUpdateRequest struct {
 }
 
 type Chat struct {
-	ID          string  `json:"id"`
-	WorkspaceID string  `json:"workspace_id"`
-	UserID      string  `json:"user_id"`
-	TeamID      string  `json:"team_id"`
-	Title       *string `json:"title"`
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
+	ID          string                     `json:"id"`
+	WorkspaceID string                     `json:"workspace_id"`
+	UserID      string                     `json:"user_id"`
+	TeamID      string                     `json:"team_id"`
+	Title       *string                    `json:"title"`
+	CreatedAt   string                     `json:"created_at"`
+	UpdatedAt   string                     `json:"updated_at"`
+	Extra       map[string]json.RawMessage `json:"-"`
+}
+
+func (v *Chat) UnmarshalJSON(b []byte) error {
+	type plain Chat
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "workspace_id", "user_id", "team_id", "title", "created_at", "updated_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = Chat(out)
+	return nil
+}
+func (v Chat) MarshalJSON() ([]byte, error) {
+	type plain Chat
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ChatResource struct {
-	Data Chat `json:"data"`
+	Data  Chat                       `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatResource) UnmarshalJSON(b []byte) error {
+	type plain ChatResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatResource(out)
+	return nil
+}
+func (v ChatResource) MarshalJSON() ([]byte, error) {
+	type plain ChatResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ChatCollection struct {
-	Data []Chat `json:"data"`
+	Data  []Chat                     `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatCollection) UnmarshalJSON(b []byte) error {
+	type plain ChatCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatCollection(out)
+	return nil
+}
+func (v ChatCollection) MarshalJSON() ([]byte, error) {
+	type plain ChatCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ChatCreateRequest struct {
-	TeamID string `json:"team_id"`
+	TeamID string                     `json:"team_id"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatCreateRequest) UnmarshalJSON(b []byte) error {
+	type plain ChatCreateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"team_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatCreateRequest(out)
+	return nil
+}
+func (v ChatCreateRequest) MarshalJSON() ([]byte, error) {
+	type plain ChatCreateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type Completion struct {
@@ -805,13 +1285,53 @@ func (v Completion) MarshalJSON() ([]byte, error) {
 }
 
 type CompletionResource struct {
-	Data Completion `json:"data"`
+	Data  Completion                 `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CompletionResource) UnmarshalJSON(b []byte) error {
+	type plain CompletionResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CompletionResource(out)
+	return nil
+}
+func (v CompletionResource) MarshalJSON() ([]byte, error) {
+	type plain CompletionResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CompletionCollection struct {
-	Data  []Completion              `json:"data"`
-	Links CompletionCollectionLinks `json:"links"`
-	Meta  CompletionCollectionMeta  `json:"meta"`
+	Data  []Completion               `json:"data"`
+	Links CompletionCollectionLinks  `json:"links"`
+	Meta  CompletionCollectionMeta   `json:"meta"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CompletionCollection) UnmarshalJSON(b []byte) error {
+	type plain CompletionCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data", "links", "meta"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CompletionCollection(out)
+	return nil
+}
+func (v CompletionCollection) MarshalJSON() ([]byte, error) {
+	type plain CompletionCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type Agent struct {
@@ -830,14 +1350,74 @@ type Agent struct {
 	Config               map[string]json.RawMessage `json:"config"`
 	CreatedAt            string                     `json:"created_at"`
 	UpdatedAt            string                     `json:"updated_at"`
+	Extra                map[string]json.RawMessage `json:"-"`
+}
+
+func (v *Agent) UnmarshalJSON(b []byte) error {
+	type plain Agent
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "user_id", "name", "description", "system_prompt", "model", "mode", "tools_enabled", "external_tools_enabled", "permissions", "can_write_knowledge", "can_write_skills", "config", "created_at", "updated_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = Agent(out)
+	return nil
+}
+func (v Agent) MarshalJSON() ([]byte, error) {
+	type plain Agent
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type AgentResource struct {
-	Data Agent `json:"data"`
+	Data  Agent                      `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *AgentResource) UnmarshalJSON(b []byte) error {
+	type plain AgentResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = AgentResource(out)
+	return nil
+}
+func (v AgentResource) MarshalJSON() ([]byte, error) {
+	type plain AgentResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type AgentCollection struct {
-	Data []Agent `json:"data"`
+	Data  []Agent                    `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *AgentCollection) UnmarshalJSON(b []byte) error {
+	type plain AgentCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = AgentCollection(out)
+	return nil
+}
+func (v AgentCollection) MarshalJSON() ([]byte, error) {
+	type plain AgentCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type AgentCreateRequest struct {
@@ -852,6 +1432,26 @@ type AgentCreateRequest struct {
 	CanWriteKnowledge    Optional[bool]                       `json:"can_write_knowledge,omitzero"`
 	CanWriteSkills       Optional[bool]                       `json:"can_write_skills,omitzero"`
 	Config               Optional[map[string]json.RawMessage] `json:"config,omitzero"`
+	Extra                map[string]json.RawMessage           `json:"-"`
+}
+
+func (v *AgentCreateRequest) UnmarshalJSON(b []byte) error {
+	type plain AgentCreateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "description", "system_prompt", "model", "mode", "tools_enabled", "external_tools_enabled", "permissions", "can_write_knowledge", "can_write_skills", "config"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = AgentCreateRequest(out)
+	return nil
+}
+func (v AgentCreateRequest) MarshalJSON() ([]byte, error) {
+	type plain AgentCreateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type AgentUpdateRequest struct {
@@ -866,27 +1466,107 @@ type AgentUpdateRequest struct {
 	CanWriteKnowledge    Optional[bool]                       `json:"can_write_knowledge,omitzero"`
 	CanWriteSkills       Optional[bool]                       `json:"can_write_skills,omitzero"`
 	Config               Optional[map[string]json.RawMessage] `json:"config,omitzero"`
+	Extra                map[string]json.RawMessage           `json:"-"`
+}
+
+func (v *AgentUpdateRequest) UnmarshalJSON(b []byte) error {
+	type plain AgentUpdateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "description", "system_prompt", "model", "mode", "tools_enabled", "external_tools_enabled", "permissions", "can_write_knowledge", "can_write_skills", "config"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = AgentUpdateRequest(out)
+	return nil
+}
+func (v AgentUpdateRequest) MarshalJSON() ([]byte, error) {
+	type plain AgentUpdateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type AgentTool map[string]json.RawMessage
 
 type Team struct {
-	ID             string       `json:"id"`
-	UserID         string       `json:"user_id"`
-	Name           string       `json:"name"`
-	Description    *string      `json:"description"`
-	OrchestratorID string       `json:"orchestrator_id"`
-	Members        []TeamMember `json:"members"`
-	CreatedAt      string       `json:"created_at"`
-	UpdatedAt      string       `json:"updated_at"`
+	ID             string                     `json:"id"`
+	UserID         string                     `json:"user_id"`
+	Name           string                     `json:"name"`
+	Description    *string                    `json:"description"`
+	OrchestratorID string                     `json:"orchestrator_id"`
+	Members        []TeamMember               `json:"members"`
+	CreatedAt      string                     `json:"created_at"`
+	UpdatedAt      string                     `json:"updated_at"`
+	Extra          map[string]json.RawMessage `json:"-"`
+}
+
+func (v *Team) UnmarshalJSON(b []byte) error {
+	type plain Team
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "user_id", "name", "description", "orchestrator_id", "members", "created_at", "updated_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = Team(out)
+	return nil
+}
+func (v Team) MarshalJSON() ([]byte, error) {
+	type plain Team
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamResource struct {
-	Data Team `json:"data"`
+	Data  Team                       `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TeamResource) UnmarshalJSON(b []byte) error {
+	type plain TeamResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamResource(out)
+	return nil
+}
+func (v TeamResource) MarshalJSON() ([]byte, error) {
+	type plain TeamResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamCollection struct {
-	Data []Team `json:"data"`
+	Data  []Team                     `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TeamCollection) UnmarshalJSON(b []byte) error {
+	type plain TeamCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamCollection(out)
+	return nil
+}
+func (v TeamCollection) MarshalJSON() ([]byte, error) {
+	type plain TeamCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamCreateRequest struct {
@@ -894,6 +1574,26 @@ type TeamCreateRequest struct {
 	Description    Optional[string]                    `json:"description,omitzero"`
 	OrchestratorID string                              `json:"orchestrator_id"`
 	Members        Optional[[]TeamMemberCreateRequest] `json:"members,omitzero"`
+	Extra          map[string]json.RawMessage          `json:"-"`
+}
+
+func (v *TeamCreateRequest) UnmarshalJSON(b []byte) error {
+	type plain TeamCreateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "description", "orchestrator_id", "members"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamCreateRequest(out)
+	return nil
+}
+func (v TeamCreateRequest) MarshalJSON() ([]byte, error) {
+	type plain TeamCreateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamUpdateRequest struct {
@@ -901,60 +1601,257 @@ type TeamUpdateRequest struct {
 	Description    Optional[string]                    `json:"description,omitzero"`
 	OrchestratorID Optional[string]                    `json:"orchestrator_id,omitzero"`
 	Members        Optional[[]TeamMemberCreateRequest] `json:"members,omitzero"`
+	Extra          map[string]json.RawMessage          `json:"-"`
+}
+
+func (v *TeamUpdateRequest) UnmarshalJSON(b []byte) error {
+	type plain TeamUpdateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "description", "orchestrator_id", "members"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamUpdateRequest(out)
+	return nil
+}
+func (v TeamUpdateRequest) MarshalJSON() ([]byte, error) {
+	type plain TeamUpdateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamMember struct {
-	AgentDefinitionID string  `json:"agent_definition_id"`
-	Name              string  `json:"name"`
-	Position          int64   `json:"position"`
-	Role              *string `json:"role"`
+	AgentDefinitionID string                     `json:"agent_definition_id"`
+	Name              string                     `json:"name"`
+	Position          int64                      `json:"position"`
+	Role              *string                    `json:"role"`
+	Extra             map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TeamMember) UnmarshalJSON(b []byte) error {
+	type plain TeamMember
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"agent_definition_id", "name", "position", "role"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamMember(out)
+	return nil
+}
+func (v TeamMember) MarshalJSON() ([]byte, error) {
+	type plain TeamMember
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamMemberCreateRequest struct {
-	AgentDefinitionID string           `json:"agent_definition_id"`
-	Role              Optional[string] `json:"role,omitzero"`
+	AgentDefinitionID string                     `json:"agent_definition_id"`
+	Role              Optional[string]           `json:"role,omitzero"`
+	Extra             map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TeamMemberCreateRequest) UnmarshalJSON(b []byte) error {
+	type plain TeamMemberCreateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"agent_definition_id", "role"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamMemberCreateRequest(out)
+	return nil
+}
+func (v TeamMemberCreateRequest) MarshalJSON() ([]byte, error) {
+	type plain TeamMemberCreateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type APIKey struct {
-	ID        string   `json:"id"`
-	Name      string   `json:"name"`
-	Scopes    []string `json:"scopes"`
-	ExpiresAt *string  `json:"expires_at"`
-	RevokedAt *string  `json:"revoked_at"`
-	CreatedAt string   `json:"created_at"`
+	ID        string                     `json:"id"`
+	Name      string                     `json:"name"`
+	Scopes    []string                   `json:"scopes"`
+	ExpiresAt *string                    `json:"expires_at"`
+	RevokedAt *string                    `json:"revoked_at"`
+	CreatedAt string                     `json:"created_at"`
+	Extra     map[string]json.RawMessage `json:"-"`
+}
+
+func (v *APIKey) UnmarshalJSON(b []byte) error {
+	type plain APIKey
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "name", "scopes", "expires_at", "revoked_at", "created_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = APIKey(out)
+	return nil
+}
+func (v APIKey) MarshalJSON() ([]byte, error) {
+	type plain APIKey
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type APIKeyCreated struct {
-	Data json.RawMessage `json:"data"`
+	Data  json.RawMessage            `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *APIKeyCreated) UnmarshalJSON(b []byte) error {
+	type plain APIKeyCreated
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = APIKeyCreated(out)
+	return nil
+}
+func (v APIKeyCreated) MarshalJSON() ([]byte, error) {
+	type plain APIKeyCreated
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type APIKeyCollection struct {
-	Data []APIKey `json:"data"`
+	Data  []APIKey                   `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *APIKeyCollection) UnmarshalJSON(b []byte) error {
+	type plain APIKeyCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = APIKeyCollection(out)
+	return nil
+}
+func (v APIKeyCollection) MarshalJSON() ([]byte, error) {
+	type plain APIKeyCollection
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type APIKeyCreate struct {
-	Name      string             `json:"name"`
-	Scopes    Optional[[]string] `json:"scopes,omitzero"`
-	ExpiresAt Optional[string]   `json:"expires_at,omitzero"`
+	Name      string                     `json:"name"`
+	Scopes    Optional[[]string]         `json:"scopes,omitzero"`
+	ExpiresAt Optional[string]           `json:"expires_at,omitzero"`
+	Extra     map[string]json.RawMessage `json:"-"`
+}
+
+func (v *APIKeyCreate) UnmarshalJSON(b []byte) error {
+	type plain APIKeyCreate
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "scopes", "expires_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = APIKeyCreate(out)
+	return nil
+}
+func (v APIKeyCreate) MarshalJSON() ([]byte, error) {
+	type plain APIKeyCreate
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type JWKSDocument struct {
-	Keys []JWK `json:"keys"`
+	Keys  []JWK                      `json:"keys"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *JWKSDocument) UnmarshalJSON(b []byte) error {
+	type plain JWKSDocument
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"keys"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = JWKSDocument(out)
+	return nil
+}
+func (v JWKSDocument) MarshalJSON() ([]byte, error) {
+	type plain JWKSDocument
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type JWK struct {
-	Kty string `json:"kty"`
-	Crv string `json:"crv"`
-	X   string `json:"x"`
-	Kid string `json:"kid"`
-	Use string `json:"use"`
-	Alg string `json:"alg"`
+	Kty   string                     `json:"kty"`
+	Crv   string                     `json:"crv"`
+	X     string                     `json:"x"`
+	Kid   string                     `json:"kid"`
+	Use   string                     `json:"use"`
+	Alg   string                     `json:"alg"`
+	Extra map[string]json.RawMessage `json:"-"`
 }
 
+func (v *JWK) UnmarshalJSON(b []byte) error {
+	type plain JWK
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"kty", "crv", "x", "kid", "use", "alg"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = JWK(out)
+	return nil
+}
+func (v JWK) MarshalJSON() ([]byte, error) { type plain JWK; return marshalUnknown(plain(v), v.Extra) }
+
 type ModelList struct {
-	Object   string           `json:"object"`
-	Data     []ModelListEntry `json:"data"`
-	Defaults ModelDefaults    `json:"defaults"`
+	Object   string                     `json:"object"`
+	Data     []ModelListEntry           `json:"data"`
+	Defaults ModelDefaults              `json:"defaults"`
+	Extra    map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ModelList) UnmarshalJSON(b []byte) error {
+	type plain ModelList
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"object", "data", "defaults"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelList(out)
+	return nil
+}
+func (v ModelList) MarshalJSON() ([]byte, error) {
+	type plain ModelList
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ModelListEntry map[string]json.RawMessage
@@ -983,53 +1880,213 @@ type LLMModelEntry struct {
 	AliasTarget            Optional[OpenRouterAliasTarget]      `json:"alias_target,omitzero"`
 	IsModerated            Optional[bool]                       `json:"is_moderated,omitzero"`
 	SyncedAt               Optional[string]                     `json:"synced_at,omitzero"`
+	Extra                  map[string]json.RawMessage           `json:"-"`
+}
+
+func (v *LLMModelEntry) UnmarshalJSON(b []byte) error {
+	type plain LLMModelEntry
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "object", "created", "owned_by", "type", "deprecated", "sunset_at", "display_name", "description", "canonical_slug", "hugging_face_id", "context_length", "max_completion_tokens", "pricing", "architecture", "supported_parameters", "default_parameters", "reasoning", "knowledge_cutoff", "upstream_expiration_date", "alias_target", "is_moderated", "synced_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = LLMModelEntry(out)
+	return nil
+}
+func (v LLMModelEntry) MarshalJSON() ([]byte, error) {
+	type plain LLMModelEntry
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type OpenRouterPricing map[string]json.RawMessage
 
 type OpenRouterArchitecture struct {
-	Modality         Optional[string]   `json:"modality,omitzero"`
-	InputModalities  Optional[[]string] `json:"input_modalities,omitzero"`
-	OutputModalities Optional[[]string] `json:"output_modalities,omitzero"`
-	Tokenizer        Optional[string]   `json:"tokenizer,omitzero"`
-	InstructType     Optional[string]   `json:"instruct_type,omitzero"`
+	Modality         Optional[string]           `json:"modality,omitzero"`
+	InputModalities  Optional[[]string]         `json:"input_modalities,omitzero"`
+	OutputModalities Optional[[]string]         `json:"output_modalities,omitzero"`
+	Tokenizer        Optional[string]           `json:"tokenizer,omitzero"`
+	InstructType     Optional[string]           `json:"instruct_type,omitzero"`
+	Extra            map[string]json.RawMessage `json:"-"`
+}
+
+func (v *OpenRouterArchitecture) UnmarshalJSON(b []byte) error {
+	type plain OpenRouterArchitecture
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"modality", "input_modalities", "output_modalities", "tokenizer", "instruct_type"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = OpenRouterArchitecture(out)
+	return nil
+}
+func (v OpenRouterArchitecture) MarshalJSON() ([]byte, error) {
+	type plain OpenRouterArchitecture
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type OpenRouterAliasTarget struct {
-	Name Optional[string] `json:"name,omitzero"`
-	Slug Optional[string] `json:"slug,omitzero"`
+	Name  Optional[string]           `json:"name,omitzero"`
+	Slug  Optional[string]           `json:"slug,omitzero"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *OpenRouterAliasTarget) UnmarshalJSON(b []byte) error {
+	type plain OpenRouterAliasTarget
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"name", "slug"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = OpenRouterAliasTarget(out)
+	return nil
+}
+func (v OpenRouterAliasTarget) MarshalJSON() ([]byte, error) {
+	type plain OpenRouterAliasTarget
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TeamModelEntry struct {
-	ID         string          `json:"id"`
-	Object     string          `json:"object"`
-	Type       string          `json:"type"`
-	OwnedBy    string          `json:"owned_by"`
-	TeamID     string          `json:"team_id"`
-	Created    Optional[int64] `json:"created,omitzero"`
-	Deprecated bool            `json:"deprecated"`
-	SunsetAt   *string         `json:"sunset_at"`
+	ID         string                     `json:"id"`
+	Object     string                     `json:"object"`
+	Type       string                     `json:"type"`
+	OwnedBy    string                     `json:"owned_by"`
+	TeamID     string                     `json:"team_id"`
+	Created    Optional[int64]            `json:"created,omitzero"`
+	Deprecated bool                       `json:"deprecated"`
+	SunsetAt   *string                    `json:"sunset_at"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TeamModelEntry) UnmarshalJSON(b []byte) error {
+	type plain TeamModelEntry
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "object", "type", "owned_by", "team_id", "created", "deprecated", "sunset_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TeamModelEntry(out)
+	return nil
+}
+func (v TeamModelEntry) MarshalJSON() ([]byte, error) {
+	type plain TeamModelEntry
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ModelDefaults struct {
-	Orchestrator string `json:"orchestrator"`
-	Subagent     string `json:"subagent"`
+	Orchestrator string                     `json:"orchestrator"`
+	Subagent     string                     `json:"subagent"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ModelDefaults) UnmarshalJSON(b []byte) error {
+	type plain ModelDefaults
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"orchestrator", "subagent"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelDefaults(out)
+	return nil
+}
+func (v ModelDefaults) MarshalJSON() ([]byte, error) {
+	type plain ModelDefaults
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TestImageGenerateRequest struct {
-	Files     []string `json:"files"`
-	Prompt    string   `json:"prompt"`
-	ModelCode string   `json:"model_code"`
+	Files     []string                   `json:"files"`
+	Prompt    string                     `json:"prompt"`
+	ModelCode string                     `json:"model_code"`
+	Extra     map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TestImageGenerateRequest) UnmarshalJSON(b []byte) error {
+	type plain TestImageGenerateRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"files", "prompt", "model_code"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TestImageGenerateRequest(out)
+	return nil
+}
+func (v TestImageGenerateRequest) MarshalJSON() ([]byte, error) {
+	type plain TestImageGenerateRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TestImageFileMetadata struct {
-	OriginalName string `json:"original_name"`
-	MimeType     string `json:"mime_type"`
-	Size         int64  `json:"size"`
+	OriginalName string                     `json:"original_name"`
+	MimeType     string                     `json:"mime_type"`
+	Size         int64                      `json:"size"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TestImageFileMetadata) UnmarshalJSON(b []byte) error {
+	type plain TestImageFileMetadata
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"original_name", "mime_type", "size"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TestImageFileMetadata(out)
+	return nil
+}
+func (v TestImageFileMetadata) MarshalJSON() ([]byte, error) {
+	type plain TestImageFileMetadata
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TestImageGenerateResource struct {
-	Data TestImageGenerateResourceData `json:"data"`
+	Data  TestImageGenerateResourceData `json:"data"`
+	Extra map[string]json.RawMessage    `json:"-"`
+}
+
+func (v *TestImageGenerateResource) UnmarshalJSON(b []byte) error {
+	type plain TestImageGenerateResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TestImageGenerateResource(out)
+	return nil
+}
+func (v TestImageGenerateResource) MarshalJSON() ([]byte, error) {
+	type plain TestImageGenerateResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type InputImage struct {
@@ -1072,12 +2129,52 @@ type ImageGenerationAcceptedRecord struct {
 	StatusURL       string                         `json:"status_url"`
 	CreatedAt       string                         `json:"created_at"`
 	ExpiresAt       string                         `json:"expires_at"`
+	Extra           map[string]json.RawMessage     `json:"-"`
+}
+
+func (v *ImageGenerationAcceptedRecord) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationAcceptedRecord
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "status", "provider", "initial_provider", "routed", "model", "webhook_url", "status_url", "created_at", "expires_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationAcceptedRecord(out)
+	return nil
+}
+func (v ImageGenerationAcceptedRecord) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationAcceptedRecord
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationLifecycleStatus string
 
 type ImageGenerationAcceptedResource struct {
-	Data ImageGenerationAcceptedRecord `json:"data"`
+	Data  ImageGenerationAcceptedRecord `json:"data"`
+	Extra map[string]json.RawMessage    `json:"-"`
+}
+
+func (v *ImageGenerationAcceptedResource) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationAcceptedResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationAcceptedResource(out)
+	return nil
+}
+func (v ImageGenerationAcceptedResource) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationAcceptedResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusRecord struct {
@@ -1098,46 +2195,206 @@ type ImageGenerationStatusRecord struct {
 	Usage           Optional[ImageUsage]                               `json:"usage,omitzero"`
 	CostUSD         Optional[float64]                                  `json:"cost_usd,omitzero"`
 	DurationMs      Optional[int64]                                    `json:"duration_ms,omitzero"`
+	Extra           map[string]json.RawMessage                         `json:"-"`
+}
+
+func (v *ImageGenerationStatusRecord) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusRecord
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "status", "provider", "initial_provider", "routed", "model", "created_at", "submitted_at", "completed_at", "expires_at", "result", "error", "files", "price", "usage", "cost_usd", "duration_ms"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusRecord(out)
+	return nil
+}
+func (v ImageGenerationStatusRecord) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusRecord
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusResource struct {
-	Data ImageGenerationStatusRecord `json:"data"`
+	Data  ImageGenerationStatusRecord `json:"data"`
+	Extra map[string]json.RawMessage  `json:"-"`
+}
+
+func (v *ImageGenerationStatusResource) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusResource(out)
+	return nil
+}
+func (v ImageGenerationStatusResource) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImagePrice struct {
-	Amount   string `json:"amount"`
-	Currency string `json:"currency"`
-	Source   string `json:"source"`
+	Amount   string                     `json:"amount"`
+	Currency string                     `json:"currency"`
+	Source   string                     `json:"source"`
+	Extra    map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImagePrice) UnmarshalJSON(b []byte) error {
+	type plain ImagePrice
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"amount", "currency", "source"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImagePrice(out)
+	return nil
+}
+func (v ImagePrice) MarshalJSON() ([]byte, error) {
+	type plain ImagePrice
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageUsage struct {
-	SchemaVersion  int64 `json:"schema_version"`
-	AttemptsTotal  int64 `json:"attempts_total"`
-	AttemptsPriced int64 `json:"attempts_priced"`
+	SchemaVersion  int64                      `json:"schema_version"`
+	AttemptsTotal  int64                      `json:"attempts_total"`
+	AttemptsPriced int64                      `json:"attempts_priced"`
+	Extra          map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageUsage) UnmarshalJSON(b []byte) error {
+	type plain ImageUsage
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"schema_version", "attempts_total", "attempts_priced"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageUsage(out)
+	return nil
+}
+func (v ImageUsage) MarshalJSON() ([]byte, error) {
+	type plain ImageUsage
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageUploadRecord struct {
-	ID               string `json:"id"`
-	MimeType         string `json:"mime_type"`
-	Size             int64  `json:"size"`
-	OriginalFilename string `json:"original_filename"`
-	ExpiresAt        string `json:"expires_at"`
-	CreatedAt        string `json:"created_at"`
+	ID               string                     `json:"id"`
+	MimeType         string                     `json:"mime_type"`
+	Size             int64                      `json:"size"`
+	OriginalFilename string                     `json:"original_filename"`
+	ExpiresAt        string                     `json:"expires_at"`
+	CreatedAt        string                     `json:"created_at"`
+	Extra            map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageUploadRecord) UnmarshalJSON(b []byte) error {
+	type plain ImageUploadRecord
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"id", "mime_type", "size", "original_filename", "expires_at", "created_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageUploadRecord(out)
+	return nil
+}
+func (v ImageUploadRecord) MarshalJSON() ([]byte, error) {
+	type plain ImageUploadRecord
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageUploadResource struct {
-	Data ImageUploadRecord `json:"data"`
+	Data  ImageUploadRecord          `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageUploadResource) UnmarshalJSON(b []byte) error {
+	type plain ImageUploadResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageUploadResource(out)
+	return nil
+}
+func (v ImageUploadResource) MarshalJSON() ([]byte, error) {
+	type plain ImageUploadResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageUploadRequest struct {
-	File string `json:"file"`
+	File  string                     `json:"file"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageUploadRequest) UnmarshalJSON(b []byte) error {
+	type plain ImageUploadRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"file"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageUploadRequest(out)
+	return nil
+}
+func (v ImageUploadRequest) MarshalJSON() ([]byte, error) {
+	type plain ImageUploadRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ModelCatalogEntry struct {
-	Model         string            `json:"model"`
-	Providers     []string          `json:"providers"`
-	PriceClasses  []ModelPriceClass `json:"price_classes"`
-	ModelSettings []ModelSetting    `json:"model_settings"`
+	Model         string                     `json:"model"`
+	Providers     []string                   `json:"providers"`
+	PriceClasses  []ModelPriceClass          `json:"price_classes"`
+	ModelSettings []ModelSetting             `json:"model_settings"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ModelCatalogEntry) UnmarshalJSON(b []byte) error {
+	type plain ModelCatalogEntry
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"model", "providers", "price_classes", "model_settings"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelCatalogEntry(out)
+	return nil
+}
+func (v ModelCatalogEntry) MarshalJSON() ([]byte, error) {
+	type plain ModelCatalogEntry
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ModelPriceClass struct {
@@ -1145,6 +2402,26 @@ type ModelPriceClass struct {
 	Label          string                      `json:"label"`
 	ProvidersCount int64                       `json:"providers_count"`
 	AveragePrice   ModelPriceClassAveragePrice `json:"average_price"`
+	Extra          map[string]json.RawMessage  `json:"-"`
+}
+
+func (v *ModelPriceClass) UnmarshalJSON(b []byte) error {
+	type plain ModelPriceClass
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"key", "label", "providers_count", "average_price"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelPriceClass(out)
+	return nil
+}
+func (v ModelPriceClass) MarshalJSON() ([]byte, error) {
+	type plain ModelPriceClass
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ModelSetting struct {
@@ -1155,16 +2432,76 @@ type ModelSetting struct {
 	Enum               Optional[[]string]                   `json:"enum,omitzero"`
 	Range              Optional[[]int64]                    `json:"range,omitzero"`
 	DefaultsByProvider Optional[map[string]json.RawMessage] `json:"defaults_by_provider,omitzero"`
+	Extra              map[string]json.RawMessage           `json:"-"`
+}
+
+func (v *ModelSetting) UnmarshalJSON(b []byte) error {
+	type plain ModelSetting
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"key", "type", "providers", "default", "enum", "range", "defaults_by_provider"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelSetting(out)
+	return nil
+}
+func (v ModelSetting) MarshalJSON() ([]byte, error) {
+	type plain ModelSetting
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ModelCatalogResource struct {
-	Data []ModelCatalogEntry `json:"data"`
+	Data  []ModelCatalogEntry        `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ModelCatalogResource) UnmarshalJSON(b []byte) error {
+	type plain ModelCatalogResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelCatalogResource(out)
+	return nil
+}
+func (v ModelCatalogResource) MarshalJSON() ([]byte, error) {
+	type plain ModelCatalogResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ProviderWebhookPayload map[string]json.RawMessage
 
 type WebhookOk struct {
-	Status string `json:"status"`
+	Status string                     `json:"status"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WebhookOk) UnmarshalJSON(b []byte) error {
+	type plain WebhookOk
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WebhookOk(out)
+	return nil
+}
+func (v WebhookOk) MarshalJSON() ([]byte, error) {
+	type plain WebhookOk
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceFile struct {
@@ -1176,72 +2513,332 @@ type WorkspaceFile struct {
 	MimeType   *string                        `json:"mime_type"`
 	Content    Optional[string]               `json:"content,omitzero"`
 	Entries    Optional[[]WorkspaceFileEntry] `json:"entries,omitzero"`
+	Extra      map[string]json.RawMessage     `json:"-"`
+}
+
+func (v *WorkspaceFile) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceFile
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"path", "name", "type", "size", "modified_at", "mime_type", "content", "entries"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceFile(out)
+	return nil
+}
+func (v WorkspaceFile) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceFile
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceFileEntry struct {
-	Path       string  `json:"path"`
-	Name       string  `json:"name"`
-	Type       string  `json:"type"`
-	Size       int64   `json:"size"`
-	ModifiedAt *string `json:"modified_at"`
-	MimeType   *string `json:"mime_type"`
+	Path       string                     `json:"path"`
+	Name       string                     `json:"name"`
+	Type       string                     `json:"type"`
+	Size       int64                      `json:"size"`
+	ModifiedAt *string                    `json:"modified_at"`
+	MimeType   *string                    `json:"mime_type"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WorkspaceFileEntry) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceFileEntry
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"path", "name", "type", "size", "modified_at", "mime_type"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceFileEntry(out)
+	return nil
+}
+func (v WorkspaceFileEntry) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceFileEntry
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceFileResource struct {
-	Data WorkspaceFile `json:"data"`
+	Data  WorkspaceFile              `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WorkspaceFileResource) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceFileResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceFileResource(out)
+	return nil
+}
+func (v WorkspaceFileResource) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceFileResource
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WorkspaceFileRequest struct {
-	Path    string `json:"path"`
-	Content string `json:"content"`
+	Path    string                     `json:"path"`
+	Content string                     `json:"content"`
+	Extra   map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WorkspaceFileRequest) UnmarshalJSON(b []byte) error {
+	type plain WorkspaceFileRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"path", "content"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WorkspaceFileRequest(out)
+	return nil
+}
+func (v WorkspaceFileRequest) MarshalJSON() ([]byte, error) {
+	type plain WorkspaceFileRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ConvertToPDFRequest struct {
-	Path string `json:"path"`
+	Path  string                     `json:"path"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ConvertToPDFRequest) UnmarshalJSON(b []byte) error {
+	type plain ConvertToPDFRequest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"path"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ConvertToPDFRequest(out)
+	return nil
+}
+func (v ConvertToPDFRequest) MarshalJSON() ([]byte, error) {
+	type plain ConvertToPDFRequest
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ThrottleError struct {
 	ErrorEnvelope ThrottleErrorErrorEnvelope `json:"error"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ThrottleError) UnmarshalJSON(b []byte) error {
+	type plain ThrottleError
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"error"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ThrottleError(out)
+	return nil
+}
+func (v ThrottleError) MarshalJSON() ([]byte, error) {
+	type plain ThrottleError
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CapabilitiesLegacy struct {
-	ProtocolVersion int64    `json:"protocol_version"`
-	Families        []string `json:"families"`
-	EventTypes      []string `json:"event_types"`
-	ToolKinds       []string `json:"tool_kinds"`
-	Features        []string `json:"features"`
+	ProtocolVersion int64                      `json:"protocol_version"`
+	Families        []string                   `json:"families"`
+	EventTypes      []string                   `json:"event_types"`
+	ToolKinds       []string                   `json:"tool_kinds"`
+	Features        []string                   `json:"features"`
+	Extra           map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CapabilitiesLegacy) UnmarshalJSON(b []byte) error {
+	type plain CapabilitiesLegacy
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"protocol_version", "families", "event_types", "tool_kinds", "features"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CapabilitiesLegacy(out)
+	return nil
+}
+func (v CapabilitiesLegacy) MarshalJSON() ([]byte, error) {
+	type plain CapabilitiesLegacy
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CreateWikiSyncRunBody struct {
-	WebhookURL string `json:"webhook_url"`
+	WebhookURL string                     `json:"webhook_url"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CreateWikiSyncRunBody) UnmarshalJSON(b []byte) error {
+	type plain CreateWikiSyncRunBody
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"webhook_url"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CreateWikiSyncRunBody(out)
+	return nil
+}
+func (v CreateWikiSyncRunBody) MarshalJSON() ([]byte, error) {
+	type plain CreateWikiSyncRunBody
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CreateWikiOutboxRunBody struct {
-	WebhookURL string `json:"webhook_url"`
+	WebhookURL string                     `json:"webhook_url"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CreateWikiOutboxRunBody) UnmarshalJSON(b []byte) error {
+	type plain CreateWikiOutboxRunBody
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"webhook_url"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CreateWikiOutboxRunBody(out)
+	return nil
+}
+func (v CreateWikiOutboxRunBody) MarshalJSON() ([]byte, error) {
+	type plain CreateWikiOutboxRunBody
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CreateWikiInboxRunBody struct {
-	WebhookURL string `json:"webhook_url"`
+	WebhookURL string                     `json:"webhook_url"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CreateWikiInboxRunBody) UnmarshalJSON(b []byte) error {
+	type plain CreateWikiInboxRunBody
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"webhook_url"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CreateWikiInboxRunBody(out)
+	return nil
+}
+func (v CreateWikiInboxRunBody) MarshalJSON() ([]byte, error) {
+	type plain CreateWikiInboxRunBody
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WithdrawWikiSourceBody struct {
-	FileID string `json:"file_id"`
+	FileID string                     `json:"file_id"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *WithdrawWikiSourceBody) UnmarshalJSON(b []byte) error {
+	type plain WithdrawWikiSourceBody
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"file_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = WithdrawWikiSourceBody(out)
+	return nil
+}
+func (v WithdrawWikiSourceBody) MarshalJSON() ([]byte, error) {
+	type plain WithdrawWikiSourceBody
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TestGenerateImageResult struct {
-	Status     string                  `json:"status"`
-	Prompt     string                  `json:"prompt"`
-	ModelCode  string                  `json:"model_code"`
-	FilesCount int64                   `json:"files_count"`
-	Files      []TestImageFileMetadata `json:"files"`
-	ReceivedAt string                  `json:"received_at"`
+	Status     string                     `json:"status"`
+	Prompt     string                     `json:"prompt"`
+	ModelCode  string                     `json:"model_code"`
+	FilesCount int64                      `json:"files_count"`
+	Files      []TestImageFileMetadata    `json:"files"`
+	ReceivedAt string                     `json:"received_at"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TestGenerateImageResult) UnmarshalJSON(b []byte) error {
+	type plain TestGenerateImageResult
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "prompt", "model_code", "files_count", "files", "received_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TestGenerateImageResult(out)
+	return nil
+}
+func (v TestGenerateImageResult) MarshalJSON() ([]byte, error) {
+	type plain TestGenerateImageResult
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type HealthCheckResult struct {
-	Status    Optional[string] `json:"status,omitzero"`
-	Timestamp Optional[string] `json:"timestamp,omitzero"`
-	App       Optional[string] `json:"app,omitzero"`
-	Env       Optional[string] `json:"env,omitzero"`
+	Status    Optional[string]           `json:"status,omitzero"`
+	Timestamp Optional[string]           `json:"timestamp,omitzero"`
+	App       Optional[string]           `json:"app,omitzero"`
+	Env       Optional[string]           `json:"env,omitzero"`
+	Extra     map[string]json.RawMessage `json:"-"`
+}
+
+func (v *HealthCheckResult) UnmarshalJSON(b []byte) error {
+	type plain HealthCheckResult
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "timestamp", "app", "env"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = HealthCheckResult(out)
+	return nil
+}
+func (v HealthCheckResult) MarshalJSON() ([]byte, error) {
+	type plain HealthCheckResult
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ThrottleErrorErrorEnvelope struct {
@@ -1250,21 +2847,81 @@ type ThrottleErrorErrorEnvelope struct {
 }
 
 type ModelPriceClassAveragePrice struct {
-	Amount   *string `json:"amount"`
-	Currency *string `json:"currency"`
+	Amount   *string                    `json:"amount"`
+	Currency *string                    `json:"currency"`
+	Extra    map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ModelPriceClassAveragePrice) UnmarshalJSON(b []byte) error {
+	type plain ModelPriceClassAveragePrice
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"amount", "currency"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ModelPriceClassAveragePrice(out)
+	return nil
+}
+func (v ModelPriceClassAveragePrice) MarshalJSON() ([]byte, error) {
+	type plain ModelPriceClassAveragePrice
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusRecordFilesItem struct {
-	ArtifactID  string  `json:"artifact_id"`
-	MimeType    string  `json:"mime_type"`
-	Size        int64   `json:"size"`
-	DownloadURL *string `json:"download_url"`
+	ArtifactID  string                     `json:"artifact_id"`
+	MimeType    string                     `json:"mime_type"`
+	Size        int64                      `json:"size"`
+	DownloadURL *string                    `json:"download_url"`
+	Extra       map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageGenerationStatusRecordFilesItem) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusRecordFilesItem
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"artifact_id", "mime_type", "size", "download_url"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusRecordFilesItem(out)
+	return nil
+}
+func (v ImageGenerationStatusRecordFilesItem) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusRecordFilesItem
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusRecordErrorEnvelope struct {
 	Code    Optional[string]                     `json:"code,omitzero"`
 	Message Optional[string]                     `json:"message,omitzero"`
 	Meta    Optional[map[string]json.RawMessage] `json:"meta,omitzero"`
+	Extra   map[string]json.RawMessage           `json:"-"`
+}
+
+func (v *ImageGenerationStatusRecordErrorEnvelope) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusRecordErrorEnvelope
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"code", "message", "meta"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusRecordErrorEnvelope(out)
+	return nil
+}
+func (v ImageGenerationStatusRecordErrorEnvelope) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusRecordErrorEnvelope
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusRecordResult struct {
@@ -1277,50 +2934,190 @@ type ImageGenerationStatusRecordResult struct {
 	Format      Optional[string]                                        `json:"format,omitzero"`
 	Quality     Optional[int64]                                         `json:"quality,omitzero"`
 	Warnings    Optional[json.RawMessage]                               `json:"warnings,omitzero"`
+	Extra       map[string]json.RawMessage                              `json:"-"`
+}
+
+func (v *ImageGenerationStatusRecordResult) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusRecordResult
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"model", "provider", "prompt", "images", "dimensions", "aspect_ratio", "format", "quality", "warnings"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusRecordResult(out)
+	return nil
+}
+func (v ImageGenerationStatusRecordResult) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusRecordResult
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusRecordResultDimensions struct {
-	Width  Optional[int64] `json:"width,omitzero"`
-	Height Optional[int64] `json:"height,omitzero"`
+	Width  Optional[int64]            `json:"width,omitzero"`
+	Height Optional[int64]            `json:"height,omitzero"`
+	Extra  map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageGenerationStatusRecordResultDimensions) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusRecordResultDimensions
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"width", "height"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusRecordResultDimensions(out)
+	return nil
+}
+func (v ImageGenerationStatusRecordResultDimensions) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusRecordResultDimensions
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ImageGenerationStatusRecordResultImagesItem struct {
-	ProviderAssetID Optional[string] `json:"provider_asset_id,omitzero"`
-	MimeType        Optional[string] `json:"mime_type,omitzero"`
-	SourceURL       Optional[string] `json:"source_url,omitzero"`
-	Format          Optional[string] `json:"format,omitzero"`
+	ProviderAssetID Optional[string]           `json:"provider_asset_id,omitzero"`
+	MimeType        Optional[string]           `json:"mime_type,omitzero"`
+	SourceURL       Optional[string]           `json:"source_url,omitzero"`
+	Format          Optional[string]           `json:"format,omitzero"`
+	Extra           map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ImageGenerationStatusRecordResultImagesItem) UnmarshalJSON(b []byte) error {
+	type plain ImageGenerationStatusRecordResultImagesItem
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"provider_asset_id", "mime_type", "source_url", "format"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ImageGenerationStatusRecordResultImagesItem(out)
+	return nil
+}
+func (v ImageGenerationStatusRecordResultImagesItem) MarshalJSON() ([]byte, error) {
+	type plain ImageGenerationStatusRecordResultImagesItem
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type TestImageGenerateResourceData struct {
-	Status     string                  `json:"status"`
-	Prompt     string                  `json:"prompt"`
-	ModelCode  string                  `json:"model_code"`
-	FilesCount int64                   `json:"files_count"`
-	Files      []TestImageFileMetadata `json:"files"`
-	ReceivedAt string                  `json:"received_at"`
+	Status     string                     `json:"status"`
+	Prompt     string                     `json:"prompt"`
+	ModelCode  string                     `json:"model_code"`
+	FilesCount int64                      `json:"files_count"`
+	Files      []TestImageFileMetadata    `json:"files"`
+	ReceivedAt string                     `json:"received_at"`
+	Extra      map[string]json.RawMessage `json:"-"`
+}
+
+func (v *TestImageGenerateResourceData) UnmarshalJSON(b []byte) error {
+	type plain TestImageGenerateResourceData
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "prompt", "model_code", "files_count", "files", "received_at"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = TestImageGenerateResourceData(out)
+	return nil
+}
+func (v TestImageGenerateResourceData) MarshalJSON() ([]byte, error) {
+	type plain TestImageGenerateResourceData
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CompletionCollectionMeta struct {
-	CurrentPage Optional[int64] `json:"current_page,omitzero"`
-	From        Optional[int64] `json:"from,omitzero"`
-	LastPage    Optional[int64] `json:"last_page,omitzero"`
-	PerPage     Optional[int64] `json:"per_page,omitzero"`
-	To          Optional[int64] `json:"to,omitzero"`
-	Total       Optional[int64] `json:"total,omitzero"`
+	CurrentPage Optional[int64]            `json:"current_page,omitzero"`
+	From        Optional[int64]            `json:"from,omitzero"`
+	LastPage    Optional[int64]            `json:"last_page,omitzero"`
+	PerPage     Optional[int64]            `json:"per_page,omitzero"`
+	To          Optional[int64]            `json:"to,omitzero"`
+	Total       Optional[int64]            `json:"total,omitzero"`
+	Extra       map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CompletionCollectionMeta) UnmarshalJSON(b []byte) error {
+	type plain CompletionCollectionMeta
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"current_page", "from", "last_page", "per_page", "to", "total"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CompletionCollectionMeta(out)
+	return nil
+}
+func (v CompletionCollectionMeta) MarshalJSON() ([]byte, error) {
+	type plain CompletionCollectionMeta
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CompletionCollectionLinks struct {
-	First Optional[string] `json:"first,omitzero"`
-	Last  Optional[string] `json:"last,omitzero"`
-	Prev  Optional[string] `json:"prev,omitzero"`
-	Next  Optional[string] `json:"next,omitzero"`
+	First Optional[string]           `json:"first,omitzero"`
+	Last  Optional[string]           `json:"last,omitzero"`
+	Prev  Optional[string]           `json:"prev,omitzero"`
+	Next  Optional[string]           `json:"next,omitzero"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CompletionCollectionLinks) UnmarshalJSON(b []byte) error {
+	type plain CompletionCollectionLinks
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"first", "last", "prev", "next"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CompletionCollectionLinks(out)
+	return nil
+}
+func (v CompletionCollectionLinks) MarshalJSON() ([]byte, error) {
+	type plain CompletionCollectionLinks
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type CompletionUsage struct {
-	PromptTokens     Optional[int64] `json:"prompt_tokens,omitzero"`
-	CompletionTokens Optional[int64] `json:"completion_tokens,omitzero"`
-	SpriteCpuMs      Optional[int64] `json:"sprite_cpu_ms,omitzero"`
-	SpriteRamGbMs    Optional[int64] `json:"sprite_ram_gb_ms,omitzero"`
+	PromptTokens     Optional[int64]            `json:"prompt_tokens,omitzero"`
+	CompletionTokens Optional[int64]            `json:"completion_tokens,omitzero"`
+	SpriteCpuMs      Optional[int64]            `json:"sprite_cpu_ms,omitzero"`
+	SpriteRamGbMs    Optional[int64]            `json:"sprite_ram_gb_ms,omitzero"`
+	Extra            map[string]json.RawMessage `json:"-"`
+}
+
+func (v *CompletionUsage) UnmarshalJSON(b []byte) error {
+	type plain CompletionUsage
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"prompt_tokens", "completion_tokens", "sprite_cpu_ms", "sprite_ram_gb_ms"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = CompletionUsage(out)
+	return nil
+}
+func (v CompletionUsage) MarshalJSON() ([]byte, error) {
+	type plain CompletionUsage
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type ErrorEnvelopeErrorEnvelope struct {
@@ -1328,6 +3125,26 @@ type ErrorEnvelopeErrorEnvelope struct {
 	Code    Optional[string]                     `json:"code,omitzero"`
 	Message string                               `json:"message"`
 	Details Optional[map[string]json.RawMessage] `json:"details,omitzero"`
+	Extra   map[string]json.RawMessage           `json:"-"`
+}
+
+func (v *ErrorEnvelopeErrorEnvelope) UnmarshalJSON(b []byte) error {
+	type plain ErrorEnvelopeErrorEnvelope
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"type", "code", "message", "details"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ErrorEnvelopeErrorEnvelope(out)
+	return nil
+}
+func (v ErrorEnvelopeErrorEnvelope) MarshalJSON() ([]byte, error) {
+	type plain ErrorEnvelopeErrorEnvelope
+	return marshalUnknown(plain(v), v.Extra)
 }
 
 type WikiOperationEventPhases struct {

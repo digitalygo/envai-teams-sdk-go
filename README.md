@@ -121,7 +121,7 @@ No automatic mutation retries occur. Optional GET retries apply only to JSON ope
 ```sh
 python3 -m pip install -r scripts/requirements.txt
 python3 scripts/generate.py
-gofmt -w models_generated.go operations_generated.go events_generated.go
+gofmt -w models_generated.go operations_generated.go events_generated.go open_models_generated_test.go
 go mod download
 go test -race -coverprofile=coverage.out ./...
 go vet ./...

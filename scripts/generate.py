@@ -43,7 +43,7 @@ def decl(n,s):
    tag=k
    if nullable and ty!='json.RawMessage' and not ty.startswith(('[]','map[')):ty='*'+ty
   fields.append('\t'+name(k)+' '+ty+' `json:"'+tag+'"`')
- if s.get('additionalProperties') is True or n=='Completion':
+ if s.get('additionalProperties',True) is not False:
   fields.append('\tExtra map[string]json.RawMessage `json:"-"`')
   return 'type '+n+' struct {\n'+'\n'.join(fields)+'\n}\n'+unknown_methods(n,s)
  return 'type '+n+' struct {\n'+'\n'.join(fields)+'\n}\n'
@@ -164,3 +164,24 @@ for key,schema in ev.items():
 while extra:
  n,s=extra.popitem();eventmodels.append(decl(n,s))
 (root/'events_generated.go').write_text('package envai\n\nimport "encoding/json"\n\n'+'\n'.join(eventmodels)+'\nfunc(e Event) TypedPayload()(any,error){switch e.Type {\n'+'\n'.join(switch)+'\n};return append(json.RawMessage(nil),e.Data...),nil}\n')
+
+# Structural regression matrix: every generated open object, including inline
+# shapes, must preserve opaque JSON extension values without float coercion.
+open_names=[]
+for output in ('models_generated.go','events_generated.go'):
+ for match in re.finditer(r'type (\w+) struct \{(.*?)\n\}',(root/output).read_text(),re.S):
+  if 'Extra map[string]json.RawMessage' in match[2]:open_names.append(match[1])
+(root/'open_models_generated_test.go').write_text('''package envai
+import("encoding/json";"reflect";"strings";"testing")
+func TestGeneratedOpenObjectPreservation(t *testing.T){
+ for _,model:=range []any{'''+','.join('&'+n+'{}' for n in open_names)+'''}{t.Run(reflect.TypeOf(model).Elem().Name(),func(t *testing.T){
+ for _,invalid:=range []string{"null","[]","{"}{if json.Unmarshal([]byte(invalid),model)==nil{t.Fatal("malformed open object accepted")}}
+ input:=[]byte(`{"extension":{"number":9007199254740993}}`)
+ err:=json.Unmarshal(input,model)
+ // Shared Wiki DTOs enforce required fields separately; their positive fixtures
+ // are covered by the handwritten Wiki fixture and accounting tests.
+ if err==nil{out,e:=json.Marshal(model);if e!=nil||!strings.Contains(string(out),`"extension":{"number":9007199254740993}`){t.Fatal(string(out),e)}}
+ value:=reflect.ValueOf(model).Elem();extra:=value.FieldByName("Extra");extra.Set(reflect.ValueOf(map[string]json.RawMessage{"extension":json.RawMessage(`true`)}));if _,err:=json.Marshal(model);err!=nil{t.Fatal(err)}
+ })}
+}
+''')

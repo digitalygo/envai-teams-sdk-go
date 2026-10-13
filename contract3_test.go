@@ -346,12 +346,9 @@ func TestExplicitLegacyMethodsBoundToVersionTwo(t *testing.T) {
 		writeEvent(w, e)
 	})
 	s, err := c.StreamChatEventsLegacy(context.Background(), StreamChatEventsLegacyParams{ChatID: events[0].ChatID})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer s.Close()
-	if _, err = s.Next(); err == nil {
-		t.Fatal("legacy accepted v3")
+	if err == nil {
+		s.Close()
+		t.Fatal("legacy accepted v3 snapshot")
 	}
 }
 func TestCompletionPageRejectsAtomicallyAndSchemaHelpers(t *testing.T) {
@@ -451,5 +448,68 @@ func TestCompletionUnknownFieldsPreserved(t *testing.T) {
 		if json.Unmarshal([]byte(invalid), &completion) == nil {
 			t.Fatal("invalid completion", invalid)
 		}
+	}
+}
+
+func TestLegacySnapshotAtomicTailBoundsAndCancellation(t *testing.T) {
+	events := fixture[[]Event](t, "events-valid.json")
+	for _, kind := range []string{"mixed", "null", "gap", "truncated", "limit", "cancel", "success"} {
+		t.Run(kind, func(t *testing.T) {
+			c := rawClient(t, func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set(ContractHeader, "2")
+				w.Header().Set("Content-Type", "text/event-stream")
+				writeEvent(w, events[0])
+				w.(http.Flusher).Flush()
+				if kind == "cancel" {
+					<-r.Context().Done()
+					return
+				}
+				event := events[1]
+				switch kind {
+				case "mixed":
+					event.V = 3
+				case "null":
+					event = events[7]
+					event.Seq = 1
+					var data map[string]any
+					json.Unmarshal(event.Data, &data)
+					data["cost"] = nil
+					event.Data, _ = json.Marshal(data)
+				case "gap":
+					event.Seq = 3
+				case "truncated":
+					fmt.Fprint(w, `data: {"v":3}`)
+					return
+				}
+				writeEvent(w, event)
+			})
+			options := StreamOptions{}
+			if kind == "limit" {
+				options.MaxLegacySnapshotBytes = 10
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			defer cancel()
+			stream, err := c.LegacyEvents(ctx, events[0].ChatID, options)
+			if kind != "success" {
+				if err == nil {
+					stream.Close()
+					t.Fatal("prefix made visible before rejecting tail", kind)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer stream.Close()
+			if e, err := stream.Next(); err != nil || e.Type != "ping" {
+				t.Fatal(e, err)
+			}
+			if e, err := stream.Next(); err != nil || e.Seq != 1 {
+				t.Fatal(e, err)
+			}
+			if _, err = stream.Next(); !errors.Is(err, io.EOF) {
+				t.Fatal(err)
+			}
+		})
 	}
 }

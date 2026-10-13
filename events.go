@@ -40,7 +40,9 @@ func DecodeEvent(b []byte) (Event, error) {
 		return Event{}, &ProtocolError{"event bytes are not valid UTF-8"}
 	}
 	var envelope struct {
-		V int `json:"v"`
+		V    int             `json:"v"`
+		Type string          `json:"type"`
+		Data json.RawMessage `json:"data"`
 	}
 	if json.Unmarshal(b, &envelope) != nil {
 		return Event{}, &ProtocolError{"invalid event JSON"}
@@ -54,6 +56,12 @@ func DecodeEvent(b []byte) (Event, error) {
 	if err := validateDefinition(file, "Event", b); err != nil {
 		return Event{}, err
 	}
+	switch envelope.Type {
+	case "turn.completed", "turn.cancelled", "turn.failed", "agent.tool.complete", "agent.done":
+		if err := validateCostFields(envelope.Data, envelope.V == 3); err != nil {
+			return Event{}, err
+		}
+	}
 	var event Event
 	if err := json.Unmarshal(b, &event); err != nil {
 		return Event{}, &ProtocolError{"invalid event envelope"}
@@ -63,10 +71,11 @@ func DecodeEvent(b []byte) (Event, error) {
 }
 
 type SSEDecoder struct {
-	reader *bufio.Reader
-	limit  int
-	first  bool
-	skipLF bool
+	reader    *bufio.Reader
+	limit     int
+	first     bool
+	skipLF    bool
+	strictEOF bool
 }
 
 func NewSSEDecoder(r io.Reader, maxBytes int) *SSEDecoder {
@@ -81,6 +90,9 @@ func (d *SSEDecoder) Next() (string, error) {
 	for {
 		line, err := d.line()
 		if err != nil {
+			if d.strictEOF && err == io.EOF && size > 0 {
+				return "", io.ErrUnexpectedEOF
+			}
 			return "", err
 		}
 		size += len(line) + 1
@@ -113,6 +125,9 @@ func (d *SSEDecoder) line() (string, error) {
 	for {
 		c, err := d.reader.ReadByte()
 		if err != nil {
+			if d.strictEOF && err == io.EOF && len(b) > 0 {
+				return "", io.ErrUnexpectedEOF
+			}
 			return "", err
 		}
 		if d.skipLF {

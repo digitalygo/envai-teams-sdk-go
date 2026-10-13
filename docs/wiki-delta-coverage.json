@@ -2,9 +2,9 @@
   "baseline_local_synthetic_commit": "1e6fadabec418e9833888d6436adfb89c6e501af",
   "baseline_real_alpha": "3ae53b16682b2b51d088d4f33995218ff62471d2",
   "method": "Go executable statement coverage blocks intersecting added/modified lines, including all blocks of new production Go files",
-  "covered": 780,
-  "statements": 844,
-  "percent": 92.42,
+  "covered": 1971,
+  "statements": 2046,
+  "percent": 96.33,
   "files": {
     "examples/wiki/main.go": {
       "covered": 19,
@@ -17,24 +17,24 @@
       "percent": 97.87
     },
     "contract.go": {
-      "covered": 123,
-      "statements": 129,
-      "percent": 95.35
+      "covered": 145,
+      "statements": 155,
+      "percent": 93.55
     },
     "events.go": {
-      "covered": 14,
-      "statements": 15,
-      "percent": 93.33
+      "covered": 19,
+      "statements": 22,
+      "percent": 86.36
     },
     "events_generated.go": {
-      "covered": 39,
-      "statements": 45,
-      "percent": 86.67
+      "covered": 63,
+      "statements": 69,
+      "percent": 91.3
     },
     "models_generated.go": {
-      "covered": 228,
-      "statements": 264,
-      "percent": 86.36
+      "covered": 1320,
+      "statements": 1356,
+      "percent": 97.35
     },
     "operations_generated.go": {
       "covered": 75,
@@ -42,9 +42,9 @@
       "percent": 100.0
     },
     "stream.go": {
-      "covered": 9,
-      "statements": 9,
-      "percent": 100.0
+      "covered": 57,
+      "statements": 62,
+      "percent": 91.94
     },
     "wiki.go": {
       "covered": 94,

@@ -41,7 +41,7 @@ jobs:
       - run: python -m pip install -r scripts/requirements.txt
       - run: python scripts/check_contracts.py
       - run: python scripts/test_check_contracts.py
-      - run: python scripts/generate.py && gofmt -w models_generated.go operations_generated.go events_generated.go && git diff --exit-code
+      - run: python scripts/generate.py && gofmt -w models_generated.go operations_generated.go events_generated.go open_models_generated_test.go && git diff --exit-code
       - run: go mod download
       - run: go vet ./...
       - run: go test -race -coverprofile=coverage.out ./...
