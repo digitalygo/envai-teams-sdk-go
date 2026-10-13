@@ -48,7 +48,7 @@ type EventStream struct {
 }
 
 func (c *Client) Events(ctx context.Context, chatID string, options StreamOptions) (*EventStream, error) {
-	if options.After < 0 || options.MaxReconnects < 0 || options.ReconnectDelay < 0 || options.MaxLegacySnapshotBytes < 0 {
+	if options.After < 0 || options.MaxReconnects < 0 || options.ReconnectDelay < 0 || options.MaxLegacySnapshotBytes < 0 || options.MaxLegacySnapshotBytes == int64(^uint64(0)>>1) {
 		return nil, errors.New("envai: invalid stream options")
 	}
 	if options.ReconnectDelay == 0 {
@@ -155,9 +155,6 @@ func (s *EventStream) Next() (Event, error) {
 			if errors.As(err, &p) {
 				return Event{}, err
 			}
-			if s.client.config.LegacyReadOnly && errors.Is(err, io.EOF) {
-				return Event{}, io.EOF
-			}
 			if err = s.reconnect(); err != nil {
 				return Event{}, err
 			}
@@ -166,9 +163,6 @@ func (s *EventStream) Next() (Event, error) {
 		e, err := DecodeEvent([]byte(data))
 		if err != nil {
 			return Event{}, err
-		}
-		if s.client.config.LegacyReadOnly && e.V != 2 {
-			return Event{}, &ProtocolError{"legacy replay contains non-v2 event"}
 		}
 		if e.ChatID != s.chatID {
 			return Event{}, &ProtocolError{"event chat does not match stream"}
@@ -365,7 +359,7 @@ func (s *EventStream) bufferLegacy(body io.ReadCloser) error {
 		}
 		if event.Type != "ping" {
 			if event.Seq <= cursor {
-				continue
+				return &ProtocolError{"legacy replay sequence must strictly increase beyond the requested cursor"}
 			}
 			if event.Seq != cursor+1 {
 				return &ReplayGapError{From: cursor + 1, To: event.Seq - 1}

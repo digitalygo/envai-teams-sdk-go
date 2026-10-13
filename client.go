@@ -129,7 +129,7 @@ func New(config Config) (*Client, error) {
 	if config.MaxResponseBytes == 0 {
 		config.MaxResponseBytes = 8 << 20
 	}
-	if config.MaxResponseBytes < 1 {
+	if config.MaxResponseBytes < 1 || config.MaxResponseBytes == int64(^uint64(0)>>1) {
 		return nil, errors.New("envai: invalid response limit")
 	}
 	if config.RetryDelay == 0 {
@@ -317,6 +317,11 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 		req, err := http.NewRequestWithContext(ctx, op.Method, uri, reader)
 		if err != nil {
 			return nil, err
+		}
+		// Prevent net/http from replaying a buffered POST merely because it carries
+		// an Idempotency-Key after an ambiguous reused-connection failure.
+		if op.Method != "GET" {
+			req.GetBody = nil
 		}
 		req.Header.Set("Accept", accept)
 		if negotiated(op) {

@@ -7,9 +7,9 @@ The five shared contracts are byte-pinned to verified backend commit `c27963d084
 ## Results
 
 - Go 1.26.9 on Linux; PostgreSQL 18.3; Node 24.19.0 / npm 11.9.0.
-- Complete Go suite with real PostgreSQL, `-race`, no test cache and coverage: **497 test/subtest passes**, no failures. The subprocess-only helper is skipped in the parent and executed by six child processes.
-- Main SDK statement coverage: **94.6%**. Aggregate including all examples: **3054/3253, 93.88%**.
-- Changed production Go statements: **1971/2046, 96.33%**. Every changed Go production file is between **86.36% and 100%**. Detailed file results are in `wiki-delta-coverage.json`. The report intersects Go coverage blocks with changed lines and includes every block of new production files.
+- Complete Go suite with real PostgreSQL, `-race`, no test cache and coverage: **502 test/subtest passes**, no failures. The subprocess-only helper is skipped in the parent and executed by six child processes.
+- Main SDK statement coverage: **94.7%**. Aggregate including all examples: **3062/3257, 94.01%**.
+- Changed production Go statements: **1980/2052, 96.49%**. Every changed Go production file is between **86.36% and 100%**. Detailed file results are in `wiki-delta-coverage.json`. The report intersects Go coverage blocks with changed lines and includes every block of new production files.
 - Standard-library trace / bytecode-line coverage of changed Python generator lines: **44/44, 100%**; provenance checker **24/25, 96%**. Its deliberately inactive pre-publication candidate branch is the uncovered line.
 - Generator rerun is byte-identical; five source schema hashes, all attributed fixtures and the complete **65-operation** inventory pass. Provenance mutation regression tests pass, including every shared fixture.
 - `go vet ./...`, workflow actionlint, and Git whitespace checks pass.
@@ -56,6 +56,6 @@ Synthetic fixtures, local HTTP fakes and public signature vectors only. No Envai
 
 The external boundary review reproduced acceptance of negative/overflowing completion costs, nullable nested legacy usage and `data:null` completion pages, plus loss of allowed unknown inline usage fields. These are fixed with retained independent regressions. All cost-bearing descendants below usage/chat-usage (including lists) are checked before hydration; unrelated root extensions remain opaque. Every generated named open object, including inline schemas, preserves exact unknown JSON values. The generated open-model matrix covers all such shapes.
 
-Finite v2 replay is now buffered and validated atomically under a configurable 64 MiB default snapshot limit before exposing any event. Late malformed, null-bearing, mixed-v3, truncated or gapped tails fail without yielding a prefix; cancellation and EOF are covered. V3 continues incrementally. The final complete PostgreSQL/race and coverage results above include these changes and the real published backend fixture pin.
+Finite v2 replay is now buffered and validated atomically under a configurable 64 MiB default snapshot limit before exposing any event. Late malformed, null-bearing, mixed-v3, wrong-chat, backwards/duplicate, truncated or gapped tails fail without yielding a prefix; cancellation, EOF and integer-overflow bounds are covered. Nonzero cost underflow cannot silently become zero. Buffered mutation requests disable the standard HTTP transport’s replay body as well as SDK-level retries. V3 continues incrementally. The final complete PostgreSQL/race and coverage results above include these changes and the real published backend fixture pin.
 
 Read-only actual GitHub metadata plus the existing locked Semantic Release dry-run predict release type `major` and version `v1.0.0-alpha.2` on alpha. The real channel note declares `alpha`; there is no stable v1 tag, so this continues the unreleased 1.0.0 line. The existing Go module-major guard passes unchanged. Local simulated refs were unchanged and no publish callback ran. No module-path migration or tag modification was needed.

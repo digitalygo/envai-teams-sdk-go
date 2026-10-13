@@ -221,3 +221,34 @@ func TestStreamingMultipartBoundariesAndFailures(t *testing.T) {
 		}
 	}
 }
+
+type wikiRoundTripper func(*http.Request) (*http.Response, error)
+
+func (f wikiRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+func TestMutationHasNoTransportReplayBody(t *testing.T) {
+	calls := 0
+	client, err := New(Config{BaseURL: "https://api.example", APIKey: "test", HTTPClient: &http.Client{Transport: wikiRoundTripper(func(r *http.Request) (*http.Response, error) {
+		h := http.Header{}
+		h.Set(ContractHeader, "3")
+		if strings.HasSuffix(r.URL.Path, "/capabilities") {
+			return &http.Response{StatusCode: 200, Header: h, Body: io.NopCloser(strings.NewReader(testCapabilities))}, nil
+		}
+		calls++
+		if r.GetBody != nil {
+			t.Error("automatic net/http mutation replay remains possible")
+		}
+		if r.Header.Get("Idempotency-Key") != "stable" {
+			t.Error("missing explicit replay identity")
+		}
+		return nil, io.ErrUnexpectedEOF
+	})}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = client.CreateWikiInboxRun(context.Background(), CreateWikiInboxRunParams{WorkspaceID: "workspace", IdempotencyKey: "stable", Body: CreateWikiInboxRunBody{WebhookURL: "https://receiver.example/wiki"}}); err == nil {
+		t.Fatal("ambiguous outcome lost")
+	}
+	if calls != 1 {
+		t.Fatal(calls)
+	}
+}

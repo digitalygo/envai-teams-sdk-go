@@ -453,7 +453,7 @@ func TestCompletionUnknownFieldsPreserved(t *testing.T) {
 
 func TestLegacySnapshotAtomicTailBoundsAndCancellation(t *testing.T) {
 	events := fixture[[]Event](t, "events-valid.json")
-	for _, kind := range []string{"mixed", "null", "gap", "truncated", "limit", "cancel", "success"} {
+	for _, kind := range []string{"mixed", "null", "gap", "truncated", "limit", "cancel", "wrongChat", "duplicate", "beforeCursor", "success"} {
 		t.Run(kind, func(t *testing.T) {
 			c := rawClient(t, func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set(ContractHeader, "2")
@@ -477,6 +477,10 @@ func TestLegacySnapshotAtomicTailBoundsAndCancellation(t *testing.T) {
 					event.Data, _ = json.Marshal(data)
 				case "gap":
 					event.Seq = 3
+				case "wrongChat":
+					event.ChatID = event.ChatID[:len(event.ChatID)-1] + "W"
+				case "duplicate":
+					writeEvent(w, event)
 				case "truncated":
 					fmt.Fprint(w, `data: {"v":3}`)
 					return
@@ -484,6 +488,9 @@ func TestLegacySnapshotAtomicTailBoundsAndCancellation(t *testing.T) {
 				writeEvent(w, event)
 			})
 			options := StreamOptions{}
+			if kind == "beforeCursor" {
+				options.After = 1
+			}
 			if kind == "limit" {
 				options.MaxLegacySnapshotBytes = 10
 			}
@@ -511,5 +518,21 @@ func TestLegacySnapshotAtomicTailBoundsAndCancellation(t *testing.T) {
 				t.Fatal(err)
 			}
 		})
+	}
+}
+
+func TestRepresentableReadLimitsAndCosts(t *testing.T) {
+	c := rawClient(t, func(w http.ResponseWriter, r *http.Request) { t.Error("invalid limit reached transport") })
+	if _, err := c.LegacyEvents(context.Background(), "chat", StreamOptions{MaxLegacySnapshotBytes: int64(^uint64(0) >> 1)}); err == nil {
+		t.Fatal("overflowing legacy limit")
+	}
+	if _, err := New(Config{BaseURL: "https://api.example", MaxResponseBytes: int64(^uint64(0) >> 1)}); err == nil {
+		t.Fatal("overflowing response limit")
+	}
+	if err := validateCompletionJSON([]byte(`{"cost_usd":1e-400}`), true); err == nil {
+		t.Fatal("nonzero cost underflowed to zero")
+	}
+	if err := validateCompletionJSON([]byte(`{"cost_usd":0e10}`), true); err != nil {
+		t.Fatal(err)
 	}
 }

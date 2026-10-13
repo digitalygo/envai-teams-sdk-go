@@ -187,7 +187,7 @@ func walkCostFields(value any, allowNull, descend bool) error {
 					return &ProtocolError{"cost must be numeric or null"}
 				}
 				amount, err := number.Float64()
-				if err != nil || math.IsInf(amount, 0) || math.IsNaN(amount) || amount < 0 {
+				if err != nil || math.IsInf(amount, 0) || math.IsNaN(amount) || amount < 0 || (amount == 0 && nonzeroDecimalMantissa(number.String())) {
 					return &ProtocolError{"cost must be finite and nonnegative"}
 				}
 			default:
@@ -208,6 +208,18 @@ func walkCostFields(value any, allowNull, descend bool) error {
 		}
 	}
 	return nil
+}
+
+func nonzeroDecimalMantissa(value string) bool {
+	for _, r := range value {
+		if r == 'e' || r == 'E' {
+			break
+		}
+		if r >= '1' && r <= '9' {
+			return true
+		}
+	}
+	return false
 }
 
 var schemaCache sync.Map
