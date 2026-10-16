@@ -5,7 +5,7 @@ import pathlib
 import re
 
 # Replaced with the verified backend publication commit by the release coordinator.
-EXPECTED_CONTRACT_COMMIT = '96acf00162984af4a86a671f924c53a18960fae6'
+EXPECTED_CONTRACT_COMMIT = '6a4e45bafe6f5856ef92a57b37db08769738b412'
 
 def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())

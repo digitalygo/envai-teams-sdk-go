@@ -228,3 +228,24 @@ func TestRunTurnReplaysCompletedIdempotentAcceptance(t *testing.T) {
 		t.Fatal(result, err, posts)
 	}
 }
+
+func TestAttachmentMessageRejectsExplicitNullBeforeAnyRequest(t *testing.T) {
+	calls := 0
+	c := testClient(t, func(w http.ResponseWriter, r *http.Request) { calls++ })
+	_, err := c.SendChatMessage(context.Background(), SendChatMessageParams{ChatID: "c", Body: ChatMessageRequest{Message: "read", AttachmentIDs: Null[[]string]()}})
+	if err == nil || calls != 0 {
+		t.Fatal(err, calls)
+	}
+}
+func TestAttachmentMessageAllowsEmptyArrayWithoutIdempotencyKey(t *testing.T) {
+	posts := 0
+	c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		posts++
+		w.Header().Set(ContractHeader, "3")
+		fmt.Fprintf(w, `{"status":"accepted","turn_id":%q}`, *fixture[[]Event](t, "events-valid.json")[1].TurnID)
+	})
+	_, err := c.SendChatMessage(context.Background(), SendChatMessageParams{ChatID: "c", Body: ChatMessageRequest{Message: "read", AttachmentIDs: Present([]string{})}})
+	if err != nil || posts != 1 {
+		t.Fatal(err, posts)
+	}
+}

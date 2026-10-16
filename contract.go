@@ -45,6 +45,9 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 	if !negotiated(op) || op.Method == "GET" {
 		return nil
 	}
+	if request, ok := body.(ChatMessageRequest); op.ID == "sendChatMessage" && ok && request.AttachmentIDs.Set && request.AttachmentIDs.Null {
+		return errors.New("envai: attachment_ids must be an array, not null")
+	}
 	ids := attachmentMessageIDs(op.ID, body)
 	if len(ids) > 0 && params["Idempotency-Key"] == nil {
 		return errors.New("envai: attachment messages require Idempotency-Key")
