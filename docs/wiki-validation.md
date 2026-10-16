@@ -1,5 +1,15 @@
 # Wiki / contract 3 validation
 
+## Chat attachments contract update (2026-10-16)
+
+Current source schemas are pinned to backend commit `96acf00162984af4a86a671f924c53a18960fae6`, with 71 HTTP operations. The attachment guide documents asynchronous conversion, whole-message rejection, explicit retry, retention and independent conversion costs. Source manifests identify exact upstream bytes separately from generated inventories and synthetic fixtures. Historical HTTP captures retain their original source commits. This update does not deploy the backend.
+
+Local checks: full PostgreSQL suite and examples passed with the race detector; aggregate statement coverage 93.91%. Go vet, deterministic generation, strict provenance and provenance-mutation tests passed. Govulncheck on Go 1.26.9 found no reachable vulnerabilities.
+
+## Earlier validation records
+
+The following counts, SDK heads and backend pins describe earlier checkpoints. They do not attest the current attachment implementation.
+
 Validated against Go SDK alpha `3ae53b16682b2b51d088d4f33995218ff62471d2` on 2026-10-13. All 76 source blobs and file modes were materialized and independently matched to Git identities. Alpha was refreshed before implementation and again after final verification; it remained unchanged. Local history is a synthetic baseline and must never be pushed. Publication uses guarded real-tree overlays.
 
 The five shared contracts are byte-pinned to verified backend commit `c27963d0848540679bccf30d2aeab354097b1a38`. Each local Git blob independently matches the published backend tree. The immutable original numeric v2 schema has blob `02b13b23cd06eacd81059d1ed99e0027769d75e4`. Shared synthetic HTTP-kernel responses now cover pending completion accounting and immutable snapshot provenance, a scheduled conversion diagnostic, and unchanged historical numeric completion data; actual response headers are retained separately. No deployment is implied by this pin.

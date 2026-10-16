@@ -189,6 +189,10 @@ func (s *EventStream) Next() (Event, error) {
 	}
 }
 func (s *EventStream) WaitLive(ctx context.Context) error {
+	return s.waitLive(ctx, nil)
+}
+
+func (s *EventStream) waitLive(ctx context.Context, replay func(Event) error) error {
 	done := make(chan struct{})
 	stopped := make(chan struct{})
 	defer func() { close(done); <-stopped }()
@@ -208,6 +212,11 @@ func (s *EventStream) WaitLive(ctx context.Context) error {
 		if e.Type == "ping" {
 			return nil
 		}
+		if replay != nil {
+			if err := replay(e); err != nil {
+				return err
+			}
+		}
 	}
 }
 
@@ -219,10 +228,12 @@ type TurnResult struct {
 	Terminal         Event
 }
 type TurnOptions struct {
-	Stream      StreamOptions
-	LiveTimeout time.Duration
-	OnEvent     func(Event) error
-	Tools       *ToolRunner
+	AttachmentIDs  []string
+	IdempotencyKey string
+	Stream         StreamOptions
+	LiveTimeout    time.Duration
+	OnEvent        func(Event) error
+	Tools          *ToolRunner
 }
 
 func (c *Client) RunTurn(ctx context.Context, chatID, message string, options TurnOptions) (TurnResult, error) {
@@ -239,23 +250,56 @@ func (c *Client) RunTurn(ctx context.Context, chatID, message string, options Tu
 		timeout = 30 * time.Second
 	}
 	live, cancel := context.WithTimeout(ctx, timeout)
-	err = s.WaitLive(live)
+	var replay []Event
+	replayBytes := 0
+	var retain func(Event) error
+	if options.IdempotencyKey != "" {
+		retain = func(event Event) error {
+			encoded, _ := json.Marshal(event)
+			replayBytes += len(encoded)
+			if replayBytes > 16*1024*1024 {
+				return &ProtocolError{Reason: "idempotent send replay exceeds 16 MiB; resume the known turn using its cursor"}
+			}
+			replay = append(replay, event)
+			return nil
+		}
+	}
+	err = s.waitLive(live, retain)
 	cancel()
 	if err != nil {
 		return TurnResult{}, err
 	}
-	accepted, err := c.SendChatMessage(ctx, SendChatMessageParams{ChatID: chatID, Body: ChatMessageRequest{Message: message}})
+	request := SendChatMessageParams{ChatID: chatID, Body: ChatMessageRequest{Message: message}}
+	if len(options.AttachmentIDs) > 0 {
+		request.Body.AttachmentIDs = Present(options.AttachmentIDs)
+	}
+	if options.IdempotencyKey != "" {
+		request.IdempotencyKey = Present(options.IdempotencyKey)
+	}
+	accepted, err := c.SendChatMessage(ctx, request)
 	if err != nil {
 		return TurnResult{}, err
 	}
 	result := TurnResult{ChatID: chatID, TurnID: accepted.TurnID}
+	replayCompleted := false
+	for _, event := range replay {
+		if event.TurnID != nil && *event.TurnID == accepted.TurnID && event.Terminal() {
+			replayCompleted = true
+		}
+	}
 	var text strings.Builder
 	toolCtx, cancelTools := context.WithCancel(ctx)
 	var work sync.WaitGroup
 	defer func() { cancelTools(); work.Wait() }()
 	toolErrors := make(chan error, 1)
 	for {
-		e, err := s.Next()
+		var e Event
+		replayed := len(replay) > 0
+		if replayed {
+			e, replay = replay[0], replay[1:]
+		} else {
+			e, err = s.Next()
+		}
 		result.LastSeq = s.Cursor()
 		if err != nil {
 			select {
@@ -272,7 +316,7 @@ func (c *Client) RunTurn(ctx context.Context, chatID, message string, options Tu
 			if err = options.Tools.ObserveContext(ctx, e); err != nil {
 				return result, err
 			}
-			if e.Type == "agent.tool.request" {
+			if e.Type == "agent.tool.request" && !(replayed && replayCompleted) {
 				work.Add(1)
 				go func(e Event) {
 					defer work.Done()

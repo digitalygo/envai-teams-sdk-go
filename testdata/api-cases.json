@@ -3,15 +3,18 @@
     "id": "sendChatMessage",
     "go_name": "SendChatMessage",
     "parameters": {
-      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "IdempotencyKey": "fixture"
     },
     "body": {
-      "message": "Summarize the last week of traffic"
+      "message": "Summarize the last week of traffic",
+      "attachment_ids": []
     },
     "status": 202,
     "response": {
       "status": "accepted",
-      "turn_id": "cmpl_01j5abcdefghjkmnpqrstvwxyz"
+      "turn_id": "cmpl_01j5abcdefghjkmnpqrstvwxyz",
+      "attachment_ids": []
     }
   },
   {
@@ -1095,6 +1098,278 @@
     "response": {
       "status": "ok"
     }
+  },
+  {
+    "id": "uploadChatAttachment",
+    "go_name": "UploadChatAttachment",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "ChatID": "fixture",
+      "IdempotencyKey": "fixture"
+    },
+    "body": null,
+    "status": 202,
+    "response": {
+      "data": {
+        "attachment_id": "catt_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "ready",
+        "revision": 1,
+        "conversion": {
+          "status": "completed",
+          "error_code": null,
+          "recoverable": false,
+          "next_retry_at": null,
+          "retryable": false
+        },
+        "derived": {
+          "sha256": "a8257d3af0961ab4c5977d60edbecd1dbbced4bc8623af7b140892abbf884264",
+          "bytes": 17,
+          "conversion": {
+            "converter": "native_text",
+            "version": 1
+          }
+        },
+        "expires_at": "2026-10-29T00:00:00Z",
+        "attached_at": null,
+        "usage_cost": {
+          "status": "complete",
+          "basis": "none",
+          "scope_status": "closed",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": [],
+          "priced_subtotals": []
+        }
+      }
+    }
+  },
+  {
+    "id": "listChatAttachments",
+    "go_name": "ListChatAttachments",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "ChatID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "attachments": [
+          {
+            "attachment_id": "catt_01j5abcdefghjkmnpqrstvwxyz",
+            "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+            "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+            "original_name": "notes.md",
+            "mime_type": "text/markdown",
+            "byte_size": 17,
+            "lifecycle": "ready",
+            "revision": 1,
+            "conversion": {
+              "status": "completed",
+              "error_code": null,
+              "recoverable": false,
+              "next_retry_at": null,
+              "retryable": false
+            },
+            "derived": {
+              "sha256": "a8257d3af0961ab4c5977d60edbecd1dbbced4bc8623af7b140892abbf884264",
+              "bytes": 17,
+              "conversion": {
+                "converter": "native_text",
+                "version": 1
+              }
+            },
+            "expires_at": "2026-10-29T00:00:00Z",
+            "attached_at": null,
+            "usage_cost": {
+              "status": "complete",
+              "basis": "none",
+              "scope_status": "closed",
+              "revision": 1,
+              "as_of": "2026-10-13T16:00:00Z",
+              "invocation_count": 0,
+              "pending_invocation_count": 0,
+              "totals": [],
+              "priced_subtotals": []
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "getChatAttachment",
+    "go_name": "GetChatAttachment",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "ChatID": "fixture",
+      "AttachmentID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "attachment_id": "catt_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "ready",
+        "revision": 1,
+        "conversion": {
+          "status": "completed",
+          "error_code": null,
+          "recoverable": false,
+          "next_retry_at": null,
+          "retryable": false
+        },
+        "derived": {
+          "sha256": "a8257d3af0961ab4c5977d60edbecd1dbbced4bc8623af7b140892abbf884264",
+          "bytes": 17,
+          "conversion": {
+            "converter": "native_text",
+            "version": 1
+          }
+        },
+        "expires_at": "2026-10-29T00:00:00Z",
+        "attached_at": null,
+        "usage_cost": {
+          "status": "complete",
+          "basis": "none",
+          "scope_status": "closed",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": [],
+          "priced_subtotals": []
+        }
+      }
+    }
+  },
+  {
+    "id": "deleteChatAttachment",
+    "go_name": "DeleteChatAttachment",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "ChatID": "fixture",
+      "AttachmentID": "fixture"
+    },
+    "body": null,
+    "status": 202,
+    "response": {
+      "data": {
+        "attachment_id": "catt_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "ready",
+        "revision": 1,
+        "conversion": {
+          "status": "completed",
+          "error_code": null,
+          "recoverable": false,
+          "next_retry_at": null,
+          "retryable": false
+        },
+        "derived": {
+          "sha256": "a8257d3af0961ab4c5977d60edbecd1dbbced4bc8623af7b140892abbf884264",
+          "bytes": 17,
+          "conversion": {
+            "converter": "native_text",
+            "version": 1
+          }
+        },
+        "expires_at": "2026-10-29T00:00:00Z",
+        "attached_at": null,
+        "usage_cost": {
+          "status": "complete",
+          "basis": "none",
+          "scope_status": "closed",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": [],
+          "priced_subtotals": []
+        }
+      }
+    }
+  },
+  {
+    "id": "retryChatAttachment",
+    "go_name": "RetryChatAttachment",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "ChatID": "fixture",
+      "AttachmentID": "fixture",
+      "IdempotencyKey": "fixture"
+    },
+    "body": null,
+    "status": 202,
+    "response": {
+      "data": {
+        "attachment_id": "catt_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "original_name": "notes.md",
+        "mime_type": "text/markdown",
+        "byte_size": 17,
+        "lifecycle": "ready",
+        "revision": 1,
+        "conversion": {
+          "status": "completed",
+          "error_code": null,
+          "recoverable": false,
+          "next_retry_at": null,
+          "retryable": false
+        },
+        "derived": {
+          "sha256": "a8257d3af0961ab4c5977d60edbecd1dbbced4bc8623af7b140892abbf884264",
+          "bytes": 17,
+          "conversion": {
+            "converter": "native_text",
+            "version": 1
+          }
+        },
+        "expires_at": "2026-10-29T00:00:00Z",
+        "attached_at": null,
+        "usage_cost": {
+          "status": "complete",
+          "basis": "none",
+          "scope_status": "closed",
+          "revision": 1,
+          "as_of": "2026-10-13T16:00:00Z",
+          "invocation_count": 0,
+          "pending_invocation_count": 0,
+          "totals": [],
+          "priced_subtotals": []
+        }
+      }
+    }
+  },
+  {
+    "id": "downloadChatAttachment",
+    "go_name": "DownloadChatAttachment",
+    "parameters": {
+      "WorkspaceID": "fixture",
+      "ChatID": "fixture",
+      "AttachmentID": "fixture",
+      "Kind": "original"
+    },
+    "body": null,
+    "status": 200,
+    "response": null
   },
   {
     "id": "uploadWikiSource",

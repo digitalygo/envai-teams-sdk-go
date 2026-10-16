@@ -6,13 +6,17 @@ import (
 )
 
 type SendChatMessageParams struct {
-	ChatID string
-	Body   ChatMessageRequest
+	ChatID         string
+	IdempotencyKey Optional[string]
+	Body           ChatMessageRequest
 }
 
 func (c *Client) SendChatMessage(ctx context.Context, req SendChatMessageParams) (ChatMessageAccepted, error) {
 	p := map[string]any{}
 	p["chat_id"] = req.ChatID
+	if req.IdempotencyKey.Set {
+		p["Idempotency-Key"] = req.IdempotencyKey.Value
+	}
 	var out ChatMessageAccepted
 	err := c.call(ctx, "sendChatMessage", p, req.Body, &out)
 	return out, err
@@ -691,6 +695,103 @@ func (c *Client) HandleProviderWebhook(ctx context.Context, req HandleProviderWe
 	var out WebhookOk
 	err := c.call(ctx, "handleProviderWebhook", p, req.Body, &out)
 	return out, err
+}
+
+type UploadChatAttachmentParams struct {
+	WorkspaceID    string
+	ChatID         string
+	IdempotencyKey string
+	Body           []MultipartPart
+}
+
+func (c *Client) UploadChatAttachment(ctx context.Context, req UploadChatAttachmentParams) (ChatAttachment, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	p["Idempotency-Key"] = req.IdempotencyKey
+	var out ChatAttachment
+	err := c.call(ctx, "uploadChatAttachment", p, req.Body, &out)
+	return out, err
+}
+
+type ListChatAttachmentsParams struct {
+	WorkspaceID string
+	ChatID      string
+}
+
+func (c *Client) ListChatAttachments(ctx context.Context, req ListChatAttachmentsParams) (ListChatAttachmentsResult, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	var out ListChatAttachmentsResult
+	err := c.call(ctx, "listChatAttachments", p, nil, &out)
+	return out, err
+}
+
+type GetChatAttachmentParams struct {
+	WorkspaceID  string
+	ChatID       string
+	AttachmentID string
+}
+
+func (c *Client) GetChatAttachment(ctx context.Context, req GetChatAttachmentParams) (ChatAttachment, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	p["attachment_id"] = req.AttachmentID
+	var out ChatAttachment
+	err := c.call(ctx, "getChatAttachment", p, nil, &out)
+	return out, err
+}
+
+type DeleteChatAttachmentParams struct {
+	WorkspaceID  string
+	ChatID       string
+	AttachmentID string
+}
+
+func (c *Client) DeleteChatAttachment(ctx context.Context, req DeleteChatAttachmentParams) (ChatAttachment, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	p["attachment_id"] = req.AttachmentID
+	var out ChatAttachment
+	err := c.call(ctx, "deleteChatAttachment", p, nil, &out)
+	return out, err
+}
+
+type RetryChatAttachmentParams struct {
+	WorkspaceID    string
+	ChatID         string
+	AttachmentID   string
+	IdempotencyKey string
+}
+
+func (c *Client) RetryChatAttachment(ctx context.Context, req RetryChatAttachmentParams) (ChatAttachment, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	p["attachment_id"] = req.AttachmentID
+	p["Idempotency-Key"] = req.IdempotencyKey
+	var out ChatAttachment
+	err := c.call(ctx, "retryChatAttachment", p, nil, &out)
+	return out, err
+}
+
+type DownloadChatAttachmentParams struct {
+	WorkspaceID  string
+	ChatID       string
+	AttachmentID string
+	Kind         string
+}
+
+func (c *Client) DownloadChatAttachment(ctx context.Context, req DownloadChatAttachmentParams) (*Download, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	p["attachment_id"] = req.AttachmentID
+	p["kind"] = req.Kind
+	return c.download(ctx, "downloadChatAttachment", p, nil)
 }
 
 type UploadWikiSourceParams struct {

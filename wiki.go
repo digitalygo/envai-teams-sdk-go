@@ -74,7 +74,7 @@ func (c *Client) validateOperationParams(op operation, params map[string]any) er
 	return nil
 }
 func validateWikiBody(op operation, body any) error {
-	if op.ID == "uploadWikiSource" {
+	if op.ID == "uploadWikiSource" || op.ID == "uploadChatAttachment" {
 		parts, ok := body.([]MultipartPart)
 		if !ok || len(parts) != 1 || parts[0].Name != "file" || parts[0].Filename == "" {
 			return errors.New("envai: exactly one named source file is required")

@@ -291,7 +291,7 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	if err = validateWikiBody(op, body); err != nil {
 		return nil, err
 	}
-	if err = c.checkMutation(ctx, op); err != nil {
+	if err = c.checkMutation(ctx, op, params, body); err != nil {
 		return nil, err
 	}
 	var data []byte
@@ -452,6 +452,14 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 		b, ok = envelope["data"]
 		if !ok {
 			return &ProtocolError{"response is missing data"}
+		}
+	}
+	if ids := attachmentMessageIDs(id, body); len(ids) > 0 {
+		var accepted struct {
+			IDs []string `json:"attachment_ids"`
+		}
+		if json.Unmarshal(b, &accepted) != nil || !sameAttachmentIDs(ids, accepted.IDs) {
+			return &ProtocolError{"message acceptance omitted or changed attachment IDs"}
 		}
 	}
 	if err = c.validateNegotiatedJSON(id, b); err != nil {

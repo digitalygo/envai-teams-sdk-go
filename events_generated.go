@@ -71,8 +71,9 @@ type ATPChatTitleUpdated struct {
 }
 
 type ATPTurnStarted struct {
-	TurnID string `json:"turn_id"`
-	Input  string `json:"input"`
+	TurnID      string                                     `json:"turn_id"`
+	Input       string                                     `json:"input"`
+	Attachments Optional[[]ATPChatAttachmentManifestEvent] `json:"attachments,omitzero"`
 }
 
 type ATPTurnCompleted struct {
@@ -337,6 +338,35 @@ func (v *ATPUsageCost) UnmarshalJSON(b []byte) error {
 }
 func (v ATPUsageCost) MarshalJSON() ([]byte, error) {
 	type plain ATPUsageCost
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPChatAttachmentManifestEvent struct {
+	AttachmentID string                     `json:"attachment_id"`
+	OriginalName string                     `json:"original_name"`
+	Revision     int64                      `json:"revision"`
+	Sha256       string                     `json:"sha256"`
+	Bytes        int64                      `json:"bytes"`
+	Conversion   map[string]json.RawMessage `json:"conversion"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPChatAttachmentManifestEvent) UnmarshalJSON(b []byte) error {
+	type plain ATPChatAttachmentManifestEvent
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"attachment_id", "original_name", "revision", "sha256", "bytes", "conversion"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPChatAttachmentManifestEvent(out)
+	return nil
+}
+func (v ATPChatAttachmentManifestEvent) MarshalJSON() ([]byte, error) {
+	type plain ATPChatAttachmentManifestEvent
 	return marshalUnknown(plain(v), v.Extra)
 }
 

@@ -4,6 +4,7 @@ class Loader(yaml.SafeLoader):pass
 Loader.add_constructor('tag:yaml.org,2002:int',lambda loader,node:node.value if ':' in node.value else yaml.SafeLoader.construct_yaml_int(loader,node))
 api=yaml.load((root/'contract/openapi.yaml').read_text(),Loader=Loader)
 schemas=api['components']['schemas']
+(root/'contract/openapi.json').write_text(json.dumps(api,indent=2)+'\n')
 def name(x):
  x=re.sub(r'[^A-Za-z0-9]+',' ',x)
  s=''.join(p[0].upper()+p[1:] for p in x.split())
@@ -13,7 +14,7 @@ def name(x):
  return s
 extra={}
 wiki_types=set(json.loads((root/'contract/wiki.json').read_text())['$defs'])
-def typed_open(n):return n in wiki_types or n.removeprefix("ATP") in wiki_types or n=="Completion"
+def typed_open(n):return n in wiki_types or n.removeprefix("ATP") in wiki_types or n=="Completion" or n.removeprefix("ATP") in {"ChatAttachment", "AttachmentManifest", "AttachmentConversion", "ChatAttachmentManifestEvent"}
 def typ(s,hint):
  if '$ref' in s:
   ref=s['$ref'];return ('ATP' if '/$defs/' in ref and not ref.startswith(('wiki.json','terminal-snapshot.json')) else '')+name(ref.rsplit('/',1)[-1])
@@ -52,6 +53,7 @@ def unknown_methods(n,s):
  validation=''
  definition=n.removeprefix('ATP')
  if definition in wiki_types and definition!='WikiWebhookEvent':validation='if err:=validateDefinition("wiki.json","'+definition+'",b);err!=nil{return err};'
+ if definition in {'ChatAttachment','AttachmentConversion','AttachmentManifest'}:validation='if err:=validateDefinition("openapi.json","'+definition+'",b);err!=nil{return err};'
  return 'func(v *'+n+') UnmarshalJSON(b []byte)error{'+validation+'type plain '+n+';var out plain;if err:=json.Unmarshal(b,&out);err!=nil{return err};extra,err:=unknownFields(b,[]string{'+keys+'});if err!=nil{return err};out.Extra=extra;*v='+n+'(out);return nil}\nfunc(v '+n+') MarshalJSON()([]byte,error){type plain '+n+';return marshalUnknown(plain(v),v.Extra)}\n'
 models=[]
 for k,v in schemas.items(): models.append(decl(name(k),v))
@@ -145,6 +147,8 @@ wiki_fixtures={'uploadWikiSource':'source-accepted','getWikiSource':'source-acce
 for case in cases:
  if case['id'] in wiki_fixtures:
   case['response']={'data':json.loads((root/'testdata/wiki'/ (wiki_fixtures[case['id']]+'.json')).read_text())['data']}
+ if case['id'] in {'uploadChatAttachment','getChatAttachment','retryChatAttachment','deleteChatAttachment'}:case['response']={'data':json.loads((root/'testdata/chat-attachments/ready.json').read_text())['data']}
+ if case['id']=='listChatAttachments':case['response']={'data':{'attachments':[json.loads((root/'testdata/chat-attachments/ready.json').read_text())['data']]}}
  if case['id'].startswith('createWiki'):case['body']={'webhook_url':'https://receiver.example/wiki'}
  if case['id']=='getWikiCategoryIndex':case['parameters'].pop('All',None)
  if case['id'] in ['getCompletion','listCompletions']:
