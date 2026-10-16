@@ -33,21 +33,39 @@ func (c *Client) selectedVersion() string {
 	return "3"
 }
 func negotiated(op operation) bool {
-	return op.ID == "getCapabilities" || op.ID == "getCapabilitiesLegacy" || strings.HasPrefix(op.Path, "/chats/") || strings.HasPrefix(op.Path, "/atp/v3/") || strings.Contains(op.Path, "/completions") || (op.Authenticated && (strings.Contains(op.Path, "/wiki/") || strings.Contains(op.Path, "/files/sources")))
+	return op.ID == "getCapabilities" || op.ID == "getCapabilitiesLegacy" || strings.HasPrefix(op.Path, "/chats/") || strings.HasPrefix(op.Path, "/atp/v3/") || strings.Contains(op.Path, "/attachments") || strings.Contains(op.Path, "/completions") || (op.Authenticated && (strings.Contains(op.Path, "/wiki/") || strings.Contains(op.Path, "/files/sources")))
 }
 func atpOperation(op operation) bool {
 	return op.ID == "getCapabilities" || op.ID == "getCapabilitiesLegacy" || strings.HasPrefix(op.Path, "/chats/") || strings.HasPrefix(op.Path, "/atp/v3/")
 }
-func (c *Client) checkMutation(ctx context.Context, op operation) error {
+func (c *Client) checkMutation(ctx context.Context, op operation, params map[string]any, body any) error {
 	if c.config.LegacyReadOnly && op.Method != "GET" {
 		return &CompatibilityError{Reason: "legacy mode is read-only"}
 	}
 	if !negotiated(op) || op.Method == "GET" {
 		return nil
 	}
-	_, err := c.GetCapabilities(ctx, GetCapabilitiesParams{})
+	if request, ok := body.(ChatMessageRequest); op.ID == "sendChatMessage" && ok && request.AttachmentIDs.Set && request.AttachmentIDs.Null {
+		return errors.New("envai: attachment_ids must be an array, not null")
+	}
+	ids := attachmentMessageIDs(op.ID, body)
+	if len(ids) > 0 && params["Idempotency-Key"] == nil {
+		return errors.New("envai: attachment messages require Idempotency-Key")
+	}
+	capability, err := c.GetCapabilities(ctx, GetCapabilitiesParams{})
 	if err != nil {
 		return &CompatibilityError{Reason: "contract 3 capabilities preflight failed before mutation", Cause: err}
+	}
+	if strings.Contains(op.Path, "/attachments") || len(ids) > 0 {
+		found := false
+		for _, feature := range capability.Features {
+			if feature == "chat_attachments" {
+				found = true
+			}
+		}
+		if !found {
+			return &CompatibilityError{Reason: "server does not advertise chat_attachments"}
+		}
 	}
 	return nil
 }
@@ -225,13 +243,17 @@ func nonzeroDecimalMantissa(value string) bool {
 var schemaCache sync.Map
 
 func validateDefinition(file, definition string, b []byte) error {
-	key := file + "#/$defs/" + definition
+	fragment := "#/$defs/"
+	if file == "openapi.json" {
+		fragment = "#/components/schemas/"
+	}
+	key := file + fragment + definition
 	cached, ok := schemaCache.Load(key)
 	if !ok {
 		compiler := jsonschema.NewCompiler()
 		compiler.AssertFormat()
 		compiler.UseLoader(denySchemaLoader{})
-		for _, f := range []string{"events.json", "events-v2.json", "wiki.json", "terminal-snapshot.json"} {
+		for _, f := range []string{"events.json", "events-v2.json", "wiki.json", "terminal-snapshot.json", "openapi.json"} {
 			raw, err := contracts.ReadFile("contract/" + f)
 			if err != nil {
 				return err

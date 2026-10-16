@@ -632,9 +632,164 @@ func (v ErrorEnvelope) MarshalJSON() ([]byte, error) {
 	return marshalUnknown(plain(v), v.Extra)
 }
 
+type AttachmentManifest struct {
+	AttachmentID string                     `json:"attachment_id"`
+	OriginalName string                     `json:"original_name"`
+	Revision     int64                      `json:"revision"`
+	Sha256       string                     `json:"sha256"`
+	Bytes        int64                      `json:"bytes"`
+	Conversion   map[string]json.RawMessage `json:"conversion"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *AttachmentManifest) UnmarshalJSON(b []byte) error {
+	if err := validateDefinition("openapi.json", "AttachmentManifest", b); err != nil {
+		return err
+	}
+	type plain AttachmentManifest
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"attachment_id", "original_name", "revision", "sha256", "bytes", "conversion"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = AttachmentManifest(out)
+	return nil
+}
+func (v AttachmentManifest) MarshalJSON() ([]byte, error) {
+	type plain AttachmentManifest
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type AttachmentConversion struct {
+	Status      string                     `json:"status"`
+	ErrorCode   *string                    `json:"error_code"`
+	Recoverable bool                       `json:"recoverable"`
+	NextRetryAt *string                    `json:"next_retry_at"`
+	Retryable   bool                       `json:"retryable"`
+	Extra       map[string]json.RawMessage `json:"-"`
+}
+
+func (v *AttachmentConversion) UnmarshalJSON(b []byte) error {
+	if err := validateDefinition("openapi.json", "AttachmentConversion", b); err != nil {
+		return err
+	}
+	type plain AttachmentConversion
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"status", "error_code", "recoverable", "next_retry_at", "retryable"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = AttachmentConversion(out)
+	return nil
+}
+func (v AttachmentConversion) MarshalJSON() ([]byte, error) {
+	type plain AttachmentConversion
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ChatAttachment struct {
+	AttachmentID string                     `json:"attachment_id"`
+	WorkspaceID  string                     `json:"workspace_id"`
+	ChatID       string                     `json:"chat_id"`
+	OriginalName string                     `json:"original_name"`
+	MimeType     string                     `json:"mime_type"`
+	ByteSize     int64                      `json:"byte_size"`
+	Lifecycle    string                     `json:"lifecycle"`
+	Revision     int64                      `json:"revision"`
+	Conversion   AttachmentConversion       `json:"conversion"`
+	Derived      map[string]json.RawMessage `json:"derived"`
+	ExpiresAt    string                     `json:"expires_at"`
+	AttachedAt   *string                    `json:"attached_at"`
+	UsageCost    UsageCost                  `json:"usage_cost"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatAttachment) UnmarshalJSON(b []byte) error {
+	if err := validateDefinition("openapi.json", "ChatAttachment", b); err != nil {
+		return err
+	}
+	type plain ChatAttachment
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"attachment_id", "workspace_id", "chat_id", "original_name", "mime_type", "byte_size", "lifecycle", "revision", "conversion", "derived", "expires_at", "attached_at", "usage_cost"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatAttachment(out)
+	return nil
+}
+func (v ChatAttachment) MarshalJSON() ([]byte, error) {
+	type plain ChatAttachment
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ChatAttachmentResource struct {
+	Data  ChatAttachment             `json:"data"`
+	Extra map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatAttachmentResource) UnmarshalJSON(b []byte) error {
+	type plain ChatAttachmentResource
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatAttachmentResource(out)
+	return nil
+}
+func (v ChatAttachmentResource) MarshalJSON() ([]byte, error) {
+	type plain ChatAttachmentResource
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ChatAttachmentCollection struct {
+	Data  ChatAttachmentCollectionData `json:"data"`
+	Extra map[string]json.RawMessage   `json:"-"`
+}
+
+func (v *ChatAttachmentCollection) UnmarshalJSON(b []byte) error {
+	type plain ChatAttachmentCollection
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"data"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatAttachmentCollection(out)
+	return nil
+}
+func (v ChatAttachmentCollection) MarshalJSON() ([]byte, error) {
+	type plain ChatAttachmentCollection
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ChatAttachmentUploadRequest struct {
+	File string `json:"file"`
+}
+
 type ChatMessageRequest struct {
-	Message string                     `json:"message"`
-	Extra   map[string]json.RawMessage `json:"-"`
+	Message       string                     `json:"message"`
+	AttachmentIDs Optional[[]string]         `json:"attachment_ids,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
 }
 
 func (v *ChatMessageRequest) UnmarshalJSON(b []byte) error {
@@ -643,7 +798,7 @@ func (v *ChatMessageRequest) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"message"})
+	extra, err := unknownFields(b, []string{"message", "attachment_ids"})
 	if err != nil {
 		return err
 	}
@@ -657,9 +812,10 @@ func (v ChatMessageRequest) MarshalJSON() ([]byte, error) {
 }
 
 type ChatMessageAccepted struct {
-	Status string                     `json:"status"`
-	TurnID string                     `json:"turn_id"`
-	Extra  map[string]json.RawMessage `json:"-"`
+	Status        string                     `json:"status"`
+	TurnID        string                     `json:"turn_id"`
+	AttachmentIDs Optional[[]string]         `json:"attachment_ids,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
 }
 
 func (v *ChatMessageAccepted) UnmarshalJSON(b []byte) error {
@@ -668,7 +824,7 @@ func (v *ChatMessageAccepted) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"status", "turn_id"})
+	extra, err := unknownFields(b, []string{"status", "turn_id", "attachment_ids"})
 	if err != nil {
 		return err
 	}
@@ -2785,6 +2941,30 @@ func (v WithdrawWikiSourceBody) MarshalJSON() ([]byte, error) {
 	return marshalUnknown(plain(v), v.Extra)
 }
 
+type ListChatAttachmentsResult struct {
+	Attachments []ChatAttachment           `json:"attachments"`
+	Extra       map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ListChatAttachmentsResult) UnmarshalJSON(b []byte) error {
+	type plain ListChatAttachmentsResult
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"attachments"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ListChatAttachmentsResult(out)
+	return nil
+}
+func (v ListChatAttachmentsResult) MarshalJSON() ([]byte, error) {
+	type plain ListChatAttachmentsResult
+	return marshalUnknown(plain(v), v.Extra)
+}
+
 type TestGenerateImageResult struct {
 	Status     string                     `json:"status"`
 	Prompt     string                     `json:"prompt"`
@@ -3117,6 +3297,30 @@ func (v *CompletionUsage) UnmarshalJSON(b []byte) error {
 }
 func (v CompletionUsage) MarshalJSON() ([]byte, error) {
 	type plain CompletionUsage
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ChatAttachmentCollectionData struct {
+	Attachments []ChatAttachment           `json:"attachments"`
+	Extra       map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ChatAttachmentCollectionData) UnmarshalJSON(b []byte) error {
+	type plain ChatAttachmentCollectionData
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"attachments"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ChatAttachmentCollectionData(out)
+	return nil
+}
+func (v ChatAttachmentCollectionData) MarshalJSON() ([]byte, error) {
+	type plain ChatAttachmentCollectionData
 	return marshalUnknown(plain(v), v.Extra)
 }
 

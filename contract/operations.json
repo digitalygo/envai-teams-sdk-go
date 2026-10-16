@@ -12,6 +12,11 @@
         "name": "chat_id",
         "in": "path",
         "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false
       }
     ]
   },
@@ -850,6 +855,167 @@
         "name": "X-BFL-Signature",
         "in": "header",
         "required": false
+      }
+    ]
+  },
+  {
+    "id": "uploadChatAttachment",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}/attachments",
+    "authenticated": true,
+    "kind": "json",
+    "body": "multipart",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "listChatAttachments",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}/attachments",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "getChatAttachment",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "attachment_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "deleteChatAttachment",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "attachment_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "retryChatAttachment",
+    "method": "POST",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}/retry",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "attachment_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "downloadChatAttachment",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}/download",
+    "authenticated": true,
+    "kind": "binary",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "attachment_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "kind",
+        "in": "query",
+        "required": true
       }
     ]
   },

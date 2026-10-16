@@ -5,7 +5,7 @@ import pathlib
 import re
 
 # Replaced with the verified backend publication commit by the release coordinator.
-EXPECTED_CONTRACT_COMMIT = 'c27963d0848540679bccf30d2aeab354097b1a38'
+EXPECTED_CONTRACT_COMMIT = '6a4e45bafe6f5856ef92a57b37db08769738b412'
 
 def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())
@@ -17,7 +17,7 @@ def verify(root):
         assert provenance['status'] == 'working-tree snapshot awaiting guarded backend publication'
     else:
         assert re.fullmatch('[0-9a-f]{40}', EXPECTED_CONTRACT_COMMIT)
-    assert provenance['protocol_version'] == 3 and provenance['operations'] == 65
+    assert provenance['protocol_version'] == 3 and provenance['operations'] == 71
     sources = provenance['sources']
     assert set(sources) == set(expected_paths), 'Incomplete source inventory'
     assert 'files' not in provenance, 'Sources and fixtures must be separated'
@@ -32,9 +32,9 @@ def verify(root):
     assert sources['events-v2.json']['git_blob_sha'] == '02b13b23cd06eacd81059d1ed99e0027769d75e4'
     fixtures = provenance['generated_fixtures']
     assert set(fixtures) == {'events-invalid.json', 'events-valid.json', 'operations.json', 'signatures.json',
-                            'sse-cases.json', 'api-cases.json', 'operation-details.json', 'schema-matrix.json'}
+                            'sse-cases.json', 'api-cases.json', 'operation-details.json', 'schema-matrix.json', 'openapi.json'}
     shared = provenance['shared_fixtures']
-    expected_shared = {str(p.relative_to(root / 'testdata')) for directory in ('wiki', 'completion-terminal', 'control-plane-http', 'v3-http')
+    expected_shared = {str(p.relative_to(root / 'testdata')) for directory in ('wiki', 'completion-terminal', 'control-plane-http', 'v3-http', 'chat-attachments')
                        for p in (root / 'testdata' / directory).glob('*.json')}
     assert set(shared) == expected_shared, 'Incomplete shared fixture inventory'
     for collection in (fixtures, shared):
@@ -44,9 +44,9 @@ def verify(root):
             assert hashlib.sha256(data).hexdigest() == entry['sha256'], name + ' SHA256'
     actual = json.loads((root / 'contract/operations.json').read_text())
     expected = json.loads((root / 'testdata/operations.json').read_text())
-    assert len(actual) == 65
+    assert len(actual) == 71
     assert [{k: op[k] for k in ['id', 'method', 'path', 'authenticated']} for op in actual] == expected
 
 if __name__ == '__main__':
     verify(pathlib.Path(__file__).resolve().parent.parent)
-    print('All 5 shared schemas, attributed fixtures and 65-operation inventory verified')
+    print('All 5 shared schemas, attributed fixtures and 71-operation inventory verified')
