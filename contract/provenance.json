@@ -1,14 +1,14 @@
 {
   "repository": "digitalygo/envai-teams",
-  "commit": "6a4e45bafe6f5856ef92a57b37db08769738b412",
+  "commit": "7192fc05ebec817bddc705186c8f195cc0dc5ec5",
   "protocol_version": 3,
   "operations": 71,
   "sources": {
     "openapi.yaml": {
       "repository_path": "packages/contracts/openapi.yaml",
-      "bytes": 233072,
-      "sha256": "af736ba76d9673f34eac453e725fe57acb4517f6faf660bb8aed43465c7a0245",
-      "git_blob_sha": "347a58fa0ce76dc43a9f2c4ff94661ff0fe3cbf8",
+      "bytes": 234213,
+      "sha256": "8d578d43b95685351963fa3fafb08e8a6ac6a346e576188ea3884414b5ff55cd",
+      "git_blob_sha": "e56f31c2fb983de6e92ef3c9b4e3b99d3af938ae",
       "snapshot_path": "contract/openapi.yaml"
     },
     "events.json": {
@@ -27,9 +27,9 @@
     },
     "wiki.json": {
       "repository_path": "packages/contracts/wiki.json",
-      "bytes": 18844,
-      "sha256": "94d25f2f2d7bfacee9544cd614cb86baaf1d952be1b714badb38b7a98a8e636f",
-      "git_blob_sha": "2a2b1af96c99db7d072a3c766426fa493e881cb0",
+      "bytes": 18872,
+      "sha256": "57e08c6058d4e3e532f9c24e0973cbf5f181f153ec764891bc3d88dd6c8004c9",
+      "git_blob_sha": "e62b9a866951a6bb56350f811f8ae36ca5ea2377",
       "snapshot_path": "contract/wiki.json"
     },
     "terminal-snapshot.json": {
@@ -84,7 +84,7 @@
     "openapi.json": {
       "snapshot_path": "contract/openapi.json",
       "origin": "Generated JSON representation of the pinned OpenAPI YAML; not an upstream repository file.",
-      "sha256": "194f5414562ad68307692163bc57fb5f6dd385fbf8848d760962c958eef6ed41"
+      "sha256": "94ab251ff136d59292d01c5e3ca43cfc6121db444bc468fe2fcb7f7cb9756e89"
     }
   },
   "status": "verified published backend source",
@@ -242,6 +242,11 @@
       "repository_path": "packages/contracts/fixtures/chat-attachments/failed.json",
       "sha256": "b6a8108c83b5a685e32303e839f9c99bff766c0728b6236a3925bf6841bdea4d",
       "origin": "Shared synthetic conformance fixture copied from the pinned server commit; not captured provider traffic."
+    },
+    "chat-attachments/original-ready.json": {
+      "snapshot_path": "testdata/chat-attachments/original-ready.json",
+      "sha256": "c0c8b69a7f3d96d5f80c89f05f2d55b998c69b3c7acdc21bf392f31045e5483a",
+      "origin": "Synthetic shared conformance fixture copied from digitalygo/envai-teams-sdk-php commit 93eafc02271035065ac975f91cd4f77d148c9d2c at tests/fixtures/chat-attachments/original-ready.json; authored from the pinned server contract and not captured provider traffic."
     }
   }
 }

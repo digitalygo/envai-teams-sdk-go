@@ -635,6 +635,8 @@ func (v ErrorEnvelope) MarshalJSON() ([]byte, error) {
 type AttachmentManifest struct {
 	AttachmentID string                     `json:"attachment_id"`
 	OriginalName string                     `json:"original_name"`
+	MimeType     Optional[string]           `json:"mime_type,omitzero"`
+	Mode         Optional[string]           `json:"mode,omitzero"`
 	Revision     int64                      `json:"revision"`
 	Sha256       string                     `json:"sha256"`
 	Bytes        int64                      `json:"bytes"`
@@ -651,7 +653,7 @@ func (v *AttachmentManifest) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"attachment_id", "original_name", "revision", "sha256", "bytes", "conversion"})
+	extra, err := unknownFields(b, []string{"attachment_id", "original_name", "mime_type", "mode", "revision", "sha256", "bytes", "conversion"})
 	if err != nil {
 		return err
 	}
@@ -1076,11 +1078,27 @@ type Capabilities struct {
 
 func (v *Capabilities) UnmarshalJSON(b []byte) error {
 	type plain Capabilities
-	var out plain
-	if err := json.Unmarshal(b, &out); err != nil {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(b, &fields); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"protocol_version", "families", "event_types", "tool_kinds", "features", "contract_version", "supported_contract_versions", "legacy_v2_mode"})
+	features, hasFeatures := fields["features"]
+	delete(fields, "features")
+	body, err := json.Marshal(fields)
+	if err != nil {
+		return err
+	}
+	var out plain
+	if err = json.Unmarshal(body, &out); err != nil {
+		return err
+	}
+	if hasFeatures {
+		out.Features, err = normalizeFeatureNames(features)
+		if err != nil {
+			return err
+		}
+	}
+	extra, err := unknownFields(body, []string{"protocol_version", "families", "event_types", "tool_kinds", "features", "contract_version", "supported_contract_versions", "legacy_v2_mode"})
 	if err != nil {
 		return err
 	}
@@ -2828,11 +2846,27 @@ type CapabilitiesLegacy struct {
 
 func (v *CapabilitiesLegacy) UnmarshalJSON(b []byte) error {
 	type plain CapabilitiesLegacy
-	var out plain
-	if err := json.Unmarshal(b, &out); err != nil {
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(b, &fields); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"protocol_version", "families", "event_types", "tool_kinds", "features"})
+	features, hasFeatures := fields["features"]
+	delete(fields, "features")
+	body, err := json.Marshal(fields)
+	if err != nil {
+		return err
+	}
+	var out plain
+	if err = json.Unmarshal(body, &out); err != nil {
+		return err
+	}
+	if hasFeatures {
+		out.Features, err = normalizeFeatureNames(features)
+		if err != nil {
+			return err
+		}
+	}
+	extra, err := unknownFields(body, []string{"protocol_version", "families", "event_types", "tool_kinds", "features"})
 	if err != nil {
 		return err
 	}

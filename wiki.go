@@ -17,9 +17,24 @@ import (
 // MaxWikiSourceBytes is the inclusive durable original upload limit.
 const MaxWikiSourceBytes int64 = 1_000_000_000
 
+const (
+	sourceProcessingConvert  = "convert"
+	sourceProcessingOriginal = "original"
+)
+
 // UploadSourceFile streams an unchanged local regular file. Replays are explicit:
 // reuse the original bytes and idempotency key after reconciling ambiguous results.
-func (c *Client) UploadSourceFile(ctx context.Context, workspaceID, path, idempotencyKey, contentType string) (WikiSource, error) {
+func (c *Client) UploadSourceFile(ctx context.Context, workspaceID, path, idempotencyKey, contentType string, processing ...string) (WikiSource, error) {
+	if len(processing) > 1 {
+		return WikiSource{}, errors.New("envai: source processing must be convert or original")
+	}
+	mode := ""
+	if len(processing) == 1 {
+		mode = processing[0]
+		if mode != sourceProcessingConvert && mode != sourceProcessingOriginal {
+			return WikiSource{}, errors.New("envai: source processing must be convert or original")
+		}
+	}
 	f, err := os.Open(path)
 	if err != nil {
 		return WikiSource{}, err
@@ -32,7 +47,87 @@ func (c *Client) UploadSourceFile(ctx context.Context, workspaceID, path, idempo
 	if !info.Mode().IsRegular() || info.Size() > MaxWikiSourceBytes {
 		return WikiSource{}, errors.New("envai: source must be a regular file of at most 1,000,000,000 bytes")
 	}
-	return c.UploadWikiSource(ctx, UploadWikiSourceParams{WorkspaceID: workspaceID, IdempotencyKey: idempotencyKey, Body: []MultipartPart{{Name: "file", Filename: filepath.Base(path), ContentType: contentType, Reader: f, Size: info.Size()}}})
+	parts := make([]MultipartPart, 0, 2)
+	if mode == sourceProcessingOriginal {
+		parts = append(parts, MultipartPart{Name: "processing", Data: []byte(sourceProcessingOriginal)})
+	}
+	parts = append(parts, MultipartPart{Name: "file", Filename: filepath.Base(path), ContentType: contentType, Reader: f, Size: info.Size()})
+	return c.UploadWikiSource(ctx, UploadWikiSourceParams{WorkspaceID: workspaceID, IdempotencyKey: idempotencyKey, Body: parts})
+}
+func sourceProcessingMode(body any) string {
+	parts, ok := body.([]MultipartPart)
+	if !ok {
+		return ""
+	}
+	for _, part := range parts {
+		if part.Name == "processing" && part.Reader == nil && string(part.Data) == sourceProcessingOriginal {
+			return sourceProcessingOriginal
+		}
+	}
+	return ""
+}
+func multipartPartSize(part MultipartPart) (int64, error) {
+	if part.Reader == nil {
+		return int64(len(part.Data)), nil
+	}
+	if part.Data != nil {
+		return 0, errors.New("envai: use source reader or bytes, not both")
+	}
+	if part.Size < 0 {
+		return 0, errors.New("envai: multipart reader requires a nonnegative size")
+	}
+	return part.Size, nil
+}
+func validateWikiSourceParts(body any) error {
+	parts, ok := body.([]MultipartPart)
+	if !ok {
+		return errors.New("envai: exactly one named source file is required")
+	}
+	files, processing := 0, 0
+	for _, part := range parts {
+		switch part.Name {
+		case "file":
+			files++
+			if part.Filename == "" {
+				return errors.New("envai: exactly one named source file is required")
+			}
+			size, err := multipartPartSize(part)
+			if err != nil {
+				return err
+			}
+			if size > MaxWikiSourceBytes {
+				return errors.New("envai: invalid source byte size")
+			}
+		case "processing":
+			processing++
+			if processing > 1 || part.Filename != "" || part.Reader != nil {
+				return errors.New("envai: invalid processing field")
+			}
+			if string(part.Data) != sourceProcessingConvert && string(part.Data) != sourceProcessingOriginal {
+				return errors.New("envai: source processing must be convert or original")
+			}
+		default:
+			return errors.New("envai: unexpected multipart field")
+		}
+	}
+	if files != 1 {
+		return errors.New("envai: exactly one named source file is required")
+	}
+	return nil
+}
+func validateChatAttachmentParts(body any) error {
+	parts, ok := body.([]MultipartPart)
+	if !ok || len(parts) != 1 || parts[0].Name != "file" || parts[0].Filename == "" {
+		return errors.New("envai: exactly one named source file is required")
+	}
+	size, err := multipartPartSize(parts[0])
+	if err != nil {
+		return err
+	}
+	if size > MaxWikiSourceBytes {
+		return errors.New("envai: invalid source byte size")
+	}
+	return nil
 }
 func (c *Client) validateOperationParams(op operation, params map[string]any) error {
 	for _, p := range op.Parameters {
@@ -74,21 +169,21 @@ func (c *Client) validateOperationParams(op operation, params map[string]any) er
 	return nil
 }
 func validateWikiBody(op operation, body any) error {
-	if op.ID == "uploadWikiSource" || op.ID == "uploadChatAttachment" {
-		parts, ok := body.([]MultipartPart)
-		if !ok || len(parts) != 1 || parts[0].Name != "file" || parts[0].Filename == "" {
-			return errors.New("envai: exactly one named source file is required")
-		}
-		p := parts[0]
-		size := int64(len(p.Data))
-		if p.Reader != nil {
-			if p.Data != nil {
-				return errors.New("envai: use source reader or bytes, not both")
+	if parts, ok := body.([]MultipartPart); ok && op.ID != "uploadWikiSource" {
+		for _, part := range parts {
+			if part.Name == "processing" {
+				return errors.New("envai: processing is only valid for wiki source uploads")
 			}
-			size = p.Size
 		}
-		if size < 0 || size > MaxWikiSourceBytes {
-			return errors.New("envai: invalid source byte size")
+	}
+	if op.ID == "uploadWikiSource" {
+		if err := validateWikiSourceParts(body); err != nil {
+			return err
+		}
+	}
+	if op.ID == "uploadChatAttachment" {
+		if err := validateChatAttachmentParts(body); err != nil {
+			return err
 		}
 	}
 	var webhook string

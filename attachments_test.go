@@ -32,7 +32,7 @@ func attachmentClient(t *testing.T, feature bool, fn http.HandlerFunc) *Client {
 		if strings.HasSuffix(r.URL.Path, "/capabilities") {
 			value := testCapabilities
 			if feature {
-				value = strings.Replace(value, `"features":[]`, `"features":["chat_attachments"]`, 1)
+				value = strings.Replace(value, `"features":[]`, `"features":["chat_attachments","chat_attachment_originals"]`, 1)
 			}
 			fmt.Fprint(w, value)
 			return

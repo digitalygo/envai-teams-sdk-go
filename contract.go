@@ -56,18 +56,30 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 	if err != nil {
 		return &CompatibilityError{Reason: "contract 3 capabilities preflight failed before mutation", Cause: err}
 	}
-	if strings.Contains(op.Path, "/attachments") || len(ids) > 0 {
-		found := false
-		for _, feature := range capability.Features {
-			if feature == "chat_attachments" {
-				found = true
-			}
+	if op.ID == "uploadChatAttachment" {
+		if !featureAdvertised(capability.Features, "chat_attachments") {
+			return &CompatibilityError{Reason: "server does not advertise chat_attachments"}
 		}
-		if !found {
+		if !featureAdvertised(capability.Features, "chat_attachment_originals") {
+			return &CompatibilityError{Reason: "server does not advertise chat_attachment_originals"}
+		}
+	} else if strings.Contains(op.Path, "/attachments") || len(ids) > 0 {
+		if !featureAdvertised(capability.Features, "chat_attachments") {
 			return &CompatibilityError{Reason: "server does not advertise chat_attachments"}
 		}
 	}
+	if op.ID == "uploadWikiSource" && sourceProcessingMode(body) == "original" && !featureAdvertised(capability.Features, "wiki_original_sources") {
+		return &CompatibilityError{Reason: "server does not advertise wiki_original_sources"}
+	}
 	return nil
+}
+func featureAdvertised(features []string, name string) bool {
+	for _, feature := range features {
+		if feature == name {
+			return true
+		}
+	}
+	return false
 }
 func (c *Client) checkAcknowledgment(op operation, resp *http.Response) error {
 	if !negotiated(op) {

@@ -69,7 +69,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			client = testClient(t, func(w http.ResponseWriter, r *http.Request) {
 				if strings.HasSuffix(r.URL.Path, "/capabilities") && tc.ID != "getCapabilities" && tc.ID != "getCapabilitiesLegacy" {
 					if strings.Contains(tc.ID, "ChatAttachment") {
-						fmt.Fprint(w, strings.Replace(testCapabilities, `"features":[]`, `"features":["chat_attachments"]`, 1))
+						fmt.Fprint(w, strings.Replace(testCapabilities, `"features":[]`, `"features":["chat_attachments","chat_attachment_originals"]`, 1))
 					} else {
 						writeCapabilities(w)
 					}

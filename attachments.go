@@ -55,7 +55,7 @@ func (c *Client) WaitForAttachment(ctx context.Context, workspaceID, chatID, att
 		if err != nil {
 			return ChatAttachment{}, err
 		}
-		if value.Lifecycle == "deleting" || value.Lifecycle == "deleted" || value.Conversion.Status == "completed" || value.Conversion.Status == "failed" && !value.Conversion.Recoverable {
+		if value.Lifecycle == "deleting" || value.Lifecycle == "deleted" || value.Conversion.Status == "completed" || value.Conversion.Status == "failed" && !value.Conversion.Recoverable || value.Conversion.Status == "not_required" && value.Lifecycle == "ready" {
 			return value, nil
 		}
 		timer := time.NewTimer(interval)

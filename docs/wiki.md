@@ -22,6 +22,16 @@ operation, err := client.CreateWikiInboxRun(ctx, envai.CreateWikiInboxRunParams{
 
 `UploadSourceFile` streams a regular file instead of copying it into memory. The original limit is inclusive: 1,000,000,000 bytes. Keep the file unchanged until the request completes, and retain its original bytes and stable key for explicit replay after reconciling an ambiguous result. `UploadWikiSource` also accepts `MultipartPart{Reader: reader, Size: size}` or small `Data` byte slices. HTTP 202 means the original was acquired durably, not that conversion or indexing succeeded. The source retains `conversion.error_code`, `recoverable`, and `next_retry_at`; only a durably scheduled, eligible automatic recovery is recoverable.
 
+Pass a sixth `"original"` argument to stage a private original without conversion. This requires `wiki_original_sources` in contract-3 capabilities, advertised either as a canonical string list or as a strict string-to-boolean map. The upload adds a separate multipart `processing=original` part. Omitting the argument, or passing `"convert"`, sends the existing file-only multipart body. An original source reports `conversion.status=not_required`, starts no conversion job, usage scope, Wiki run, sync or automatic analysis, and is staged in `inbox` with `indexing.status=pending`.
+
+```go
+original, err := client.UploadSourceFile(ctx, workspaceID, "report.pdf", originalKey, "application/pdf", "original")
+if err != nil { return err }
+if original.Conversion.Status != "not_required" { return errors.New("unexpected original source state") }
+```
+
+Low-level `UploadWikiSource` accepts at most one `processing` field with the value `convert` or `original`, plus exactly one named file part. Duplicate or unknown fields fail before the request. The processing field is valid only for source uploads, and `processing=original` passes the same capability gate as the helper.
+
 Supported originals are MD/TXT, CSV, XLSX, PDF/DOCX, MP3 and MP4 audio. MP4 does not imply frame analysis. Backend/provider limitations remain explicit errors; the SDK does not promise successful conversion or substitute placeholder text. The application controls polling cadence and its deadline. The compilable `examples/wiki` program shows upload/status/inbox sequencing with offline tests.
 
 `CreateWikiOutboxRun` and `CreateWikiSyncRun` take their corresponding typed bodies and an explicit idempotency key. `GetWikiOperation` returns phase counts, file outcomes, captured batch sizes, diagnostics and current usage. Identical replay returns the existing operation; different payload with the same key conflicts. Queue full is HTTP 429 `wiki_queue_full` with a retry hint; it is not a slot reservation. Mutations and uploads are never retried automatically, including ambiguous transport failures, 429, 5xx or missing acknowledgment.

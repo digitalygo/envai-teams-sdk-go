@@ -50,6 +50,8 @@ def decl(n,s):
  return 'type '+n+' struct {\n'+'\n'.join(fields)+'\n}\n'
 def unknown_methods(n,s):
  keys=','.join('"'+k+'"' for k in s['properties'])
+ if n in ('Capabilities','CapabilitiesLegacy'):
+  return 'func(v *'+n+') UnmarshalJSON(b []byte)error{type plain '+n+';var fields map[string]json.RawMessage;if err:=json.Unmarshal(b,&fields);err!=nil{return err};features,hasFeatures:=fields["features"];delete(fields,"features");body,err:=json.Marshal(fields);if err!=nil{return err};var out plain;if err=json.Unmarshal(body,&out);err!=nil{return err};if hasFeatures{out.Features,err=normalizeFeatureNames(features);if err!=nil{return err}};extra,err:=unknownFields(body,[]string{'+keys+'});if err!=nil{return err};out.Extra=extra;*v='+n+'(out);return nil}\nfunc(v '+n+') MarshalJSON()([]byte,error){type plain '+n+';return marshalUnknown(plain(v),v.Extra)}\n'
  validation=''
  definition=n.removeprefix('ATP')
  if definition in wiki_types and definition!='WikiWebhookEvent':validation='if err:=validateDefinition("wiki.json","'+definition+'",b);err!=nil{return err};'
