@@ -5,6 +5,74 @@ import (
 	"encoding/json"
 )
 
+type DeliverWorkflowResultParams struct {
+	ChatID string
+	Body   NativeDeliveryRequest
+}
+
+func (c *Client) DeliverWorkflowResult(ctx context.Context, req DeliverWorkflowResultParams) (NativeDeliveryReceipt, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	var out NativeDeliveryReceipt
+	err := c.call(ctx, "deliverWorkflowResult", p, req.Body, &out)
+	return out, err
+}
+
+type DelegateToTeamParams struct {
+	ChatID string
+	Body   TeamDelegationRequest
+}
+
+func (c *Client) DelegateToTeam(ctx context.Context, req DelegateToTeamParams) (TeamDelegationReceipt, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	var out TeamDelegationReceipt
+	err := c.call(ctx, "delegateToTeam", p, req.Body, &out)
+	return out, err
+}
+
+type GetDetachedTaskParams struct {
+	ChatID string
+	TaskID string
+}
+
+func (c *Client) GetDetachedTask(ctx context.Context, req GetDetachedTaskParams) (DetachedTaskSnapshot, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	p["task_id"] = req.TaskID
+	var out DetachedTaskSnapshot
+	err := c.call(ctx, "getDetachedTask", p, nil, &out)
+	return out, err
+}
+
+type CancelDetachedTaskParams struct {
+	ChatID string
+	TaskID string
+	Body   CancelDetachedTaskBody
+}
+
+func (c *Client) CancelDetachedTask(ctx context.Context, req CancelDetachedTaskParams) (CancelDetachedTaskResult, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	p["task_id"] = req.TaskID
+	var out CancelDetachedTaskResult
+	err := c.call(ctx, "cancelDetachedTask", p, req.Body, &out)
+	return out, err
+}
+
+type ClassifyPhaseParams struct {
+	ChatID string
+	Body   PhaseClassificationRequest
+}
+
+func (c *Client) ClassifyPhase(ctx context.Context, req ClassifyPhaseParams) (PhaseClassificationResult, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	var out PhaseClassificationResult
+	err := c.call(ctx, "classifyPhase", p, req.Body, &out)
+	return out, err
+}
+
 type SendChatMessageParams struct {
 	ChatID         string
 	IdempotencyKey Optional[string]

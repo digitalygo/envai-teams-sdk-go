@@ -6,7 +6,7 @@ Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v3, wi
 
 The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
-Includes named, typed methods for all **71 HTTP operations**, **29 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+Includes named, typed methods for all **76 HTTP operations**, **36 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
 
 - [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
 - [HTTP API reference](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/api-reference.md)
@@ -136,7 +136,9 @@ MIT, Copyright (c) 2026 DigItalyGo. The original repository license is preserved
 
 ### Source provenance
 
-`contract/provenance.json` records the five byte-exact HTTP, current/legacy event, Wiki and terminal snapshot contracts separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
+`contract/provenance.json` records the six byte-exact HTTP, current/legacy event, Wiki, terminal snapshot and native-task contracts separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
 
 
 See [chat attachments](docs/chat-attachments.md) for upload, conversion, retry and streaming with files. This surface is unreleased until the matching backend is deployed.
+
+See [native background tasks](docs/background-tasks.md) for opt-in task sessions, signed post-turn tools, final delegated-job outcomes, cancellation and phase classification. This surface is unreleased.

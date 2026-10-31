@@ -22,6 +22,8 @@ import (
 var contracts embed.FS
 
 type Config struct {
+	// NativeTasks opts into native-tasks-v1 discovery, streams, admissions and tool outputs.
+	NativeTasks bool
 	// LegacyReadOnly selects strict ATP v2 historical reads; all mutations are rejected.
 	LegacyReadOnly   bool
 	BaseURL          string
@@ -326,6 +328,9 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 		req.Header.Set("Accept", accept)
 		if negotiated(op) {
 			req.Header.Set(ContractHeader, c.versionFor(op))
+			if c.config.NativeTasks && c.versionFor(op) == "3" {
+				req.Header.Set("X-Envai-Extensions", "native-tasks-v1")
+			}
 		}
 		for _, p := range op.Parameters {
 			if p.In == "header" {

@@ -1,5 +1,109 @@
 [
   {
+    "id": "deliverWorkflowResult",
+    "go_name": "DeliverWorkflowResult",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "workspace_id": "fixture",
+      "event_id": "fixture",
+      "origin_turn_id": "fixture",
+      "task_id": "fixture",
+      "output": "fixture",
+      "status": "completed"
+    },
+    "status": 202,
+    "response": {
+      "event_id": "fixture",
+      "status": "queued",
+      "turn_id": "fixture",
+      "error": "fixture",
+      "duplicate": true
+    }
+  },
+  {
+    "id": "delegateToTeam",
+    "go_name": "DelegateToTeam",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "workspace_id": "fixture",
+      "event_id": "fixture",
+      "origin_turn_id": "fixture",
+      "target_chat_id": "fixture",
+      "prompt": "fixture",
+      "notify_origin": true,
+      "strict_model": true
+    },
+    "status": 202,
+    "response": {
+      "task_id": "fixture",
+      "target_chat_id": "fixture",
+      "turn_id": "fixture"
+    }
+  },
+  {
+    "id": "getDetachedTask",
+    "go_name": "GetDetachedTask",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "TaskID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "task_id": "fixture",
+      "origin_turn_id": "fixture",
+      "parent_task_id": "fixture",
+      "target_chat_id": "fixture",
+      "result_turn_id": "fixture",
+      "output": "fixture",
+      "error": "fixture",
+      "delivery_error": "fixture",
+      "status": "running"
+    }
+  },
+  {
+    "id": "cancelDetachedTask",
+    "go_name": "CancelDetachedTask",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "TaskID": "fixture"
+    },
+    "body": {
+      "subtree": true
+    },
+    "status": 202,
+    "response": {
+      "task_id": "fixture",
+      "status": "cancelled",
+      "subtree": true
+    }
+  },
+  {
+    "id": "classifyPhase",
+    "go_name": "ClassifyPhase",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "request_id": "fixture",
+      "phase_id": "fixture",
+      "final_output": "fixture",
+      "task_context": {},
+      "attempt": 1
+    },
+    "status": 200,
+    "response": {
+      "model": "fixture",
+      "request_id": "fixture",
+      "invocation_id": "fixture",
+      "decision": "BLOCKED"
+    }
+  },
+  {
     "id": "sendChatMessage",
     "go_name": "SendChatMessage",
     "parameters": {
@@ -8,7 +112,8 @@
     },
     "body": {
       "message": "Summarize the last week of traffic",
-      "attachment_ids": []
+      "attachment_ids": [],
+      "strict_model": true
     },
     "status": 202,
     "response": {

@@ -221,10 +221,12 @@ type ATPAgentContextCompacted struct {
 }
 
 type ATPAgentDone struct {
-	Status     string   `json:"status"`
-	Summary    string   `json:"summary"`
-	Usage      ATPUsage `json:"usage"`
-	DurationMs int64    `json:"duration_ms"`
+	Status         string           `json:"status"`
+	Summary        string           `json:"summary"`
+	Usage          ATPUsage         `json:"usage"`
+	DurationMs     int64            `json:"duration_ms"`
+	RequestedModel Optional[string] `json:"requested_model,omitzero"`
+	Model          Optional[string] `json:"model,omitzero"`
 }
 
 type ATPAgentFailed struct {
@@ -370,6 +372,200 @@ func (v ATPChatAttachmentManifestEvent) MarshalJSON() ([]byte, error) {
 	return marshalUnknown(plain(v), v.Extra)
 }
 
+type ATPTaskStarted struct {
+	TaskID       string                     `json:"task_id"`
+	OriginTurnID string                     `json:"origin_turn_id"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPTaskStarted) UnmarshalJSON(b []byte) error {
+	type plain ATPTaskStarted
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPTaskStarted(out)
+	return nil
+}
+func (v ATPTaskStarted) MarshalJSON() ([]byte, error) {
+	type plain ATPTaskStarted
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPTaskEvent struct {
+	TaskID       string                     `json:"task_id"`
+	OriginTurnID string                     `json:"origin_turn_id"`
+	EventType    string                     `json:"event_type"`
+	EventPayload map[string]json.RawMessage `json:"event_payload"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPTaskEvent) UnmarshalJSON(b []byte) error {
+	type plain ATPTaskEvent
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "event_type", "event_payload"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPTaskEvent(out)
+	return nil
+}
+func (v ATPTaskEvent) MarshalJSON() ([]byte, error) {
+	type plain ATPTaskEvent
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPTaskCompleted struct {
+	TaskID        string                     `json:"task_id"`
+	OriginTurnID  string                     `json:"origin_turn_id"`
+	Status        string                     `json:"status"`
+	Output        string                     `json:"output"`
+	ErrorEnvelope string                     `json:"error"`
+	ResultTurnID  Optional[string]           `json:"result_turn_id,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPTaskCompleted) UnmarshalJSON(b []byte) error {
+	type plain ATPTaskCompleted
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "status", "output", "error", "result_turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPTaskCompleted(out)
+	return nil
+}
+func (v ATPTaskCompleted) MarshalJSON() ([]byte, error) {
+	type plain ATPTaskCompleted
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPTaskFailed struct {
+	TaskID        string                     `json:"task_id"`
+	OriginTurnID  string                     `json:"origin_turn_id"`
+	Status        string                     `json:"status"`
+	Output        string                     `json:"output"`
+	ErrorEnvelope string                     `json:"error"`
+	ResultTurnID  Optional[string]           `json:"result_turn_id,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPTaskFailed) UnmarshalJSON(b []byte) error {
+	type plain ATPTaskFailed
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "status", "output", "error", "result_turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPTaskFailed(out)
+	return nil
+}
+func (v ATPTaskFailed) MarshalJSON() ([]byte, error) {
+	type plain ATPTaskFailed
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPTaskCancelled struct {
+	TaskID        string                     `json:"task_id"`
+	OriginTurnID  string                     `json:"origin_turn_id"`
+	Status        string                     `json:"status"`
+	Output        string                     `json:"output"`
+	ErrorEnvelope string                     `json:"error"`
+	ResultTurnID  Optional[string]           `json:"result_turn_id,omitzero"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPTaskCancelled) UnmarshalJSON(b []byte) error {
+	type plain ATPTaskCancelled
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "status", "output", "error", "result_turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPTaskCancelled(out)
+	return nil
+}
+func (v ATPTaskCancelled) MarshalJSON() ([]byte, error) {
+	type plain ATPTaskCancelled
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPChatDeliveryQueued struct {
+	TaskID       string                     `json:"task_id"`
+	OriginTurnID string                     `json:"origin_turn_id"`
+	Status       string                     `json:"status"`
+	EventID      string                     `json:"event_id"`
+	Extra        map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPChatDeliveryQueued) UnmarshalJSON(b []byte) error {
+	type plain ATPChatDeliveryQueued
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "status", "event_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPChatDeliveryQueued(out)
+	return nil
+}
+func (v ATPChatDeliveryQueued) MarshalJSON() ([]byte, error) {
+	type plain ATPChatDeliveryQueued
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ATPChatDeliveryDelivered struct {
+	TaskID         string                     `json:"task_id"`
+	OriginTurnID   string                     `json:"origin_turn_id"`
+	Status         string                     `json:"status"`
+	EventID        string                     `json:"event_id"`
+	DeliveryTurnID string                     `json:"delivery_turn_id"`
+	Extra          map[string]json.RawMessage `json:"-"`
+}
+
+func (v *ATPChatDeliveryDelivered) UnmarshalJSON(b []byte) error {
+	type plain ATPChatDeliveryDelivered
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "status", "event_id", "delivery_turn_id"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = ATPChatDeliveryDelivered(out)
+	return nil
+}
+func (v ATPChatDeliveryDelivered) MarshalJSON() ([]byte, error) {
+	type plain ATPChatDeliveryDelivered
+	return marshalUnknown(plain(v), v.Extra)
+}
+
 type ATPAgentToolRequestSignature struct {
 	Alg string `json:"alg"`
 	Kid string `json:"kid"`
@@ -492,6 +688,34 @@ func (e Event) TypedPayload() (any, error) {
 		return value, err
 	case "approval.expire":
 		var value ATPApprovalExpire
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "task.started":
+		var value ATPTaskStarted
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "task.event":
+		var value ATPTaskEvent
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "task.completed":
+		var value ATPTaskCompleted
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "task.failed":
+		var value ATPTaskFailed
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "task.cancelled":
+		var value ATPTaskCancelled
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "chat.delivery.queued":
+		var value ATPChatDeliveryQueued
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "chat.delivery.delivered":
+		var value ATPChatDeliveryDelivered
 		err := json.Unmarshal(e.Data, &value)
 		return value, err
 	}

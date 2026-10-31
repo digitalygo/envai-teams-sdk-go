@@ -1,5 +1,95 @@
 [
   {
+    "id": "deliverWorkflowResult",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/deliveries",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "delegateToTeam",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/delegations",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "getDetachedTask",
+    "method": "GET",
+    "path": "/atp/v3/chats/{chat_id}/tasks/{task_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "task_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "cancelDetachedTask",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/tasks/{task_id}/cancel",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "task_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "classifyPhase",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/classify-phase",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
     "id": "sendChatMessage",
     "method": "POST",
     "path": "/atp/v3/chats/{chat_id}/messages",

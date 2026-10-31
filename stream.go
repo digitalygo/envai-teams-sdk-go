@@ -228,6 +228,7 @@ type TurnResult struct {
 	Terminal         Event
 }
 type TurnOptions struct {
+	StrictModel    bool
 	AttachmentIDs  []string
 	IdempotencyKey string
 	Stream         StreamOptions
@@ -270,6 +271,9 @@ func (c *Client) RunTurn(ctx context.Context, chatID, message string, options Tu
 		return TurnResult{}, err
 	}
 	request := SendChatMessageParams{ChatID: chatID, Body: ChatMessageRequest{Message: message}}
+	if options.StrictModel {
+		request.Body.StrictModel = Present(true)
+	}
 	if len(options.AttachmentIDs) > 0 {
 		request.Body.AttachmentIDs = Present(options.AttachmentIDs)
 	}
