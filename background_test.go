@@ -165,6 +165,17 @@ func TestWaitTaskFinalStatesAndUnknown(t *testing.T) {
 func TestRunDelegatedJobKeepsTargetToolsAliveAfterAck(t *testing.T) {
 	wrapped := wrappedTool(t)
 	target := wrapped.ChatID
+	origin := "cht_01ARZ3NDEKTSV4RRFFQ69G5FAW"
+	var wrapper NativeTaskEvent
+	if err := json.Unmarshal(wrapped.Data, &wrapper); err != nil {
+		t.Fatal(err)
+	}
+	initialTurn := wrapper.OriginTurnID
+	finalTurn := "cmpl_01ARZ3NDEKTSV4RRFFQ69G5FAX"
+	var signedRequest ToolRequest
+	if err := json.Unmarshal(wrapper.EventPayload, &signedRequest); err != nil {
+		t.Fatal(err)
+	}
 	started := make(chan struct{})
 	var completed atomic.Bool
 	var calls atomic.Int32
@@ -199,6 +210,7 @@ func TestRunDelegatedJobKeepsTargetToolsAliveAfterAck(t *testing.T) {
 				if e.Terminal() {
 					e.V = 3
 					e.Seq = 1
+					e.TurnID = &initialTurn
 					emit(e)
 					break
 				}
@@ -208,7 +220,7 @@ func TestRunDelegatedJobKeepsTargetToolsAliveAfterAck(t *testing.T) {
 			<-r.Context().Done()
 		case strings.HasSuffix(r.URL.Path, "/delegations"):
 			w.WriteHeader(202)
-			fmt.Fprintf(w, `{"task_id":"job","target_chat_id":%q,"turn_id":"initial_ack"}`, target)
+			fmt.Fprintf(w, `{"task_id":"job","target_chat_id":%q,"turn_id":%q}`, target, initialTurn)
 			close(started)
 		case strings.HasSuffix(r.URL.Path, "/tool-output"):
 			if r.Header.Get("X-Envai-Extensions") != "native-tasks-v1" {
@@ -217,15 +229,25 @@ func TestRunDelegatedJobKeepsTargetToolsAliveAfterAck(t *testing.T) {
 			if !strings.Contains(r.URL.Path, target) {
 				t.Error("wrong output chat")
 			}
+			var output ToolOutputRequest
+			if err := json.NewDecoder(r.Body).Decode(&output); err != nil {
+				t.Error(err)
+			}
+			if output.CallID != signedRequest.CallID || output.Output != "answer" {
+				t.Errorf("wrong tool output: call=%q output=%q", output.CallID, output.Output)
+			}
 			calls.Add(1)
 			completed.Store(true)
 			w.WriteHeader(204)
 		case strings.Contains(r.URL.Path, "/tasks/"):
+			if r.URL.Path != "/api/v1/atp/v3/chats/"+origin+"/tasks/job" {
+				t.Error("task outcome was not read from origin", r.URL.Path)
+			}
 			state := "running"
 			if completed.Load() {
 				state = "completed"
 			}
-			fmt.Fprintf(w, `{"task_id":"job","origin_turn_id":"origin","status":%q,"output":"final synthesis","result_turn_id":"final_turn"}`, state)
+			fmt.Fprintf(w, `{"task_id":"job","origin_turn_id":"origin","status":%q,"output":"final synthesis","result_turn_id":%q}`, state, finalTurn)
 		default:
 			t.Errorf("unexpected route %s", r.URL.Path)
 		}
@@ -242,8 +264,8 @@ func TestRunDelegatedJobKeepsTargetToolsAliveAfterAck(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	notify := false
-	result, err := c.RunDelegatedJob(ctx, "origin_chat", NativeDelegationRequest{WorkspaceID: "workspace", EventID: "event", OriginTurnID: "origin", TargetChatID: target, Prompt: "work", NotifyOrigin: &notify}, BackgroundOptions{Tools: runner})
-	if err != nil || result.ResultTurnID != "final_turn" || result.Output != "final synthesis" || calls.Load() != 1 {
+	result, err := c.RunDelegatedJob(ctx, origin, NativeDelegationRequest{WorkspaceID: "workspace", EventID: "event", OriginTurnID: "origin", TargetChatID: target, Prompt: "work", NotifyOrigin: &notify}, BackgroundOptions{Tools: runner})
+	if err != nil || result.ResultTurnID != finalTurn || result.ResultTurnID == initialTurn || result.Output != "final synthesis" || calls.Load() != 1 {
 		t.Fatal(result, err, calls.Load())
 	}
 }
