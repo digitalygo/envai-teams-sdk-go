@@ -22,6 +22,9 @@ import (
 var contracts embed.FS
 
 type Config struct {
+	// StrictValidation validates canonical HTTP parameters/bodies before preflight
+	// and JSON success responses before unwrapping. The default remains additive.
+	StrictValidation bool
 	// NativeTasks opts into native-tasks-v1 discovery, streams, admissions and tool outputs.
 	NativeTasks bool
 	// LegacyReadOnly selects strict ATP v2 historical reads; all mutations are rejected.
@@ -312,6 +315,11 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	if err = validateWikiBody(op, body); err != nil {
 		return nil, err
 	}
+	if c.config.StrictValidation {
+		if err = c.validateStrictRequest(op, params, body); err != nil {
+			return nil, err
+		}
+	}
 	if err = c.checkMutation(ctx, op, params, body); err != nil {
 		return nil, err
 	}
@@ -396,6 +404,12 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 			}
 			return nil, apiErr
 		}
+		if c.config.StrictValidation {
+			if err = validateStrictStatus(op, status); err != nil {
+				resp.Body.Close()
+				return nil, err
+			}
+		}
 		if err = c.checkAcknowledgment(op, resp); err != nil {
 			resp.Body.Close()
 			return nil, err
@@ -466,6 +480,11 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 	}
 	if int64(len(b)) > c.config.MaxResponseBytes {
 		return errors.New("envai: response exceeds configured limit")
+	}
+	if c.config.StrictValidation {
+		if err = c.validateStrictResponse(c.operations[id], resp.StatusCode, b); err != nil {
+			return err
+		}
 	}
 	if c.operations[id].Unwrap {
 		var envelope map[string]json.RawMessage

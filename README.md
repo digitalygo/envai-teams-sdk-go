@@ -151,3 +151,12 @@ See [native background tasks](docs/background-tasks.md) for opt-in task sessions
 `WaitForSource`, `WaitForWikiOperation` and `WaitForImage` perform read-only polling with positive `PollOptions{Interval, Timeout}`. `GenerateAndWait` admits an image once, then polls using the same overall deadline. Terminal failures/cancellations remain typed results; uncertain admissions are not resubmitted. Source polling never starts conversion retries or indexing. All helpers also honor caller context cancellation.
 
 `PostgresCallStore{DB: db}` shares tool claims and observed barriers across workers. Apply `PostgresCallStoreSchema` as an explicit application migration before using it; constructors perform no DDL and never close your database. Set a stable, account/deployment-specific runner namespace. Atomic claims never reclaim existing work; locked versioned updates preserve observed resolved/ambiguous states against late submissions. Corrupt or conflicting ownership records fail closed. Application side effects still require transactions or call-ID idempotency; this is not an exactly-once execution guarantee.
+
+For canonical HTTP request/response validation, set `Config.StrictValidation: true`.
+This validates parameters and JSON/multipart request shapes before capability
+preflight or mutation admission, and validates JSON success envelopes before
+resource unwrapping. Missing required fields, invalid enums/types/ranges and
+unsupported success statuses fail with `ProtocolError`. The default preserves
+existing additive REST hydration; native task and event validation remain active
+in either mode. Binary downloads and SSE retain their dedicated validators.
+Schema compilation is cached; its first use is part of local validation work.

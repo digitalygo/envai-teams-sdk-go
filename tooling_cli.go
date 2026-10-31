@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -32,6 +33,16 @@ func RunDefinitionsCLI(ctx context.Context, args []string, out, errOut io.Writer
 		}
 		return fallback
 	}
+	strictDefault := false
+	if value := getenv("ENVAI_STRICT_VALIDATION"); value != "" {
+		var err error
+		strictDefault, err = strconv.ParseBool(value)
+		if err != nil {
+			fmt.Fprintln(errOut, "ENVAI_STRICT_VALIDATION must be a boolean")
+			return 1
+		}
+	}
+	strictValidation := flags.Bool("strict-validation", strictDefault, "validate canonical HTTP request and response schemas")
 	path := flags.String("path", envDefault("ENVAI_DEFINITIONS_PATH", "definitions"), "JSON manifest or definition directory")
 	scope := flags.String("connection", getenv("ENVAI_CONNECTION"), "stable public account/deployment scope")
 	driver := flags.String("store", envDefault("ENVAI_STATE_DRIVER", "file"), "file, postgres, sqlite or mysql (SQL drivers must be linked)")
@@ -136,7 +147,7 @@ func RunDefinitionsCLI(ctx context.Context, args []string, out, errOut io.Writer
 		}
 		return 0
 	}
-	client, err := New(Config{BaseURL: getenv("ENVAI_BASE_URL"), APIKey: getenv("ENVAI_API_KEY"), AllowHTTP: getenv("ENVAI_ALLOW_HTTP") == "true"})
+	client, err := New(Config{StrictValidation: *strictValidation, BaseURL: getenv("ENVAI_BASE_URL"), APIKey: getenv("ENVAI_API_KEY"), AllowHTTP: getenv("ENVAI_ALLOW_HTTP") == "true"})
 	if err != nil {
 		return fail(err)
 	}

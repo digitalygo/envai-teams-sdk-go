@@ -131,3 +131,5 @@ The adapter checks existing table metadata before acquiring a lock and rejects
 older case-insensitive `VARCHAR` schemas. Apply an explicit application-owned
 migration after resolving any pre-existing scope collisions; the SDK never
 alters an existing schema automatically.
+
+Set `--strict-validation` or `ENVAI_STRICT_VALIDATION=true` to validate canonical HTTP request and response schemas. The default is false for compatibility; malformed boolean settings fail before any network request. Python validates canonical HTTP payloads by default.

@@ -332,7 +332,10 @@ func validateDefinition(file, definition string, b []byte) error {
 	if file == "openapi.json" {
 		fragment = "#/components/schemas/"
 	}
-	key := file + fragment + definition
+	return validateSchema(file, fragment+definition, b)
+}
+func validateSchema(file, fragment string, b []byte) error {
+	key := file + fragment
 	cached, ok := schemaCache.Load(key)
 	if !ok {
 		compiler := jsonschema.NewCompiler()
@@ -367,7 +370,7 @@ func validateDefinition(file, definition string, b []byte) error {
 		return &ProtocolError{"invalid JSON"}
 	}
 	if err = cached.(*jsonschema.Schema).Validate(doc); err != nil {
-		return &ProtocolError{fmt.Sprintf("invalid %s representation", definition)}
+		return &ProtocolError{fmt.Sprintf("invalid %s representation", fragment)}
 	}
 	return nil
 }

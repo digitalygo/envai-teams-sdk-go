@@ -46,6 +46,7 @@ The SDK itself never reads environment variables. Supply credentials explicitly 
 
 | Option | Default / behavior |
 | --- | --- |
+| `StrictValidation` | False for compatibility. Validate canonical HTTP parameters/request bodies before preflight and JSON success envelopes before unwrapping. |
 | `NativeTasks` | False. Opt into `native-tasks-v1` for background APIs, discovery, streams and tool outputs. |
 | `LegacyReadOnly` | False. Select historical v2 replay; cannot combine with native tasks. |
 | `BaseURL` | Required. HTTPS origin or URL ending in `/api/v1`. An origin gets `/api/v1` appended. No credentials, query, or fragment. |
