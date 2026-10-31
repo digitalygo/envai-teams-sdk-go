@@ -51,6 +51,35 @@ func TestSQLDefinitionStoreEngines(t *testing.T) {
 			}); err != nil {
 				t.Fatal(err)
 			}
+			identities := []string{"Account", "account", "cafe", "café", "account "}
+			for _, scope := range identities {
+				if e := store.WithLock(ctx, scope, func(s envai.DefinitionSession) error {
+					v, e := s.Load()
+					if e != nil {
+						return e
+					}
+					v.ReadyHash = scope
+					return s.Save(v)
+				}); e != nil {
+					t.Fatal(e)
+				}
+			}
+			for _, scope := range identities {
+				if e := store.WithLock(ctx, scope, func(s envai.DefinitionSession) error {
+					v, e := s.Load()
+					if v.ReadyHash != scope {
+						t.Errorf("scope alias %q: %+v", scope, v)
+					}
+					return e
+				}); e != nil {
+					t.Fatal(e)
+				}
+			}
+			if e := store.WithLock(ctx, "Account", func(envai.DefinitionSession) error {
+				return store.WithLock(ctx, "account ", func(envai.DefinitionSession) error { return nil })
+			}); e != nil {
+				t.Fatal(e)
+			}
 			reopened := &envai.SQLDefinitionStore{DB: db, Dialect: dialect, LockTimeout: 40 * time.Millisecond}
 			if err = reopened.WithLock(ctx, "one", func(s envai.DefinitionSession) error {
 				v, e := s.Load()

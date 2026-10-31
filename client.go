@@ -384,7 +384,7 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 			}
 			resp.Body.Close()
 			if err := wait(ctx, delay); err != nil {
-				return nil, err
+				return nil, transportFailure(id, err)
 			}
 			continue
 		}

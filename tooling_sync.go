@@ -306,6 +306,11 @@ func planDefinitions(m DefinitionManifest, s DefinitionSnapshot, remote map[stri
 				op.Classification = "conflict"
 				op.Blocking = true
 			}
+			if o.FailOnDrift && (op.Classification == "drift" || op.Classification == "conflict") {
+				op.Blocking = true
+				op.Action = "none"
+				op.ReasonCode = "fail_on_drift"
+			}
 			if op.Blocking {
 				if op.ReasonCode == "" {
 					op.ReasonCode = op.Classification
@@ -427,6 +432,19 @@ func (d *Definitions) Sync(ctx context.Context, m DefinitionManifest, o Definiti
 		return report, e
 	}
 	err := d.Store.WithLock(ctx, d.Scope, func(session DefinitionSession) error {
+		// Any real deploy invalidates readiness before remote discovery: an
+		// interrupted catalog/list/identity check cannot retain stale readiness.
+		if !o.DryRun {
+			prior, loadErr := session.Load()
+			if loadErr != nil {
+				return loadErr
+			}
+			prior.ReadyHash = ""
+			prior.ReadyAt = time.Time{}
+			if saveErr := session.Save(prior); saveErr != nil {
+				return saveErr
+			}
+		}
 		p, s, err := d.prepare(ctx, m, session, o)
 		if err != nil {
 			return err

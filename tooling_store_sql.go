@@ -29,7 +29,7 @@ func DefinitionSQLSchema(dialect string) ([]string, error) {
 	case "sqlite":
 		return []string{`CREATE TABLE envai_definition_state (scope TEXT PRIMARY KEY, snapshot TEXT NOT NULL)`, `CREATE TABLE envai_definition_locks (scope TEXT PRIMARY KEY, owner TEXT NOT NULL)`}, nil
 	case "mysql":
-		return []string{`CREATE TABLE envai_definition_state (scope VARCHAR(191) PRIMARY KEY, snapshot LONGTEXT NOT NULL) ENGINE=InnoDB`, `CREATE TABLE envai_definition_locks (scope VARCHAR(191) PRIMARY KEY, owner VARCHAR(64) NOT NULL) ENGINE=InnoDB`}, nil
+		return []string{`CREATE TABLE envai_definition_state (scope VARBINARY(191) PRIMARY KEY, snapshot LONGTEXT NOT NULL) ENGINE=InnoDB`, `CREATE TABLE envai_definition_locks (scope VARBINARY(191) PRIMARY KEY, owner VARCHAR(64) NOT NULL) ENGINE=InnoDB`}, nil
 	}
 	return nil, errors.New("envai: definition SQL store supports sqlite/mysql")
 }

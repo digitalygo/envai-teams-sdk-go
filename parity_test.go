@@ -603,3 +603,24 @@ func TestConvenienceWaitersPreserveErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestGeneratedCancellationUsesDefaultFalseSubtree(t *testing.T) {
+	var posts atomic.Int32
+	c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/capabilities") {
+			fmt.Fprint(w, backgroundCapabilities)
+			return
+		}
+		var body map[string]json.RawMessage
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || len(body) != 0 {
+			t.Error(body, err)
+		}
+		posts.Add(1)
+		fmt.Fprint(w, `{"task_id":"job","status":"cancelled","subtree":false}`)
+	})
+	c.config.NativeTasks = true
+	result, err := c.CancelDetachedTask(context.Background(), CancelDetachedTaskParams{ChatID: "chat", TaskID: "job", Body: CancelDetachedTaskBody{}})
+	if err != nil || result.TaskID != "job" || result.Subtree || posts.Load() != 1 {
+		t.Fatal(result, err, posts.Load())
+	}
+}

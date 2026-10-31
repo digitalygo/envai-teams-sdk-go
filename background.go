@@ -229,7 +229,14 @@ func validateNativeIdentity(id string, params map[string]any, body any, raw []by
 				return &ProtocolError{"invalid cancellation response"}
 			}
 			var expected bool
-			if json.Unmarshal(request["subtree"], &expected) != nil || subtree != expected {
+			if raw, supplied := request["subtree"]; supplied {
+				var value *bool
+				if json.Unmarshal(raw, &value) != nil || value == nil {
+					return &ProtocolError{"invalid cancellation subtree"}
+				}
+				expected = *value
+			}
+			if subtree != expected {
 				return &ProtocolError{"cancellation subtree mismatch"}
 			}
 		}

@@ -778,3 +778,45 @@ func TestToolingDeleteGoneAndDependencyRejection(t *testing.T) {
 		})
 	}
 }
+
+func TestToolingLibraryFailOnDriftAndPrepareFailureInvalidateReady(t *testing.T) {
+	ctx := context.Background()
+	m := toolingManifest()
+	remote := &toolingFake{resources: map[string][]DefinitionPayload{}}
+	d := Definitions{Remote: remote, Store: &MemoryDefinitionStore{}, Scope: "test"}
+	if r, e := d.Sync(ctx, m, DefinitionOptions{}); e != nil || !r.ManifestReady {
+		t.Fatal(r, e)
+	}
+	remote.resources["tool"][0]["description"] = "outside edit"
+	before := len(remote.calls)
+	r, e := d.Sync(ctx, m, DefinitionOptions{OverwriteDrift: true, FailOnDrift: true})
+	if e != nil || r.Status != "blocked" || len(remote.calls) != before {
+		t.Fatal(r, e, remote.calls)
+	}
+	if e = d.RequireSynchronized(ctx, m); e == nil {
+		t.Fatal("fail-on-drift kept ready")
+	}
+	remote.resources["tool"][0]["description"] = "before"
+	if r, e = d.Sync(ctx, m, DefinitionOptions{}); e != nil || !r.ManifestReady {
+		t.Fatal(r, e)
+	}
+	remote.modelsErr = errors.New("catalog unavailable")
+	if _, e = d.Plan(ctx, m, DefinitionOptions{}); e == nil {
+		t.Fatal("plan should fail")
+	}
+	if e = d.RequireSynchronized(ctx, m); e != nil {
+		t.Fatal("plan mutated ready", e)
+	}
+	if _, e = d.Sync(ctx, m, DefinitionOptions{DryRun: true}); e == nil {
+		t.Fatal("dry-run should fail")
+	}
+	if e = d.RequireSynchronized(ctx, m); e != nil {
+		t.Fatal("dry-run mutated ready", e)
+	}
+	if _, e = d.Sync(ctx, m, DefinitionOptions{}); e == nil {
+		t.Fatal("real sync should fail")
+	}
+	if e = d.RequireSynchronized(ctx, m); e == nil {
+		t.Fatal("catalog error kept stale readiness")
+	}
+}
