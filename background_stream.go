@@ -112,6 +112,7 @@ type BackgroundSession struct {
 	mu          sync.Mutex
 	err         error
 	replayTurns map[string]bool
+	replay      []Event
 }
 
 func (c *Client) OpenBackgroundSession(ctx context.Context, chatID string, options BackgroundOptions) (*BackgroundSession, error) {
@@ -134,8 +135,10 @@ func (c *Client) OpenBackgroundSession(ctx context.Context, chatID string, optio
 	live, stop := context.WithTimeout(ctx, timeout)
 	replayTurns := map[string]bool{}
 	replayBytes := 0
+	var replay []Event
 	err = stream.waitLive(live, func(e Event) error {
 		replayBytes += len(e.Raw)
+		replay = append(replay, e)
 		if replayBytes > 16*1024*1024 {
 			return &ProtocolError{"background replay exceeds reconciliation limit"}
 		}
@@ -160,7 +163,7 @@ func (c *Client) OpenBackgroundSession(ctx context.Context, chatID string, optio
 		cancel()
 		return nil, err
 	}
-	session := &BackgroundSession{stream: stream, cancel: cancel, done: make(chan struct{}), replayTurns: replayTurns}
+	session := &BackgroundSession{stream: stream, cancel: cancel, done: make(chan struct{}), replayTurns: replayTurns, replay: replay}
 	go func() {
 		var workers sync.WaitGroup
 		defer func() { cancel(); stream.Close(); workers.Wait(); close(session.done) }()
@@ -246,10 +249,31 @@ func (c *Client) RunDelegatedJob(ctx context.Context, originChatID string, reque
 		if task.TaskID != receipt.TaskID {
 			return task, &ProtocolError{"task response identity mismatch"}
 		}
+		if task.TargetChatID != "" && task.TargetChatID != request.TargetChatID {
+			return task, &ProtocolError{"task target identity mismatch"}
+		}
 		if task.Terminal() {
 			return task, nil
 		}
-		return task, &ProtocolError{"existing delegated job requires reconciliation of pending tools; no historical tool executed"}
+		// Every replay result and terminal has already been observed at the
+		// live boundary. Resume only requests belonging to this receipt.
+		if options.Tools != nil {
+			for _, event := range session.replay {
+				inner, err := backgroundEvent(event)
+				if err != nil {
+					return task, err
+				}
+				turn := inner.originTurnID
+				if turn == "" && inner.TurnID != nil {
+					turn = *inner.TurnID
+				}
+				if turn == receipt.TurnID && inner.Type == "agent.tool.request" {
+					if err := options.Tools.HandleBackground(ctx, event, request.TargetChatID); err != nil {
+						return task, err
+					}
+				}
+			}
+		}
 	}
 	task, err := c.WaitTask(ctx, originChatID, receipt.TaskID, 0)
 	if err != nil {
@@ -259,6 +283,9 @@ func (c *Client) RunDelegatedJob(ctx context.Context, originChatID string, reque
 		if streamErr != nil {
 			return task, streamErr
 		}
+	}
+	if err == nil && task.TargetChatID != "" && task.TargetChatID != request.TargetChatID {
+		return task, &ProtocolError{"task target identity mismatch"}
 	}
 	return task, err
 }

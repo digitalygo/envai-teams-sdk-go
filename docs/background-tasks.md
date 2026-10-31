@@ -31,7 +31,7 @@ if err != nil { return err }
 switch result.Status {
 case envai.TaskCompleted:
     // Persist result.Output and result.ResultTurnID before the next phase.
-case envai.TaskFailed, envai.TaskCancelled, envai.TaskBlocked:
+case envai.TaskFailed, envai.TaskCancelled:
     // Preserve and handle this explicit outcome; it is not successful output.
 }
 ```
@@ -40,7 +40,7 @@ case envai.TaskFailed, envai.TaskCancelled, envai.TaskBlocked:
 
 For same-team detached work, open `OpenBackgroundSession` before admitting the message, keep it open through every required task terminal, then close it. For manual cross-team requests, likewise open the target session before `DelegateTeam` and close it only after `WaitTask` returns. Opening a session authorizes live tool dispatch for the whole selected execution chat, including later turns: use an isolated chat or application authorization policy where appropriate.
 
-**Initial attachment is for new live work, not recovery of already-pending tool requests.** The initial replay is observed for resolved-call and terminal barriers but never executes historical tool requests. Reconcile an existing job before resuming it; a new session cannot promise to recover pending calls. `RunDelegatedJob` rejects nonzero initial cursors. If a duplicate event ID returns a coordinator turn present in initial replay, it returns an already-terminal task or an explicit reconciliation error for an active job; it does not silently wait with unserviced historical tools. Within an established session, bounded SSE reconnect uses the usual cursor/replay rules.
+`OpenBackgroundSession` observes initial replay barriers and begins new live work. `RunDelegatedJob` additionally recovers an exact duplicate event ID: it reads the origin task, returns a terminal snapshot without historical effects, or resumes only pending signed requests correlated to the existing receipt's coordinator turn. All buffered result and task-terminal barriers are applied before replay dispatch, with the same persistent call store and signature verification. Keep the namespace and store stable across restarts. The helper requires an initial cursor of zero so it can reconcile the complete retained replay (bounded to 16 MiB); incomplete history and unknown resident tasks fail explicitly. Within an established session, bounded SSE reconnect uses the usual cursor/replay rules.
 
 `task.event` is unwrapped from `event_payload`, with the outer agent/chat identity retained. Existing Ed25519 verification authenticates the original call ID, tool name and arguments before a handler or store claim. Call IDs deduplicate across foreground and task wrappers using the same account/chat store. Task barriers are distinct from origin-turn barriers, so an origin terminal does not suppress detached calls; the task's own terminal cancels active handlers and prevents late execution. `ToolInvocation.TaskID` and `OriginTurnID` identify wrapped work; its `TurnID` is empty because the wire wrapper has no turn. Signatures still do not authenticate the envelope or prove freshness: only use the trusted authenticated stream.
 

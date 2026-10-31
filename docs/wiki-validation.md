@@ -2,7 +2,7 @@
 
 ## Chat attachments contract update (2026-10-16)
 
-Current source schemas are pinned to backend commit `6a4e45bafe6f5856ef92a57b37db08769738b412`, with 71 HTTP operations. The attachment guide documents asynchronous conversion, whole-message rejection, explicit retry, retention and independent conversion costs. Source manifests identify exact upstream bytes separately from generated inventories and synthetic fixtures. Historical HTTP captures retain their original source commits. This update does not deploy the backend.
+Current source schemas are pinned to backend commit `3a9ecf3a4ccd3291474848d3dc9d0100170b9e54`, with 76 HTTP operations. The attachment guide documents asynchronous conversion, whole-message rejection, explicit retry, retention and independent conversion costs. Source manifests identify exact upstream bytes separately from generated inventories and synthetic fixtures. Historical HTTP captures retain their original source commits. This update does not deploy the backend.
 
 Local checks: full PostgreSQL suite and examples passed with the race detector; aggregate statement coverage 93.91%. Go vet, deterministic generation, strict provenance and provenance-mutation tests passed. Govulncheck on Go 1.26.9 found no reachable vulnerabilities.
 

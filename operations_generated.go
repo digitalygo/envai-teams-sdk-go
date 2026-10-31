@@ -357,6 +357,7 @@ type ListCompletionsParams struct {
 	ModelOrchestrator Optional[string]
 	StartedAtFrom     Optional[string]
 	StartedAtTo       Optional[string]
+	Page              Optional[int64]
 	PerPage           Optional[int64]
 }
 
@@ -375,6 +376,9 @@ func (c *Client) ListCompletions(ctx context.Context, req ListCompletionsParams)
 	}
 	if req.StartedAtTo.Set {
 		p["started_at[to]"] = req.StartedAtTo.Value
+	}
+	if req.Page.Set {
+		p["page"] = req.Page.Value
 	}
 	if req.PerPage.Set {
 		p["per_page"] = req.PerPage.Value

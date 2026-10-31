@@ -455,13 +455,14 @@ func TestNativeStreamReconnectRetainsExtension(t *testing.T) {
 		t.Fatal(connects.Load())
 	}
 }
-func TestDuplicateDelegationRequiresExplicitReconciliation(t *testing.T) {
-	for _, state := range []TaskStatus{TaskRunning, TaskCompleted} {
+func TestDuplicateDelegationResumesRunningAndTerminal(t *testing.T) {
+	for _, state := range []TaskStatus{TaskRunning, TaskCompleted, TaskFailed, TaskCancelled} {
 		t.Run(string(state), func(t *testing.T) {
 			old := signedEvent(t, `{}`)
 			old.V = 3
 			old.Seq = 1
 			target := old.ChatID
+			var polls atomic.Int32
 			c := testClient(t, func(w http.ResponseWriter, r *http.Request) {
 				switch {
 				case strings.HasSuffix(r.URL.Path, "/capabilities"):
@@ -479,7 +480,11 @@ func TestDuplicateDelegationRequiresExplicitReconciliation(t *testing.T) {
 				case strings.HasSuffix(r.URL.Path, "/delegations"):
 					fmt.Fprintf(w, `{"task_id":"existing","target_chat_id":%q,"turn_id":%q}`, target, *old.TurnID)
 				case strings.Contains(r.URL.Path, "/tasks/"):
-					fmt.Fprintf(w, `{"task_id":"existing","origin_turn_id":"origin","status":%q,"output":"previous final","result_turn_id":"final"}`, state)
+					next := state
+					if polls.Add(1) > 1 {
+						next = TaskCompleted
+					}
+					fmt.Fprintf(w, `{"task_id":"existing","origin_turn_id":"origin","status":%q,"output":"previous final","result_turn_id":"final"}`, next)
 				default:
 					t.Error("unexpected request", r.URL.Path)
 				}
@@ -487,12 +492,30 @@ func TestDuplicateDelegationRequiresExplicitReconciliation(t *testing.T) {
 			c.config.NativeTasks = true
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			result, err := c.RunDelegatedJob(ctx, "origin", NativeDelegationRequest{TargetChatID: target, EventID: "duplicate"}, BackgroundOptions{})
-			if state == TaskRunning {
-				if err == nil || !strings.Contains(err.Error(), "reconciliation") {
-					t.Fatal(result, err)
+			options := BackgroundOptions{}
+			if state != TaskRunning {
+				registry, err := NewRegistry(Tool{Name: "fixture_echo", Parameters: json.RawMessage(`{"type":"object"}`), Handler: func(context.Context, ToolInvocation) (ToolResult, error) {
+					t.Error("terminal duplicate executed historical tool")
+					return ToolResult{Output: "bad"}, nil
+				}})
+				if err != nil {
+					t.Fatal(err)
 				}
-			} else if err != nil || result.Output != "previous final" {
+				store, err := NewFileCallStore(t.TempDir())
+				if err != nil {
+					t.Fatal(err)
+				}
+				options.Tools, err = NewToolRunner(c, registry, store, RunnerOptions{Namespace: "terminal-duplicate"})
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			result, err := c.RunDelegatedJob(ctx, "origin", NativeDelegationRequest{TargetChatID: target, EventID: "duplicate"}, options)
+			want := state
+			if want == TaskRunning {
+				want = TaskCompleted
+			}
+			if err != nil || result.Output != "previous final" || result.Status != want {
 				t.Fatal(result, err)
 			}
 		})

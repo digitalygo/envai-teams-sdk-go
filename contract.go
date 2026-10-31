@@ -158,6 +158,17 @@ func (c *Client) checkAcknowledgment(op operation, resp *http.Response) error {
 	return nil
 }
 func (c *Client) validateNegotiatedJSON(id string, b []byte) error {
+	definitions := map[string]string{
+		"deliverWorkflowResult": "NativeDeliveryReceipt",
+		"delegateToTeam":        "TeamDelegationReceipt",
+		"getDetachedTask":       "DetachedTaskSnapshot",
+		"classifyPhase":         "PhaseClassificationResult",
+	}
+	if definition := definitions[id]; definition != "" {
+		if err := validateDefinition("openapi.json", definition, b); err != nil {
+			return &ProtocolError{Reason: "invalid native response: " + err.Error()}
+		}
+	}
 	if id == "getCapabilitiesLegacy" || (id == "getCapabilities" && c.config.LegacyReadOnly) {
 		var capability struct {
 			Version int `json:"protocol_version"`

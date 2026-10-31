@@ -1,6 +1,7 @@
 package envai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -137,6 +138,9 @@ func (c *Client) GetTask(ctx context.Context, chatID, taskID string) (NativeTask
 		return out, err
 	}
 	err := c.call(ctx, "getDetachedTask", map[string]any{"chat_id": chatID, "task_id": taskID}, nil, &out)
+	if err == nil && out.TaskID != taskID {
+		err = &ProtocolError{"task response identity mismatch"}
+	}
 	return out, err
 }
 func (c *Client) CancelTask(ctx context.Context, chatID, taskID string, subtree bool) (NativeCancellation, error) {
@@ -145,19 +149,25 @@ func (c *Client) CancelTask(ctx context.Context, chatID, taskID string, subtree 
 		return out, err
 	}
 	err := c.call(ctx, "cancelDetachedTask", map[string]any{"chat_id": chatID, "task_id": taskID}, map[string]bool{"subtree": subtree}, &out)
+	if err == nil && (out.TaskID != taskID || out.Status != TaskCancelled || out.Subtree != subtree) {
+		err = &ProtocolError{"invalid cancellation response"}
+	}
 	return out, err
 }
 
 // ClassifyPhase never retries admission, including an uncertain 502/503 result.
 func (c *Client) ClassifyNativePhase(ctx context.Context, chatID string, request NativePhaseRequest) (NativePhaseResult, error) {
 	var out NativePhaseResult
-	if request.Attempt < 1 || len(request.TaskContext) == 0 || string(request.TaskContext) == "null" || !json.Valid(request.TaskContext) {
+	if request.Attempt < 1 || len(request.TaskContext) == 0 || string(bytes.TrimSpace(request.TaskContext)) == "null" || !json.Valid(request.TaskContext) {
 		return out, errors.New("envai: classification requires positive attempt and non-null JSON task context")
 	}
 	if err := c.requireFeatures(ctx, "phase_classification"); err != nil {
 		return out, err
 	}
 	err := c.call(ctx, "classifyPhase", map[string]any{"chat_id": chatID}, request, &out)
+	if err == nil && out.RequestID != request.RequestID {
+		err = &ProtocolError{"classification request identity mismatch"}
+	}
 	return out, err
 }
 
@@ -189,4 +199,47 @@ func (c *Client) WaitTask(ctx context.Context, chatID, taskID string, interval t
 			return task, err
 		}
 	}
+}
+
+// validateNativeIdentity also protects generated low-level operation methods.
+func validateNativeIdentity(id string, params map[string]any, body any, raw []byte) error {
+	var result map[string]json.RawMessage
+	if id != "getDetachedTask" && id != "cancelDetachedTask" && id != "delegateToTeam" && id != "classifyPhase" && id != "deliverWorkflowResult" {
+		return nil
+	}
+	if json.Unmarshal(raw, &result) != nil {
+		return &ProtocolError{"invalid native response"}
+	}
+	requestBytes, _ := json.Marshal(body)
+	var request map[string]json.RawMessage
+	_ = json.Unmarshal(requestBytes, &request)
+	matches := func(key string, expected any) bool {
+		var actual string
+		return json.Unmarshal(result[key], &actual) == nil && actual != "" && actual == expected
+	}
+	switch id {
+	case "getDetachedTask", "cancelDetachedTask":
+		if !matches("task_id", params["task_id"]) {
+			return &ProtocolError{"task response identity mismatch"}
+		}
+		if id == "cancelDetachedTask" {
+			var status string
+			var subtree bool
+			if len(result) != 3 || (string(result["subtree"]) != "true" && string(result["subtree"]) != "false") || json.Unmarshal(result["status"], &status) != nil || status != "cancelled" || json.Unmarshal(result["subtree"], &subtree) != nil {
+				return &ProtocolError{"invalid cancellation response"}
+			}
+			var expected bool
+			if json.Unmarshal(request["subtree"], &expected) != nil || subtree != expected {
+				return &ProtocolError{"cancellation subtree mismatch"}
+			}
+		}
+	default:
+		key := map[string]string{"delegateToTeam": "target_chat_id", "classifyPhase": "request_id", "deliverWorkflowResult": "event_id"}[id]
+		var expected string
+		_ = json.Unmarshal(request[key], &expected)
+		if !matches(key, expected) {
+			return &ProtocolError{"native response correlation mismatch"}
+		}
+	}
+	return nil
 }

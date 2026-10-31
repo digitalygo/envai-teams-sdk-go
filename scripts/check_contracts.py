@@ -5,7 +5,7 @@ import pathlib
 import re
 
 # Exact reviewed backend source pin; this does not imply a published release.
-EXPECTED_CONTRACT_COMMIT = '20dfd5a6c8ec9e75d3754875d4f94520feb3bbf6'
+EXPECTED_CONTRACT_COMMIT = '3a9ecf3a4ccd3291474848d3dc9d0100170b9e54'
 
 def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())
@@ -34,7 +34,7 @@ def verify(root):
     assert set(fixtures) == {'events-invalid.json', 'events-valid.json', 'operations.json', 'signatures.json',
                             'sse-cases.json', 'api-cases.json', 'operation-details.json', 'schema-matrix.json', 'openapi.json'}
     shared = provenance['shared_fixtures']
-    expected_shared = {str(p.relative_to(root / 'testdata')) for directory in ('wiki', 'completion-terminal', 'control-plane-http', 'v3-http', 'chat-attachments')
+    expected_shared = {str(p.relative_to(root / 'testdata')) for directory in ('wiki', 'completion-terminal', 'control-plane-http', 'v3-http', 'chat-attachments', 'parity')
                        for p in (root / 'testdata' / directory).glob('*.json')}
     assert set(shared) == expected_shared, 'Incomplete shared fixture inventory'
     for collection in (fixtures, shared):
