@@ -22,6 +22,11 @@ import (
 var contracts embed.FS
 
 type Config struct {
+	// StrictValidation validates canonical HTTP parameters/bodies before preflight
+	// and JSON success responses before unwrapping. The default remains additive.
+	StrictValidation bool
+	// NativeTasks opts into native-tasks-v1 discovery, streams, admissions and tool outputs.
+	NativeTasks bool
 	// LegacyReadOnly selects strict ATP v2 historical reads; all mutations are rejected.
 	LegacyReadOnly   bool
 	BaseURL          string
@@ -63,6 +68,25 @@ type Client struct {
 	http       *http.Client
 	operations map[string]operation
 }
+
+// TransportError is a network, cancellation or deadline failure. Cause retains
+// errors.Is/errors.As semantics while Error omits URLs and credential material.
+type TransportError struct {
+	Operation string
+	Cause     error
+}
+
+func (e *TransportError) Error() string {
+	return "envai: transport request failed during " + e.Operation
+}
+func (e *TransportError) Unwrap() error { return e.Cause }
+func transportFailure(operation string, err error) error {
+	if err == nil {
+		return nil
+	}
+	return &TransportError{Operation: operation, Cause: sanitizeTransportError(err)}
+}
+
 type APIError struct {
 	Status     int
 	Type       string
@@ -291,6 +315,11 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	if err = validateWikiBody(op, body); err != nil {
 		return nil, err
 	}
+	if c.config.StrictValidation {
+		if err = c.validateStrictRequest(op, params, body); err != nil {
+			return nil, err
+		}
+	}
 	if err = c.checkMutation(ctx, op, params, body); err != nil {
 		return nil, err
 	}
@@ -326,6 +355,9 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 		req.Header.Set("Accept", accept)
 		if negotiated(op) {
 			req.Header.Set(ContractHeader, c.versionFor(op))
+			if c.config.NativeTasks && c.versionFor(op) == "3" {
+				req.Header.Set("X-Envai-Extensions", "native-tasks-v1")
+			}
 		}
 		for _, p := range op.Parameters {
 			if p.In == "header" {
@@ -351,7 +383,7 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 			c.config.Observer(RequestObservation{id, status, attempt, time.Since(start)})
 		}
 		if err != nil {
-			return nil, fmt.Errorf("envai: transport request failed: %w", sanitizeTransportError(err))
+			return nil, transportFailure(id, err)
 		}
 		if op.Method == "GET" && op.Kind == "json" && attempt < c.config.RetryAttempts && (status == 429 || status == 502 || status == 503 || status == 504) {
 			delay := time.Duration(float64(c.config.RetryDelay*time.Duration(1<<attempt)) * (0.8 + 0.4*rand.Float64()))
@@ -360,17 +392,23 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 			}
 			resp.Body.Close()
 			if err := wait(ctx, delay); err != nil {
-				return nil, err
+				return nil, transportFailure(id, err)
 			}
 			continue
 		}
 		if status < 200 || status >= 300 {
 			apiErr := c.apiError(resp)
 			var api *APIError
-			if negotiated(op) && errors.As(apiErr, &api) && (status == 426 || (status == 400 && api.Code == "unsupported_contract_version") || (status == 404 && atpOperation(op) && !c.config.LegacyReadOnly)) {
+			if negotiated(op) && errors.As(apiErr, &api) && (status == 426 || (status == 400 && api.Code == "unsupported_contract_version") || (status == 404 && api.Code != "task_unknown" && atpOperation(op) && !c.config.LegacyReadOnly)) {
 				return nil, &CompatibilityError{Reason: "selected contract endpoint is unavailable or requires an upgrade", Cause: apiErr}
 			}
 			return nil, apiErr
+		}
+		if c.config.StrictValidation {
+			if err = validateStrictStatus(op, status); err != nil {
+				resp.Body.Close()
+				return nil, err
+			}
 		}
 		if err = c.checkAcknowledgment(op, resp); err != nil {
 			resp.Body.Close()
@@ -438,10 +476,15 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 	}
 	b, err := io.ReadAll(io.LimitReader(resp.Body, c.config.MaxResponseBytes+1))
 	if err != nil {
-		return err
+		return transportFailure(id, err)
 	}
 	if int64(len(b)) > c.config.MaxResponseBytes {
 		return errors.New("envai: response exceeds configured limit")
+	}
+	if c.config.StrictValidation {
+		if err = c.validateStrictResponse(c.operations[id], resp.StatusCode, b); err != nil {
+			return err
+		}
 	}
 	if c.operations[id].Unwrap {
 		var envelope map[string]json.RawMessage
@@ -465,10 +508,13 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 	if err = c.validateNegotiatedJSON(id, b); err != nil {
 		return err
 	}
+	if err = validateNativeIdentity(id, params, body, b); err != nil {
+		return err
+	}
 	if err = json.Unmarshal(b, out); err != nil {
 		return &ProtocolError{"invalid JSON response shape"}
 	}
-	return nil
+	return transportFailure(id, ctx.Err())
 }
 func (c *Client) download(ctx context.Context, id string, params map[string]any, body any) (*Download, error) {
 	ctx, cancel := context.WithTimeout(ctx, c.config.RequestTimeout)

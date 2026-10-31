@@ -10,15 +10,20 @@ Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which use
 
 | Method | Params | Returns | HTTP path | Bearer |
 | --- | --- | --- | --- | --- |
-| `SendChatMessage` | `SendChatMessageParams` | `(ChatMessageAccepted, error)` | POST `/chats/{chat_id}/messages` | Yes |
-| `StreamChatEvents` | `StreamChatEventsParams` | `(*EventStream, error)` | GET `/chats/{chat_id}/events` | Yes |
-| `CancelChatTurn` | `CancelChatTurnParams` | `(TurnAccepted, error)` | POST `/chats/{chat_id}/cancel` | Yes |
-| `SteerChatTurn` | `SteerChatTurnParams` | `(TurnAccepted, error)` | POST `/chats/{chat_id}/steer` | Yes |
-| `ResolveChatTool` | `ResolveChatToolParams` | `error` | POST `/chats/{chat_id}/tool-output` | Yes |
-| `ResolveChatApproval` | `ResolveChatApprovalParams` | `error` | POST `/chats/{chat_id}/approval` | Yes |
-| `ForkChat` | `ForkChatParams` | `(ChatForked, error)` | POST `/chats/{chat_id}/fork` | Yes |
-| `RestoreChat` | `RestoreChatParams` | `(RestoreChatAccepted, error)` | POST `/chats/{chat_id}/restore` | Yes |
-| `GetCapabilities` | `GetCapabilitiesParams` | `(Capabilities, error)` | GET `/capabilities` | Yes |
+| `DeliverWorkflowResult` | `DeliverWorkflowResultParams` | `(NativeDeliveryReceipt, error)` | POST `/atp/v3/chats/{chat_id}/deliveries` | Yes |
+| `DelegateToTeam` | `DelegateToTeamParams` | `(TeamDelegationReceipt, error)` | POST `/atp/v3/chats/{chat_id}/delegations` | Yes |
+| `GetDetachedTask` | `GetDetachedTaskParams` | `(DetachedTaskSnapshot, error)` | GET `/atp/v3/chats/{chat_id}/tasks/{task_id}` | Yes |
+| `CancelDetachedTask` | `CancelDetachedTaskParams` | `(CancelDetachedTaskResult, error)` | POST `/atp/v3/chats/{chat_id}/tasks/{task_id}/cancel` | Yes |
+| `ClassifyPhase` | `ClassifyPhaseParams` | `(PhaseClassificationResult, error)` | POST `/atp/v3/chats/{chat_id}/classify-phase` | Yes |
+| `SendChatMessage` | `SendChatMessageParams` | `(ChatMessageAccepted, error)` | POST `/atp/v3/chats/{chat_id}/messages` | Yes |
+| `StreamChatEvents` | `StreamChatEventsParams` | `(*EventStream, error)` | GET `/atp/v3/chats/{chat_id}/events` | Yes |
+| `CancelChatTurn` | `CancelChatTurnParams` | `(TurnAccepted, error)` | POST `/atp/v3/chats/{chat_id}/cancel` | Yes |
+| `SteerChatTurn` | `SteerChatTurnParams` | `(TurnAccepted, error)` | POST `/atp/v3/chats/{chat_id}/steer` | Yes |
+| `ResolveChatTool` | `ResolveChatToolParams` | `error` | POST `/atp/v3/chats/{chat_id}/tool-output` | Yes |
+| `ResolveChatApproval` | `ResolveChatApprovalParams` | `error` | POST `/atp/v3/chats/{chat_id}/approval` | Yes |
+| `ForkChat` | `ForkChatParams` | `(ChatForked, error)` | POST `/atp/v3/chats/{chat_id}/fork` | Yes |
+| `RestoreChat` | `RestoreChatParams` | `(RestoreChatAccepted, error)` | POST `/atp/v3/chats/{chat_id}/restore` | Yes |
+| `GetCapabilities` | `GetCapabilitiesParams` | `(Capabilities, error)` | GET `/atp/v3/capabilities` | Yes |
 | `HealthCheck` | `HealthCheckParams` | `(HealthCheckResult, error)` | GET `/up` | No |
 | `GetJWKS` | `GetJWKSParams` | `(JWKSDocument, error)` | GET `/.well-known/jwks.json` | No |
 | `CreateWorkspace` | `CreateWorkspaceParams` | `(Workspace, error)` | POST `/workspaces` | Yes |
@@ -62,11 +67,30 @@ Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which use
 | `ListImageModels` | `ListImageModelsParams` | `([]ModelCatalogEntry, error)` | GET `/images/models` | Yes |
 | `DownloadArtifact` | `DownloadArtifactParams` | `(*Download, error)` | GET `/artifacts/download` | No |
 | `HandleProviderWebhook` | `HandleProviderWebhookParams` | `(WebhookOk, error)` | POST `/webhooks/providers/{provider}` | No |
+| `UploadChatAttachment` | `UploadChatAttachmentParams` | `(ChatAttachment, error)` | POST `/workspaces/{workspace_id}/chats/{chat_id}/attachments` | Yes |
+| `ListChatAttachments` | `ListChatAttachmentsParams` | `(ListChatAttachmentsResult, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}/attachments` | Yes |
+| `GetChatAttachment` | `GetChatAttachmentParams` | `(ChatAttachment, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}` | Yes |
+| `DeleteChatAttachment` | `DeleteChatAttachmentParams` | `(ChatAttachment, error)` | DELETE `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}` | Yes |
+| `RetryChatAttachment` | `RetryChatAttachmentParams` | `(ChatAttachment, error)` | POST `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}/retry` | Yes |
+| `DownloadChatAttachment` | `DownloadChatAttachmentParams` | `(*Download, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}/download` | Yes |
+| `UploadWikiSource` | `UploadWikiSourceParams` | `(WikiSource, error)` | POST `/workspaces/{workspace_id}/files/sources` | Yes |
+| `GetWikiSource` | `GetWikiSourceParams` | `(WikiSource, error)` | GET `/workspaces/{workspace_id}/files/sources/{file_id}` | Yes |
+| `DownloadWikiSource` | `DownloadWikiSourceParams` | `(*Download, error)` | GET `/workspaces/{workspace_id}/files/sources/{file_id}/download` | Yes |
+| `WithdrawWikiSource` | `WithdrawWikiSourceParams` | `(WikiSource, error)` | POST `/workspaces/{workspace_id}/wiki/outbox/files` | Yes |
+| `CreateWikiInboxRun` | `CreateWikiInboxRunParams` | `(WikiOperation, error)` | POST `/workspaces/{workspace_id}/wiki/inbox/runs` | Yes |
+| `CreateWikiOutboxRun` | `CreateWikiOutboxRunParams` | `(WikiOperation, error)` | POST `/workspaces/{workspace_id}/wiki/outbox/runs` | Yes |
+| `CreateWikiSyncRun` | `CreateWikiSyncRunParams` | `(WikiOperation, error)` | POST `/workspaces/{workspace_id}/wiki/syncs` | Yes |
+| `GetWikiOperation` | `GetWikiOperationParams` | `(WikiOperation, error)` | GET `/workspaces/{workspace_id}/wiki/operations/{operation_id}` | Yes |
+| `ListWikiCategories` | `ListWikiCategoriesParams` | `(Categories, error)` | GET `/workspaces/{workspace_id}/wiki/categories` | Yes |
+| `GetWikiCategoryIndex` | `GetWikiCategoryIndexParams` | `(CategoryIndex, error)` | GET `/workspaces/{workspace_id}/wiki/categories/{category_id}/index` | Yes |
+| `GetWikiWebhookJWKS` | `GetWikiWebhookJWKSParams` | `(JWKSDocument, error)` | GET `/.well-known/wiki-webhook-jwks.json` | No |
+| `StreamChatEventsLegacy` | `StreamChatEventsLegacyParams` | `(*EventStream, error)` | GET `/chats/{chat_id}/events` | Yes |
+| `GetCapabilitiesLegacy` | `GetCapabilitiesLegacyParams` | `(CapabilitiesLegacy, error)` | GET `/capabilities` | Yes |
 
 ## Models, optional fields, and collections
 
 - `envai.Present(value)` includes an optional field. The zero-value `Optional[T]` omits it. `envai.Null[T]()` explicitly sends JSON null; use only when the field's schema allows null.
-- Resource `data` wrappers are unwrapped into typed resources. Completion pages retain `Data`, `Links`, and `Meta`. This contract has no declared completion `page` request parameter; there is no automatic page iterator.
+- Resource `data` wrappers are unwrapped into typed resources. Completion pages retain `Data`, `Links`, and `Meta`. Use `ListCompletionsParams.Page` or `CompletionPages` for numeric traversal on the configured origin.
 - API key creation distinguishes omitted expiry from explicit `"never"`. Treat the plaintext key in the creation response as a secret.
 - Flexible metadata, schema, and union values use `json.RawMessage` or typed JSON maps. Unknown REST response properties are ignored; known fields keep their declared Go types.
 - HTTP 204 methods return only an error. `Download` contains `Body`, `Header`, and `Status`; always call `Close`, including after partial reads. Reading a download is your responsibility and must remain within the request's context deadline.
@@ -79,7 +103,7 @@ See [configuration](getting-started.md#configuration) for defaults and [error ha
 
 ## Event payloads
 
-`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 29 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
+`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 36 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
 
 ## Wiki and negotiated contracts
 

@@ -2,6 +2,86 @@ package envai
 
 import "encoding/json"
 
+type NativeDeliveryRequest struct {
+	WorkspaceID  string         `json:"workspace_id"`
+	EventID      string         `json:"event_id"`
+	OriginTurnID string         `json:"origin_turn_id"`
+	TaskID       string         `json:"task_id"`
+	Output       string         `json:"output"`
+	Status       DeliveryStatus `json:"status"`
+}
+
+type NativeDeliveryReceipt struct {
+	EventID       string                `json:"event_id"`
+	Status        DeliveryReceiptStatus `json:"status"`
+	TurnID        Optional[string]      `json:"turn_id,omitzero"`
+	ErrorEnvelope Optional[string]      `json:"error,omitzero"`
+	Duplicate     bool                  `json:"duplicate"`
+}
+
+type TeamDelegationRequest struct {
+	WorkspaceID  string         `json:"workspace_id"`
+	EventID      string         `json:"event_id"`
+	OriginTurnID string         `json:"origin_turn_id"`
+	TargetChatID string         `json:"target_chat_id"`
+	Prompt       string         `json:"prompt"`
+	NotifyOrigin Optional[bool] `json:"notify_origin,omitzero"`
+	StrictModel  Optional[bool] `json:"strict_model,omitzero"`
+}
+
+type TeamDelegationReceipt struct {
+	TaskID       string `json:"task_id"`
+	TargetChatID string `json:"target_chat_id"`
+	TurnID       string `json:"turn_id"`
+}
+
+type DetachedTaskSnapshot struct {
+	TaskID        string                     `json:"task_id"`
+	OriginTurnID  string                     `json:"origin_turn_id"`
+	ParentTaskID  Optional[string]           `json:"parent_task_id,omitzero"`
+	TargetChatID  Optional[string]           `json:"target_chat_id,omitzero"`
+	ResultTurnID  Optional[string]           `json:"result_turn_id,omitzero"`
+	Output        Optional[string]           `json:"output,omitzero"`
+	ErrorEnvelope Optional[string]           `json:"error,omitzero"`
+	DeliveryError Optional[string]           `json:"delivery_error,omitzero"`
+	Status        TaskStatus                 `json:"status"`
+	Extra         map[string]json.RawMessage `json:"-"`
+}
+
+func (v *DetachedTaskSnapshot) UnmarshalJSON(b []byte) error {
+	type plain DetachedTaskSnapshot
+	var out plain
+	if err := json.Unmarshal(b, &out); err != nil {
+		return err
+	}
+	extra, err := unknownFields(b, []string{"task_id", "origin_turn_id", "parent_task_id", "target_chat_id", "result_turn_id", "output", "error", "delivery_error", "status"})
+	if err != nil {
+		return err
+	}
+	out.Extra = extra
+	*v = DetachedTaskSnapshot(out)
+	return nil
+}
+func (v DetachedTaskSnapshot) MarshalJSON() ([]byte, error) {
+	type plain DetachedTaskSnapshot
+	return marshalUnknown(plain(v), v.Extra)
+}
+
+type PhaseClassificationRequest struct {
+	RequestID   string          `json:"request_id"`
+	PhaseID     string          `json:"phase_id"`
+	FinalOutput string          `json:"final_output"`
+	TaskContext json.RawMessage `json:"task_context"`
+	Attempt     int64           `json:"attempt"`
+}
+
+type PhaseClassificationResult struct {
+	Model        string        `json:"model"`
+	RequestID    string        `json:"request_id"`
+	InvocationID string        `json:"invocation_id"`
+	Decision     PhaseDecision `json:"decision"`
+}
+
 type CompletionTerminalSnapshotUsage struct {
 	InputTokens   Optional[int64]        `json:"input_tokens,omitzero"`
 	OutputTokens  Optional[int64]        `json:"output_tokens,omitzero"`
@@ -311,18 +391,19 @@ func (v PhaseResult) MarshalJSON() ([]byte, error) {
 }
 
 type WikiOperation struct {
-	OperationID string                     `json:"operation_id"`
-	WorkspaceID string                     `json:"workspace_id"`
-	Kind        string                     `json:"kind"`
-	Status      string                     `json:"status"`
-	Phase       *string                    `json:"phase"`
-	Phases      WikiOperationPhases        `json:"phases"`
-	StartedAt   *string                    `json:"started_at"`
-	FinishedAt  *string                    `json:"finished_at"`
-	BatchSizes  BatchSizes                 `json:"batch_sizes"`
-	Billing     BillingState               `json:"billing"`
-	UsageCost   UsageCost                  `json:"usage_cost"`
-	Extra       map[string]json.RawMessage `json:"-"`
+	OperationID      string                      `json:"operation_id"`
+	WorkspaceID      string                      `json:"workspace_id"`
+	Kind             string                      `json:"kind"`
+	Status           string                      `json:"status"`
+	Phase            *string                     `json:"phase"`
+	Phases           WikiOperationPhases         `json:"phases"`
+	StartedAt        *string                     `json:"started_at"`
+	FinishedAt       *string                     `json:"finished_at"`
+	BatchSizes       BatchSizes                  `json:"batch_sizes"`
+	Billing          BillingState                `json:"billing"`
+	UsageCost        UsageCost                   `json:"usage_cost"`
+	ReportedProblems Optional[[]ReportedProblem] `json:"reported_problems,omitzero"`
+	Extra            map[string]json.RawMessage  `json:"-"`
 }
 
 func (v *WikiOperation) UnmarshalJSON(b []byte) error {
@@ -334,7 +415,7 @@ func (v *WikiOperation) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"operation_id", "workspace_id", "kind", "status", "phase", "phases", "started_at", "finished_at", "batch_sizes", "billing", "usage_cost"})
+	extra, err := unknownFields(b, []string{"operation_id", "workspace_id", "kind", "status", "phase", "phases", "started_at", "finished_at", "batch_sizes", "billing", "usage_cost", "reported_problems"})
 	if err != nil {
 		return err
 	}
@@ -345,6 +426,11 @@ func (v *WikiOperation) UnmarshalJSON(b []byte) error {
 func (v WikiOperation) MarshalJSON() ([]byte, error) {
 	type plain WikiOperation
 	return marshalUnknown(plain(v), v.Extra)
+}
+
+type ReportedProblem struct {
+	FileID  string `json:"file_id"`
+	Message string `json:"message"`
 }
 
 type Category struct {
@@ -791,6 +877,7 @@ type ChatAttachmentUploadRequest struct {
 type ChatMessageRequest struct {
 	Message       string                     `json:"message"`
 	AttachmentIDs Optional[[]string]         `json:"attachment_ids,omitzero"`
+	StrictModel   Optional[bool]             `json:"strict_model,omitzero"`
 	Extra         map[string]json.RawMessage `json:"-"`
 }
 
@@ -800,7 +887,7 @@ func (v *ChatMessageRequest) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"message", "attachment_ids"})
+	extra, err := unknownFields(b, []string{"message", "attachment_ids", "strict_model"})
 	if err != nil {
 		return err
 	}
@@ -3053,6 +3140,16 @@ func (v *HealthCheckResult) UnmarshalJSON(b []byte) error {
 func (v HealthCheckResult) MarshalJSON() ([]byte, error) {
 	type plain HealthCheckResult
 	return marshalUnknown(plain(v), v.Extra)
+}
+
+type CancelDetachedTaskResult struct {
+	TaskID  string `json:"task_id"`
+	Status  string `json:"status"`
+	Subtree bool   `json:"subtree"`
+}
+
+type CancelDetachedTaskBody struct {
+	Subtree Optional[bool] `json:"subtree,omitzero"`
 }
 
 type ThrottleErrorErrorEnvelope struct {

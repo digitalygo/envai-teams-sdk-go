@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -27,36 +28,41 @@ func originalAttachmentUploaded(t *testing.T) json.RawMessage {
 
 func TestWaitForOriginalAttachmentRequiresReady(t *testing.T) {
 	ready := attachmentFixture(t, "original-ready")
+	// Compile the contract outside the polling clock: these assertions test
+	// lifecycle transitions and a short polling deadline, not cold compilation.
+	var validated ChatAttachment
+	if err := json.Unmarshal(ready, &validated); err != nil {
+		t.Fatal(err)
+	}
 	uploaded := originalAttachmentUploaded(t)
-	reads := 0
+	var reads atomic.Int32
 	c := attachmentClient(t, true, func(w http.ResponseWriter, r *http.Request) {
-		reads++
-		if reads == 1 {
+		if reads.Add(1) == 1 {
 			fmt.Fprintf(w, `{"data":%s}`, uploaded)
 			return
 		}
 		fmt.Fprintf(w, `{"data":%s}`, ready)
 	})
 	value, err := c.WaitForAttachment(context.Background(), "w", "c", "a", time.Millisecond, time.Second)
-	if err != nil || value.Lifecycle != "ready" || value.Conversion.Status != "not_required" || reads != 2 {
-		t.Fatal(value, err, reads)
+	if err != nil || value.Lifecycle != "ready" || value.Conversion.Status != "not_required" || reads.Load() != 2 {
+		t.Fatal(value, err, reads.Load())
 	}
-	reads = 0
+	reads.Store(0)
 	c = attachmentClient(t, true, func(w http.ResponseWriter, r *http.Request) {
-		reads++
+		reads.Add(1)
 		fmt.Fprintf(w, `{"data":%s}`, ready)
 	})
 	value, err = c.WaitForAttachment(context.Background(), "w", "c", "a", time.Millisecond, time.Second)
-	if err != nil || value.Conversion.Status != "not_required" || reads != 1 {
-		t.Fatal(value, err, reads)
+	if err != nil || value.Conversion.Status != "not_required" || reads.Load() != 1 {
+		t.Fatal(value, err, reads.Load())
 	}
-	reads = 0
+	reads.Store(0)
 	c = attachmentClient(t, true, func(w http.ResponseWriter, r *http.Request) {
-		reads++
+		reads.Add(1)
 		fmt.Fprintf(w, `{"data":%s}`, uploaded)
 	})
-	if _, err = c.WaitForAttachment(context.Background(), "w", "c", "a", time.Millisecond, 50*time.Millisecond); !errors.Is(err, context.DeadlineExceeded) || reads < 2 {
-		t.Fatal(err, reads)
+	if _, err = c.WaitForAttachment(context.Background(), "w", "c", "a", time.Millisecond, 50*time.Millisecond); !errors.Is(err, context.DeadlineExceeded) || reads.Load() < 2 {
+		t.Fatal(err, reads.Load())
 	}
 }
 

@@ -31,10 +31,12 @@ type ToolRequest struct {
 	Signature Signature       `json:"signature"`
 }
 type ToolInvocation struct {
-	ChatID    string
-	TurnID    string
-	CallID    string
-	Arguments json.RawMessage
+	TaskID       string
+	OriginTurnID string
+	ChatID       string
+	TurnID       string
+	CallID       string
+	Arguments    json.RawMessage
 }
 type ToolResult struct {
 	Output  string
@@ -235,6 +237,12 @@ func (r *ToolRunner) ObserveContext(ctx context.Context, e Event) error {
 	if err != nil || e.TurnID == nil {
 		return nil
 	}
+	return r.observeValidated(ctx, e)
+}
+func (r *ToolRunner) observeValidated(ctx context.Context, e Event) error {
+	if e.TurnID == nil {
+		return nil
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if e.Terminal() {
@@ -269,18 +277,27 @@ func (r *ToolRunner) ObserveContext(ctx context.Context, e Event) error {
 	return nil
 }
 func (r *ToolRunner) Handle(ctx context.Context, event Event, chatID string) error {
+	return r.handle(ctx, event, chatID)
+}
+func (r *ToolRunner) handle(ctx context.Context, event Event, chatID string) error {
 	admitted := time.Now()
 	if event.ChatID != chatID || event.Type != "agent.tool.request" || event.TurnID == nil {
 		return &ProtocolError{"tool request does not match execution context"}
+	}
+	scope := event.TurnID
+	if event.taskID != "" {
+		event.TurnID = &event.originTurnID
 	}
 	wire, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
+	taskID, originTurnID := event.taskID, event.originTurnID
 	event, err = DecodeEvent(wire)
 	if err != nil {
 		return err
 	}
+	event.TurnID = scope
 	var req ToolRequest
 	if err = json.Unmarshal(event.Data, &req); err != nil {
 		return err
@@ -319,6 +336,10 @@ func (r *ToolRunner) Handle(ctx context.Context, event Event, chatID string) err
 		return controlled("invalid_arguments")
 	}
 	invocation := ToolInvocation{ChatID: chatID, TurnID: *event.TurnID, CallID: req.CallID, Arguments: append(json.RawMessage(nil), req.Args...)}
+	invocation.TaskID, invocation.OriginTurnID = taskID, originTurnID
+	if taskID != "" {
+		invocation.TurnID = ""
+	}
 	if r.options.Authorize != nil {
 		if err = r.options.Authorize(ctx, invocation, req.ToolName); err != nil {
 			return controlled("tool_not_authorized")

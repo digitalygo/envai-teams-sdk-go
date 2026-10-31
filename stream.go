@@ -228,6 +228,7 @@ type TurnResult struct {
 	Terminal         Event
 }
 type TurnOptions struct {
+	StrictModel    bool
 	AttachmentIDs  []string
 	IdempotencyKey string
 	Stream         StreamOptions
@@ -270,6 +271,9 @@ func (c *Client) RunTurn(ctx context.Context, chatID, message string, options Tu
 		return TurnResult{}, err
 	}
 	request := SendChatMessageParams{ChatID: chatID, Body: ChatMessageRequest{Message: message}}
+	if options.StrictModel {
+		request.Body.StrictModel = Present(true)
+	}
 	if len(options.AttachmentIDs) > 0 {
 		request.Body.AttachmentIDs = Present(options.AttachmentIDs)
 	}
@@ -282,7 +286,15 @@ func (c *Client) RunTurn(ctx context.Context, chatID, message string, options Tu
 	}
 	result := TurnResult{ChatID: chatID, TurnID: accepted.TurnID}
 	replayCompleted := false
+	// Observe the entire replay before admitting any historical side effect.
+	// A result later in this batch can settle an earlier request even when
+	// the original turn is still running.
 	for _, event := range replay {
+		if options.Tools != nil && event.TurnID != nil && *event.TurnID == accepted.TurnID {
+			if err := options.Tools.ObserveContext(ctx, event); err != nil {
+				return result, err
+			}
+		}
 		if event.TurnID != nil && *event.TurnID == accepted.TurnID && event.Terminal() {
 			replayCompleted = true
 		}
