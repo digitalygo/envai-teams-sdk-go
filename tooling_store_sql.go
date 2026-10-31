@@ -43,6 +43,15 @@ func (s *SQLDefinitionStore) WithLock(ctx context.Context, scope string, fn func
 	if len(scope) > 191 {
 		return errors.New("envai: SQL definition scope exceeds 191 bytes")
 	}
+	if s.Dialect == "mysql" {
+		var count int
+		if e := s.DB.QueryRowContext(ctx, "SELECT COUNT(*) FROM information_schema.columns WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('envai_definition_state','envai_definition_locks') AND COLUMN_NAME='scope' AND DATA_TYPE='varbinary'").Scan(&count); e != nil {
+			return e
+		}
+		if count != 2 {
+			return errors.New("envai: MySQL definition scope columns require VARBINARY; apply an explicit schema migration")
+		}
+	}
 	token := make([]byte, 24)
 	if _, e := rand.Read(token); e != nil {
 		return e

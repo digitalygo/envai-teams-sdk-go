@@ -150,6 +150,21 @@ func TestSQLDefinitionStoreEngines(t *testing.T) {
 			if err = db.QueryRow("SELECT COUNT(*) FROM envai_definition_state WHERE scope=?", "two").Scan(&count); err != nil || count != 0 {
 				t.Fatal(count, err)
 			}
+			if dialect == "mysql" {
+				if _, e := db.Exec("DELETE FROM envai_definition_state"); e != nil {
+					t.Fatal(e)
+				}
+				if _, e := db.Exec("DELETE FROM envai_definition_locks"); e != nil {
+					t.Fatal(e)
+				}
+				if _, e := db.Exec("ALTER TABLE envai_definition_state MODIFY scope VARCHAR(191)"); e != nil {
+					t.Fatal(e)
+				}
+				if e := store.WithLock(ctx, "unsafe-schema", func(envai.DefinitionSession) error { t.Fatal("unsafe schema admitted"); return nil }); e == nil {
+					t.Fatal("unsafe schema accepted")
+				}
+			}
+
 		})
 	}
 }

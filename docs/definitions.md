@@ -125,3 +125,9 @@ The next lazy apply always replans under the exclusive store lock.
 The portable conformance fixtures are in `testdata/parity/tooling-golden.json`.
 They preserve historical PHP behavior; `safety-overrides.json` specifies the
 coordinated correction preventing false readiness after differing adoption.
+
+MySQL scope columns must use `VARBINARY(191)` in both state and lock tables.
+The adapter checks existing table metadata before acquiring a lock and rejects
+older case-insensitive `VARCHAR` schemas. Apply an explicit application-owned
+migration after resolving any pre-existing scope collisions; the SDK never
+alters an existing schema automatically.
