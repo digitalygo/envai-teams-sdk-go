@@ -28,7 +28,7 @@ Cancelling a Go context or closing the stream stops local work. It does not canc
 
 ## Error handling
 
-Use `errors.As` with `*envai.APIError` to inspect `Status`, `Type`, `Code`, `RequestID`, and `RetryAfter`. Branch on stable codes and status, not human-readable message text. `Message` and `Details` may contain sensitive server data; `Error()` intentionally omits them. Transport, protocol, replay, cancellation, and application-handler failures also return Go errors.
+Use `errors.As` with `*envai.APIError` to inspect `Status`, `Type`, `Code`, `RequestID`, and `RetryAfter`. Branch on stable codes and status, not human-readable message text. `Message` and `Details` may contain sensitive server data; `Error()` intentionally omits them. HTTP network failures return `*envai.TransportError` with an operation name and an unwrapped cause; its display text omits URLs and credentials. `errors.Is(err, context.Canceled)` and `errors.Is(err, context.DeadlineExceeded)` remain available. Protocol, replay and application-handler failures remain distinct Go errors.
 
 No mutation is automatically retried. If enabled with `RetryAttempts`, eligible JSON GETs retry supported transient statuses with jitter and `Retry-After`. Stream reconnects use their own budget, and binary/partially consumed responses are never retried as buffered JSON.
 

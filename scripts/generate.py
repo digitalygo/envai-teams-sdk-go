@@ -14,8 +14,10 @@ def name(x):
  return s
 extra={}
 wiki_types=set(json.loads((root/'contract/wiki.json').read_text())['$defs'])
-def typed_open(n):return n in wiki_types or n.removeprefix("ATP") in wiki_types or n=="Completion" or n.removeprefix("ATP") in {"ChatAttachment", "AttachmentManifest", "AttachmentConversion", "ChatAttachmentManifestEvent"}
+def typed_open(n):return n in wiki_types or n.removeprefix("ATP") in wiki_types or n=="Completion" or n.removeprefix("ATP") in {"TaskStarted", "TaskEvent", "TaskCompleted", "TaskFailed", "TaskCancelled", "ChatDeliveryQueued", "ChatDeliveryDelivered"} or n.removeprefix("ATP") in {"ChatAttachment", "AttachmentManifest", "AttachmentConversion", "ChatAttachmentManifestEvent"}
 def typ(s,hint):
+ native_enums={'NativeDeliveryRequestStatus':'DeliveryStatus','NativeDeliveryReceiptStatus':'DeliveryReceiptStatus','DetachedTaskSnapshotStatus':'TaskStatus','PhaseClassificationResultDecision':'PhaseDecision'}
+ if hint in native_enums:return native_enums[hint]
  if '$ref' in s:
   ref=s['$ref'];return ('ATP' if '/$defs/' in ref and not ref.startswith(('wiki.json','terminal-snapshot.json')) else '')+name(ref.rsplit('/',1)[-1])
  if 'anyOf' in s:
@@ -39,7 +41,8 @@ def decl(n,s):
  fields=[]
  for k,v in s['properties'].items():
   ty=typ(v,n+name(k)); required=k in s.get('required',[]); nullable='null' in v.get('type',[]) or any(x.get('type')=='null' for x in v.get('anyOf',[]))
-  if not required:ty='Optional['+ty+']'; tag=k+',omitzero'
+  if n=='NativeDeliveryRequest' and k=='origin_turn_id':tag=k+',omitempty'
+  elif not required:ty='Optional['+ty+']'; tag=k+',omitzero'
   else:
    tag=k
    if nullable and ty!='json.RawMessage' and not ty.startswith(('[]','map[')):ty='*'+ty
@@ -66,7 +69,7 @@ for path,items in api['paths'].items():
   oid=op['operationId']; n=name(oid); pars=[]
   for pp in items.get('parameters',[])+op.get('parameters',[]):
    p=api['components']['parameters'][pp['$ref'].rsplit('/',1)[-1]] if '$ref' in pp else pp
-   if p['name']!='X-Envai-Contract-Version':pars.append(p)
+   if p['name'] not in {'X-Envai-Contract-Version','X-Envai-Extensions'}:pars.append(p)
   auth=op.get('security',api.get('security',[]))!=[]
   content=op.get('requestBody',{}).get('content',{});bodytype='';bodykind=''
   if 'application/json' in content:bodytype=typ(content['application/json']['schema'],n+'Body');bodykind='json'
@@ -134,7 +137,7 @@ for path,methods in api['paths'].items():
   oid=op['operationId'];entry={'id':oid,'go_name':name(oid),'parameters':{},'body':None,'status':204,'response':None}
   for pp in op.get('parameters',[]):
    p=api['components']['parameters'][pp['$ref'].rsplit('/',1)[-1]] if '$ref' in pp else pp
-   if p['name']!='X-Envai-Contract-Version':entry['parameters'][name(p['name'])]=sample(p['schema'])
+   if p['name'] not in {'X-Envai-Contract-Version','X-Envai-Extensions'}:entry['parameters'][name(p['name'])]=sample(p['schema'])
   content=op.get('requestBody',{}).get('content',{})
   if 'application/json' in content:entry['body']=sample(content['application/json']['schema'])
   for status,r in op.get('responses',{}).items():
@@ -144,6 +147,8 @@ for path,methods in api['paths'].items():
     break
   if oid=='resolveChatApproval':entry['status']=409;entry['response']={'error':{'type':'conflict','message':'approval unavailable'}}
   cases.append(entry)
+for entry in cases:
+ if entry['id']=='classifyChoice':entry['body']['choices']=[{'label':'fixture','description':'First choice'},{'label':'alternative','description':'Second choice'}]
 # Use shared valid Wiki fixtures, not arbitrary shape samples, for constrained models.
 wiki_fixtures={'uploadWikiSource':'source-accepted','getWikiSource':'source-accepted','withdrawWikiSource':'source-accepted','createWikiInboxRun':'operation-completed','createWikiOutboxRun':'operation-completed','createWikiSyncRun':'operation-completed','getWikiOperation':'operation-completed','listWikiCategories':'categories','getWikiCategoryIndex':'category-index'}
 for case in cases:

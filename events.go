@@ -16,16 +16,18 @@ type EventAgent struct {
 	Model      string  `json:"model,omitempty"`
 }
 type Event struct {
-	V      int             `json:"v"`
-	ID     string          `json:"id"`
-	Seq    int64           `json:"seq"`
-	TS     string          `json:"ts"`
-	ChatID string          `json:"chat_id"`
-	TurnID *string         `json:"turn_id"`
-	Agent  *EventAgent     `json:"agent"`
-	Type   string          `json:"type"`
-	Data   json.RawMessage `json:"data"`
-	Raw    json.RawMessage `json:"-"`
+	taskID       string
+	originTurnID string
+	V            int             `json:"v"`
+	ID           string          `json:"id"`
+	Seq          int64           `json:"seq"`
+	TS           string          `json:"ts"`
+	ChatID       string          `json:"chat_id"`
+	TurnID       *string         `json:"turn_id"`
+	Agent        *EventAgent     `json:"agent"`
+	Type         string          `json:"type"`
+	Data         json.RawMessage `json:"data"`
+	Raw          json.RawMessage `json:"-"`
 }
 
 func (e Event) Terminal() bool {
