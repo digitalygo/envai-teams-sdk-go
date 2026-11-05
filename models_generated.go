@@ -3,9 +3,10 @@ package envai
 import "encoding/json"
 
 type NativeDeliveryRequest struct {
+	StrictModel  Optional[bool] `json:"strict_model,omitzero"`
 	WorkspaceID  string         `json:"workspace_id"`
 	EventID      string         `json:"event_id"`
-	OriginTurnID string         `json:"origin_turn_id"`
+	OriginTurnID string         `json:"origin_turn_id,omitempty"`
 	TaskID       string         `json:"task_id"`
 	Output       string         `json:"output"`
 	Status       DeliveryStatus `json:"status"`
@@ -65,6 +66,32 @@ func (v *DetachedTaskSnapshot) UnmarshalJSON(b []byte) error {
 func (v DetachedTaskSnapshot) MarshalJSON() ([]byte, error) {
 	type plain DetachedTaskSnapshot
 	return marshalUnknown(plain(v), v.Extra)
+}
+
+type IndependentJobRequest struct {
+	WorkspaceID string         `json:"workspace_id"`
+	RequestID   string         `json:"request_id"`
+	Prompt      string         `json:"prompt"`
+	StrictModel Optional[bool] `json:"strict_model,omitzero"`
+}
+
+type IndependentJobReceipt struct {
+	TaskID string `json:"task_id"`
+	TurnID string `json:"turn_id"`
+}
+
+type ChoiceClassificationRequest struct {
+	RequestID string                                   `json:"request_id"`
+	Context   json.RawMessage                          `json:"context"`
+	Question  string                                   `json:"question"`
+	Choices   []ChoiceClassificationRequestChoicesItem `json:"choices"`
+}
+
+type ChoiceClassificationResult struct {
+	Choice       string `json:"choice"`
+	Model        string `json:"model"`
+	RequestID    string `json:"request_id"`
+	InvocationID string `json:"invocation_id"`
 }
 
 type PhaseClassificationRequest struct {
@@ -3502,4 +3529,9 @@ type CompletionTerminalSnapshotData struct {
 	Message      Optional[string]                              `json:"message,omitzero"`
 	ChatUsage    Optional[CompletionTerminalSnapshotChatUsage] `json:"chat_usage,omitzero"`
 	ChatCost     Optional[float64]                             `json:"chat_cost,omitzero"`
+}
+
+type ChoiceClassificationRequestChoicesItem struct {
+	Label       string `json:"label"`
+	Description string `json:"description"`
 }

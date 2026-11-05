@@ -204,11 +204,26 @@ func (c *Client) WaitTask(ctx context.Context, chatID, taskID string, interval t
 // validateNativeIdentity also protects generated low-level operation methods.
 func validateNativeIdentity(id string, params map[string]any, body any, raw []byte) error {
 	var result map[string]json.RawMessage
-	if id != "getDetachedTask" && id != "cancelDetachedTask" && id != "delegateToTeam" && id != "classifyPhase" && id != "deliverWorkflowResult" {
+	if id != "startIndependentJob" && id != "getDetachedTask" && id != "cancelDetachedTask" && id != "delegateToTeam" && id != "classifyPhase" && id != "classifyChoice" && id != "deliverWorkflowResult" {
 		return nil
 	}
 	if json.Unmarshal(raw, &result) != nil {
 		return &ProtocolError{"invalid native response"}
+	}
+	if id == "startIndependentJob" || id == "classifyChoice" {
+		keys := []string{"model", "invocation_id"}
+		if id == "startIndependentJob" {
+			keys = []string{"task_id", "turn_id"}
+		}
+		for _, key := range keys {
+			var value string
+			if json.Unmarshal(result[key], &value) != nil || value == "" {
+				return &ProtocolError{"native response omitted " + key}
+			}
+		}
+		if id == "startIndependentJob" {
+			return nil
+		}
 	}
 	requestBytes, _ := json.Marshal(body)
 	var request map[string]json.RawMessage
@@ -216,6 +231,21 @@ func validateNativeIdentity(id string, params map[string]any, body any, raw []by
 	matches := func(key string, expected any) bool {
 		var actual string
 		return json.Unmarshal(result[key], &actual) == nil && actual != "" && actual == expected
+	}
+	if id == "classifyChoice" {
+		var choice string
+		var choices []struct {
+			Label string `json:"label"`
+		}
+		_ = json.Unmarshal(result["choice"], &choice)
+		_ = json.Unmarshal(request["choices"], &choices)
+		found := false
+		for _, candidate := range choices {
+			found = found || candidate.Label == choice
+		}
+		if !found {
+			return &ProtocolError{"classifier returned an unknown choice"}
+		}
 	}
 	switch id {
 	case "getDetachedTask", "cancelDetachedTask":
@@ -241,7 +271,7 @@ func validateNativeIdentity(id string, params map[string]any, body any, raw []by
 			}
 		}
 	default:
-		key := map[string]string{"delegateToTeam": "target_chat_id", "classifyPhase": "request_id", "deliverWorkflowResult": "event_id"}[id]
+		key := map[string]string{"delegateToTeam": "target_chat_id", "classifyPhase": "request_id", "classifyChoice": "request_id", "deliverWorkflowResult": "event_id"}[id]
 		var expected string
 		_ = json.Unmarshal(request[key], &expected)
 		if !matches(key, expected) {

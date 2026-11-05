@@ -6,6 +6,7 @@
       "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": {
+      "strict_model": true,
       "workspace_id": "fixture",
       "event_id": "fixture",
       "origin_turn_id": "fixture",
@@ -101,6 +102,53 @@
       "request_id": "fixture",
       "invocation_id": "fixture",
       "decision": "BLOCKED"
+    }
+  },
+  {
+    "id": "classifyChoice",
+    "go_name": "ClassifyChoice",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "request_id": "fixture",
+      "context": {},
+      "question": "fixture",
+      "choices": [
+        {
+          "label": "fixture",
+          "description": "First choice"
+        },
+        {
+          "label": "alternative",
+          "description": "Second choice"
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "choice": "fixture",
+      "model": "fixture",
+      "request_id": "fixture",
+      "invocation_id": "fixture"
+    }
+  },
+  {
+    "id": "startIndependentJob",
+    "go_name": "StartIndependentJob",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "workspace_id": "fixture",
+      "request_id": "fixture",
+      "prompt": "fixture",
+      "strict_model": true
+    },
+    "status": 202,
+    "response": {
+      "task_id": "fixture",
+      "turn_id": "fixture"
     }
   },
   {

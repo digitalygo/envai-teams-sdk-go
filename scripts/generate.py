@@ -41,7 +41,8 @@ def decl(n,s):
  fields=[]
  for k,v in s['properties'].items():
   ty=typ(v,n+name(k)); required=k in s.get('required',[]); nullable='null' in v.get('type',[]) or any(x.get('type')=='null' for x in v.get('anyOf',[]))
-  if not required:ty='Optional['+ty+']'; tag=k+',omitzero'
+  if n=='NativeDeliveryRequest' and k=='origin_turn_id':tag=k+',omitempty'
+  elif not required:ty='Optional['+ty+']'; tag=k+',omitzero'
   else:
    tag=k
    if nullable and ty!='json.RawMessage' and not ty.startswith(('[]','map[')):ty='*'+ty
@@ -146,6 +147,8 @@ for path,methods in api['paths'].items():
     break
   if oid=='resolveChatApproval':entry['status']=409;entry['response']={'error':{'type':'conflict','message':'approval unavailable'}}
   cases.append(entry)
+for entry in cases:
+ if entry['id']=='classifyChoice':entry['body']['choices']=[{'label':'fixture','description':'First choice'},{'label':'alternative','description':'Second choice'}]
 # Use shared valid Wiki fixtures, not arbitrary shape samples, for constrained models.
 wiki_fixtures={'uploadWikiSource':'source-accepted','getWikiSource':'source-accepted','withdrawWikiSource':'source-accepted','createWikiInboxRun':'operation-completed','createWikiOutboxRun':'operation-completed','createWikiSyncRun':'operation-completed','getWikiOperation':'operation-completed','listWikiCategories':'categories','getWikiCategoryIndex':'category-index'}
 for case in cases:

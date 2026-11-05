@@ -62,7 +62,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 		Path          string `json:"path"`
 		Authenticated bool   `json:"authenticated"`
 	}](t, "operations.json")
-	if len(cases) != 76 || len(inventory) != 76 {
+	if len(cases) != 78 || len(inventory) != 78 {
 		t.Fatal("contract inventory changed")
 	}
 	for _, tc := range cases {
@@ -74,7 +74,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 					if strings.Contains(tc.ID, "ChatAttachment") {
 						fmt.Fprint(w, strings.Replace(testCapabilities, `"features":[]`, `"features":["chat_attachments","chat_attachment_originals","native_deliveries","cross_team_delegation","detached_background","phase_classification","delegated_job_lifecycle","delegation_notify_origin","strict_model"]`, 1))
 					} else {
-						fmt.Fprint(w, backgroundCapabilities)
+						fmt.Fprint(w, independentCapabilities)
 					}
 					return
 				}
@@ -304,7 +304,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(c.OperationIDs()) != 76 {
+	if len(c.OperationIDs()) != 78 {
 		t.Fatal("inventory")
 	}
 	if _, err = c.requestURL(c.operations["getUserTool"], map[string]any{"name": "../x"}); err == nil {

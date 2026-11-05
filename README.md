@@ -6,7 +6,7 @@ Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v3, wi
 
 The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
-Includes named, typed methods for all **76 HTTP operations**, **36 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+Includes named, typed methods for all **78 HTTP operations**, **36 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
 
 - [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
 - [Definitions compiler, reconciliation and CLI](docs/definitions.md)

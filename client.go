@@ -508,6 +508,16 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 	if err = c.validateNegotiatedJSON(id, b); err != nil {
 		return err
 	}
+	if id == "getDetachedTask" {
+		var task struct {
+			Origin string `json:"origin_turn_id"`
+		}
+		if json.Unmarshal(b, &task) == nil && task.Origin == "" {
+			if err = c.requireFeatures(ctx, "independent_jobs"); err != nil {
+				return err
+			}
+		}
+	}
 	if err = validateNativeIdentity(id, params, body, b); err != nil {
 		return err
 	}

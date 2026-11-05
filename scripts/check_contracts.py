@@ -5,7 +5,7 @@ import pathlib
 import re
 
 # Exact reviewed backend source pin; this does not imply a published release.
-EXPECTED_CONTRACT_COMMIT = '3a9ecf3a4ccd3291474848d3dc9d0100170b9e54'
+EXPECTED_CONTRACT_COMMIT = '18ce9124604874d8d4bac784b521171d2ff9e064'
 
 def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())
@@ -17,7 +17,7 @@ def verify(root):
         assert provenance['status'] == 'working-tree snapshot awaiting guarded backend publication'
     else:
         assert re.fullmatch('[0-9a-f]{40}', EXPECTED_CONTRACT_COMMIT)
-    assert provenance['protocol_version'] == 3 and provenance['operations'] == 76
+    assert provenance['protocol_version'] == 3 and provenance['operations'] == 78
     sources = provenance['sources']
     assert set(sources) == set(expected_paths), 'Incomplete source inventory'
     assert 'files' not in provenance, 'Sources and fixtures must be separated'
@@ -44,9 +44,9 @@ def verify(root):
             assert hashlib.sha256(data).hexdigest() == entry['sha256'], name + ' SHA256'
     actual = json.loads((root / 'contract/operations.json').read_text())
     expected = json.loads((root / 'testdata/operations.json').read_text())
-    assert len(actual) == 76
+    assert len(actual) == 78
     assert [{k: op[k] for k in ['id', 'method', 'path', 'authenticated']} for op in actual] == expected
 
 if __name__ == '__main__':
     verify(pathlib.Path(__file__).resolve().parent.parent)
-    print('All 6 shared contracts, attributed fixtures and 76-operation inventory verified')
+    print('All 6 shared contracts, attributed fixtures and 78-operation inventory verified')

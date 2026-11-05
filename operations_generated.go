@@ -73,6 +73,32 @@ func (c *Client) ClassifyPhase(ctx context.Context, req ClassifyPhaseParams) (Ph
 	return out, err
 }
 
+type ClassifyChoiceParams struct {
+	ChatID string
+	Body   ChoiceClassificationRequest
+}
+
+func (c *Client) ClassifyChoice(ctx context.Context, req ClassifyChoiceParams) (ChoiceClassificationResult, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	var out ChoiceClassificationResult
+	err := c.call(ctx, "classifyChoice", p, req.Body, &out)
+	return out, err
+}
+
+type StartIndependentJobParams struct {
+	ChatID string
+	Body   IndependentJobRequest
+}
+
+func (c *Client) StartIndependentJob(ctx context.Context, req StartIndependentJobParams) (IndependentJobReceipt, error) {
+	p := map[string]any{}
+	p["chat_id"] = req.ChatID
+	var out IndependentJobReceipt
+	err := c.call(ctx, "startIndependentJob", p, req.Body, &out)
+	return out, err
+}
+
 type SendChatMessageParams struct {
 	ChatID         string
 	IdempotencyKey Optional[string]

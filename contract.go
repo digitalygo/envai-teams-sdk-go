@@ -61,11 +61,34 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 		return &CompatibilityError{Reason: "contract 3 capabilities preflight failed before mutation", Cause: err}
 	}
 
+	if op.ID == "classifyChoice" || op.ID == "startIndependentJob" {
+		data, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+		if op.ID == "classifyChoice" {
+			var input ChoiceClassificationRequest
+			if json.Unmarshal(data, &input) != nil || len(input.Context) == 0 || strings.TrimSpace(string(input.Context)) == "null" {
+				return errors.New("envai: choice context must be non-null JSON")
+			}
+			labels := map[string]bool{}
+			for _, choice := range input.Choices {
+				if labels[choice.Label] {
+					return errors.New("envai: choice labels must be unique")
+				}
+				labels[choice.Label] = true
+			}
+		}
+		definition := map[string]string{"classifyChoice": "ChoiceClassificationRequest", "startIndependentJob": "IndependentJobRequest"}[op.ID]
+		if err := validateDefinition("openapi.json", definition, data); err != nil {
+			return err
+		}
+	}
 	requiredFeatures := []string{}
 	if c.config.NativeTasks && atpOperation(op) {
 		requiredFeatures = append(requiredFeatures, "detached_background")
 	}
-	if (op.ID == "deliverWorkflowResult" || op.ID == "delegateToTeam" || op.ID == "cancelDetachedTask" || op.ID == "classifyPhase") && !c.config.NativeTasks {
+	if (op.ID == "deliverWorkflowResult" || op.ID == "delegateToTeam" || op.ID == "cancelDetachedTask" || op.ID == "classifyPhase" || op.ID == "classifyChoice" || op.ID == "startIndependentJob") && !c.config.NativeTasks {
 		return &CompatibilityError{Reason: "native API requires Config.NativeTasks"}
 	}
 	switch op.ID {
@@ -75,10 +98,14 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 		requiredFeatures = append(requiredFeatures, "cross_team_delegation", "delegated_job_lifecycle")
 	case "cancelDetachedTask":
 		requiredFeatures = append(requiredFeatures, "detached_background")
+	case "startIndependentJob":
+		requiredFeatures = append(requiredFeatures, "independent_jobs")
+	case "classifyChoice":
+		requiredFeatures = append(requiredFeatures, "finite_choice_classification")
 	case "classifyPhase":
 		requiredFeatures = append(requiredFeatures, "phase_classification")
 	}
-	if op.ID == "sendChatMessage" || op.ID == "delegateToTeam" {
+	if op.ID == "sendChatMessage" || op.ID == "delegateToTeam" || op.ID == "startIndependentJob" || op.ID == "deliverWorkflowResult" {
 		data, err := json.Marshal(body)
 		if err != nil {
 			return err
@@ -86,6 +113,13 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 		var flags map[string]json.RawMessage
 		if err = json.Unmarshal(data, &flags); err != nil {
 			return err
+		}
+		if op.ID == "deliverWorkflowResult" {
+			var origin string
+			_ = json.Unmarshal(flags["origin_turn_id"], &origin)
+			if origin == "" {
+				requiredFeatures = append(requiredFeatures, "originless_deliveries")
+			}
 		}
 		if raw, ok := flags["strict_model"]; ok {
 			var enabled bool
@@ -163,6 +197,8 @@ func (c *Client) validateNegotiatedJSON(id string, b []byte) error {
 		"delegateToTeam":        "TeamDelegationReceipt",
 		"getDetachedTask":       "DetachedTaskSnapshot",
 		"classifyPhase":         "PhaseClassificationResult",
+		"classifyChoice":        "ChoiceClassificationResult",
+		"startIndependentJob":   "IndependentJobReceipt",
 	}
 	if definition := definitions[id]; definition != "" {
 		if err := validateDefinition("openapi.json", definition, b); err != nil {
