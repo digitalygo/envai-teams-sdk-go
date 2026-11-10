@@ -165,6 +165,12 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			}
 			results := method.Call([]reflect.Value{reflect.ValueOf(context.Background()), req})
 			last := results[len(results)-1]
+			if strings.HasPrefix(client.operations[tc.ID].Path, "/api-keys") {
+				if last.IsNil() || !errors.Is(last.Interface().(error), ErrAPIKeyManagementUnsupported) || calls != 0 {
+					t.Fatal("session-only operation must fail before HTTP", last, calls)
+				}
+				return
+			}
 			if tc.Status == 409 {
 				if last.IsNil() {
 					t.Fatal("stub silently succeeded")
@@ -307,7 +313,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if len(c.OperationIDs()) != 78 {
 		t.Fatal("inventory")
 	}
-	if _, err = c.requestURL(c.operations["getUserTool"], map[string]any{"name": "../x"}); err == nil {
+	if _, err = c.requestURL(c.operations["getProjectTool"], map[string]any{"name": "../x"}); err == nil {
 		t.Fatal("traversal")
 	}
 	if _, err = c.requestURL(c.operations["getWorkspace"], nil); err == nil {
@@ -316,7 +322,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if _, err = c.requestURL(c.operations["getWorkspace"], map[string]any{"workspace_id": "id", "extra": 1}); err == nil {
 		t.Fatal("unknown")
 	}
-	u, err := c.requestURL(c.operations["getUserTool"], map[string]any{"name": "a b%"})
+	u, err := c.requestURL(c.operations["getProjectTool"], map[string]any{"name": "a b%"})
 	if err != nil || !strings.HasSuffix(u, "a%20b%25") {
 		t.Fatal(u, err)
 	}

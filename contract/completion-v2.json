@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frozen contract 2 completion responses",
+  "$defs": {
+    "Completion": {
+      "type": "object",
+      "description": "Metadata-only record of a model turn inside a chat, with id `cmpl_<ulid>`. It never contains message content: usage, cost and lifecycle fields summarize the turn while the content lives in the execution plane stream. The `user_id` property is the owner user.\n",
+      "required": [
+        "id",
+        "workspace_id",
+        "chat_id",
+        "team_id",
+        "user_id",
+        "models_subagents",
+        "started_at",
+        "usage",
+        "cost_usd",
+        "status",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Completion id `cmpl_<ulid>`, 31 characters",
+          "example": "cmpl_01j5abcdefghjkmnpqrstvwxyz"
+        },
+        "workspace_id": {
+          "type": "string",
+          "description": "Workspace id `wsp_<ulid>`, 30 characters",
+          "example": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+        },
+        "chat_id": {
+          "type": "string",
+          "description": "Chat id `cht_<ulid>`, 30 characters",
+          "example": "cht_01j5abcdefghjkmnpqrstvwxyz"
+        },
+        "team_id": {
+          "type": "string",
+          "maxLength": 31,
+          "description": "Team id `team_<ulid>` selected by the chat at creation",
+          "example": "team_01j5abcdefghjkmnpqrstvwxyz"
+        },
+        "user_id": {
+          "type": "string",
+          "description": "Owner user id `usr_<ulid>`, 30 characters",
+          "example": "usr_01j5abcdefghjkmnpqrstvwxyz"
+        },
+        "model_orchestrator": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Model id used by the team orchestrator, or null when not yet resolved",
+          "example": "anthropic/claude-sonnet-4"
+        },
+        "models_subagents": {
+          "type": "array",
+          "description": "Model ids used by the subagents of the turn",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "openai/gpt-4o"
+          ]
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Turn start timestamp in UTC"
+        },
+        "finished_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "Turn end timestamp in UTC, null while the turn is running"
+        },
+        "duration_ms": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Turn duration in milliseconds, null while the turn is running"
+        },
+        "usage": {
+          "type": "object",
+          "description": "Aggregated usage metadata of the turn",
+          "properties": {
+            "prompt_tokens": {
+              "type": "integer"
+            },
+            "completion_tokens": {
+              "type": "integer"
+            },
+            "sprite_cpu_ms": {
+              "type": "integer"
+            },
+            "sprite_ram_gb_ms": {
+              "type": "integer"
+            }
+          }
+        },
+        "cost_usd": {
+          "type": "number",
+          "format": "double",
+          "description": "Aggregated turn cost in USD (LLM plus Fly.io Sprites), sub-cent precision"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "running",
+            "succeeded",
+            "failed",
+            "canceled"
+          ]
+        },
+        "finish_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "stop",
+            "error",
+            "canceled",
+            null
+          ]
+        },
+        "content_hash": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Optional hash of the turn content; the content itself is never stored"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Resource": {
+      "type": "object",
+      "description": "Laravel JsonResource wrapper for a single completion",
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "data": {
+          "$ref": "#/$defs/Completion"
+        }
+      }
+    },
+    "Collection": {
+      "type": "object",
+      "description": "Laravel JsonResource collection wrapper for a paginated completion list",
+      "required": [
+        "data",
+        "links",
+        "meta"
+      ],
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Completion"
+          }
+        },
+        "links": {
+          "type": "object",
+          "properties": {
+            "first": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "last": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "prev": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "next": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "current_page": {
+              "type": "integer"
+            },
+            "from": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "last_page": {
+              "type": "integer"
+            },
+            "per_page": {
+              "type": "integer"
+            },
+            "to": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "total": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}

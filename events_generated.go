@@ -73,6 +73,7 @@ type ATPChatTitleUpdated struct {
 type ATPTurnStarted struct {
 	TurnID      string                                     `json:"turn_id"`
 	Input       string                                     `json:"input"`
+	Source      Optional[string]                           `json:"source,omitzero"`
 	Attachments Optional[[]ATPChatAttachmentManifestEvent] `json:"attachments,omitzero"`
 }
 
@@ -566,6 +567,31 @@ func (v ATPChatDeliveryDelivered) MarshalJSON() ([]byte, error) {
 	return marshalUnknown(plain(v), v.Extra)
 }
 
+type ATPChatCronWakeup struct {
+	CronID       string `json:"cron_id"`
+	OccurrenceID string `json:"occurrence_id"`
+	ScheduledAt  string `json:"scheduled_at"`
+	DeliveredAt  string `json:"delivered_at"`
+	Prompt       string `json:"prompt"`
+	TargetMode   string `json:"target_mode"`
+	DispatchMode string `json:"dispatch_mode"`
+}
+
+type ATPBillingLimitReached struct {
+	Reason    string           `json:"reason"`
+	Scope     string           `json:"scope"`
+	Currency  string           `json:"currency"`
+	ResetAt   Optional[string] `json:"reset_at,omitzero"`
+	Amount    Optional[string] `json:"amount,omitzero"`
+	Remaining Optional[string] `json:"remaining,omitzero"`
+}
+
+type ATPBillingCreditExhausted struct {
+	Reason   string `json:"reason"`
+	Scope    string `json:"scope"`
+	Currency string `json:"currency"`
+}
+
 type ATPAgentToolRequestSignature struct {
 	Alg string `json:"alg"`
 	Kid string `json:"kid"`
@@ -716,6 +742,18 @@ func (e Event) TypedPayload() (any, error) {
 		return value, err
 	case "chat.delivery.delivered":
 		var value ATPChatDeliveryDelivered
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "chat.cron.wakeup":
+		var value ATPChatCronWakeup
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "billing.limit_reached":
+		var value ATPBillingLimitReached
+		err := json.Unmarshal(e.Data, &value)
+		return value, err
+	case "billing.credit_exhausted":
+		var value ATPBillingCreditExhausted
 		err := json.Unmarshal(e.Data, &value)
 		return value, err
 	}

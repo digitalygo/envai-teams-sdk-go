@@ -1,0 +1,88 @@
+{
+  "getWorkspace": {
+    "data": {
+      "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "project_id": "prj_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "created_by_user_id": null,
+      "name": "Product analytics",
+      "metadata": [],
+      "created_at": "2026-11-10T03:00:00Z",
+      "updated_at": "2026-11-10T03:00:00Z"
+    }
+  },
+  "getChat": {
+    "data": {
+      "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "project_id": "prj_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "created_by_user_id": null,
+      "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+      "title": "fixture",
+      "created_at": "2026-11-10T03:00:00Z",
+      "updated_at": "2026-11-10T03:00:00Z"
+    }
+  },
+  "getCompletion": {
+    "data": {
+      "id": "cmpl_01j5abcdefghjkmnpqrstvwxyz",
+      "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+      "project_id": "prj_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "api_key_id": "key_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "user_id": null,
+      "model_orchestrator": "anthropic/claude-sonnet-4",
+      "models_subagents": [
+        "openai/gpt-4o"
+      ],
+      "started_at": "2026-11-10T03:00:00Z",
+      "finished_at": "2026-11-10T03:00:00Z",
+      "duration_ms": 1,
+      "usage": {
+        "prompt_tokens": 1,
+        "completion_tokens": 1,
+        "sprite_cpu_ms": 1,
+        "sprite_ram_gb_ms": 1
+      },
+      "cost_usd": 0.00125,
+      "status": "succeeded",
+      "finish_reason": "stop",
+      "content_hash": "fixture",
+      "created_at": "2026-11-10T03:00:00Z",
+      "updated_at": "2026-11-10T03:00:00Z"
+    }
+  },
+  "getAgent": {
+    "data": {
+      "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+      "project_id": "prj_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "created_by_user_id": null,
+      "name": "researcher",
+      "description": "Research specialist",
+      "system_prompt": "fixture",
+      "model": "anthropic/claude-sonnet-4-5",
+      "mode": "primary",
+      "tools_enabled": [],
+      "external_tools_enabled": [],
+      "permissions": {},
+      "can_write_knowledge": true,
+      "can_write_skills": true,
+      "config": {},
+      "created_at": "2026-11-10T03:00:00Z",
+      "updated_at": "2026-11-10T03:00:00Z"
+    }
+  },
+  "getTeam": {
+    "data": {
+      "id": "team_01j5abcdefghjkmnpqrstvwxyz",
+      "project_id": "prj_01ARZ3NDEKTSV4RRFFQ69G5FAV",
+      "created_by_user_id": null,
+      "name": "Research team",
+      "description": "fixture",
+      "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
+      "members": [],
+      "created_at": "2026-11-10T03:00:00Z",
+      "updated_at": "2026-11-10T03:00:00Z"
+    }
+  }
+}

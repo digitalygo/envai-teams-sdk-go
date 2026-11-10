@@ -106,7 +106,7 @@ func definitionNormalize(kind string, p DefinitionPayload, reverse map[string]st
 	if q == nil {
 		return nil
 	}
-	for _, k := range []string{"id", "user_id", "created_at", "updated_at"} {
+	for _, k := range []string{"id", "user_id", "project_id", "created_by_user_id", "created_at", "updated_at"} {
 		delete(q, k)
 	}
 	optional := []string{"description"}

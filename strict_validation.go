@@ -189,6 +189,17 @@ func (c *Client) validateStrictResponse(op operation, status int, raw []byte) er
 	if schema == nil {
 		return strictContractError(op, "JSON success body")
 	}
+	// Historical reads retain the frozen numeric/owner contract, not v3 tenancy.
+	if c.config.LegacyReadOnly && (op.ID == "getCompletion" || op.ID == "listCompletions") {
+		definition := "Resource"
+		if op.ID == "listCompletions" {
+			definition = "Collection"
+		}
+		if err = validateSchema("completion-v2.json", "#/$defs/"+definition, raw); err != nil {
+			return strictContractError(op, "legacy JSON success body")
+		}
+		return nil
+	}
 	// Discovery lists are additive and features also accept the existing strict
 	// boolean-map wire representation. Validate their types, then project only
 	// those fields for canonical validation without changing decoded discovery.

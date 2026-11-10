@@ -4,6 +4,7 @@ class Loader(yaml.SafeLoader):pass
 Loader.add_constructor('tag:yaml.org,2002:int',lambda loader,node:node.value if ':' in node.value else yaml.SafeLoader.construct_yaml_int(loader,node))
 api=yaml.load((root/'contract/openapi.yaml').read_text(),Loader=Loader)
 schemas=api['components']['schemas']
+allowed_operations=set(json.loads((root/'scripts/sdk-operations.json').read_text()))
 (root/'contract/openapi.json').write_text(json.dumps(api,indent=2)+'\n')
 def name(x):
  x=re.sub(r'[^A-Za-z0-9]+',' ',x)
@@ -37,7 +38,9 @@ def typ(s,hint):
  if t=='boolean':return 'bool'
  return 'json.RawMessage'
 def decl(n,s):
- if 'properties' not in s or (s.get('additionalProperties') is True and not typed_open(n)):return 'type '+n+' '+typ(s,n)+'\n'
+ if 'properties' not in s or (s.get('additionalProperties') is True and not typed_open(n)):
+  ty=typ(s,n)
+  return 'type '+n+(' = ' if ty=='json.RawMessage' else ' ')+ty+'\n'
  fields=[]
  for k,v in s['properties'].items():
   ty=typ(v,n+name(k)); required=k in s.get('required',[]); nullable='null' in v.get('type',[]) or any(x.get('type')=='null' for x in v.get('anyOf',[]))
@@ -62,10 +65,11 @@ def unknown_methods(n,s):
  return 'func(v *'+n+') UnmarshalJSON(b []byte)error{'+validation+'type plain '+n+';var out plain;if err:=json.Unmarshal(b,&out);err!=nil{return err};extra,err:=unknownFields(b,[]string{'+keys+'});if err!=nil{return err};out.Extra=extra;*v='+n+'(out);return nil}\nfunc(v '+n+') MarshalJSON()([]byte,error){type plain '+n+';return marshalUnknown(plain(v),v.Extra)}\n'
 models=[]
 for k,v in schemas.items(): models.append(decl(name(k),v))
+models.extend('type '+old+' = '+new+'\n' for new in schemas if new.startswith('ProjectTool') for old in [new.replace('ProjectTool','UserTool')])
 ops=[]; wrappers=[]
 for path,items in api['paths'].items():
  for method,op in items.items():
-  if not isinstance(op,dict) or 'operationId' not in op:continue
+  if not isinstance(op,dict) or op.get('operationId') not in allowed_operations:continue
   oid=op['operationId']; n=name(oid); pars=[]
   for pp in items.get('parameters',[])+op.get('parameters',[]):
    p=api['components']['parameters'][pp['$ref'].rsplit('/',1)[-1]] if '$ref' in pp else pp
@@ -105,6 +109,11 @@ for path,items in api['paths'].items():
    elif not rt:code+='return c.call(ctx, "'+oid+'", p, '+body+', nil)\n}\n'
    else:code+='var out '+rt+'\nerr := c.call(ctx, "'+oid+'", p, '+body+', &out)\nreturn out, err\n}\n'
   wrappers.append(code)
+  if 'ProjectTool' in n:
+   old=n.replace('ProjectTool','UserTool')
+   wrappers.append('// Deprecated: use '+n+'. Tools are scoped to the key project, not the user.\ntype '+old+'Params = '+n+'Params\n')
+   wrappers.append('// Deprecated: use '+n+'. This alias uses project scope.\n'+start.replace(n,old)+ret+' { return c.'+n+'(ctx, req) }\n')
+assert {op["id"] for op in ops} == allowed_operations, "Reviewed SDK operation missing from canonical source"
 while extra:
  n,s=extra.popitem()
  if n in [name(x) for x in schemas]:continue
@@ -133,7 +142,7 @@ def sample(s,depth=0):
 cases=[]
 for path,methods in api['paths'].items():
  for method,op in methods.items():
-  if not isinstance(op,dict) or 'operationId' not in op:continue
+  if not isinstance(op,dict) or op.get('operationId') not in allowed_operations:continue
   oid=op['operationId'];entry={'id':oid,'go_name':name(oid),'parameters':{},'body':None,'status':204,'response':None}
   for pp in op.get('parameters',[]):
    p=api['components']['parameters'][pp['$ref'].rsplit('/',1)[-1]] if '$ref' in pp else pp

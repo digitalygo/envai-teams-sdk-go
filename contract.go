@@ -382,7 +382,7 @@ func validateSchema(file, fragment string, b []byte) error {
 			return regexp.Compile(strings.ReplaceAll(pattern, `\u0000`, `\x{0000}`))
 		})
 		compiler.UseLoader(denySchemaLoader{})
-		for _, f := range []string{"events.json", "events-v2.json", "wiki.json", "terminal-snapshot.json", "openapi.json"} {
+		for _, f := range []string{"events.json", "events-v2.json", "wiki.json", "terminal-snapshot.json", "openapi.json", "completion-v2.json"} {
 			raw, err := contracts.ReadFile("contract/" + f)
 			if err != nil {
 				return err

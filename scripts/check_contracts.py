@@ -5,7 +5,7 @@ import pathlib
 import re
 
 # Exact reviewed backend source pin; this does not imply a published release.
-EXPECTED_CONTRACT_COMMIT = '18ce9124604874d8d4bac784b521171d2ff9e064'
+EXPECTED_CONTRACT_COMMIT = '6fc8463470396faba4aeb6acc29c91f8c529a582'
 
 def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())
@@ -42,6 +42,10 @@ def verify(root):
             assert entry['origin'], name + ' origin'
             data = (root / entry['snapshot_path']).read_bytes()
             assert hashlib.sha256(data).hexdigest() == entry['sha256'], name + ' SHA256'
+    legacy = provenance['legacy_artifacts']['completion-v2.json']
+    assert legacy['source_commit'] == '55275860c9a950eaad8e39e9d2b728149084779c'
+    assert legacy['source_git_blob_sha'] == '2d3fe7581229a6fb7a798c99ecccfe5f823fa6ed'
+    assert hashlib.sha256((root / legacy['snapshot_path']).read_bytes()).hexdigest() == legacy['sha256']
     actual = json.loads((root / 'contract/operations.json').read_text())
     expected = json.loads((root / 'testdata/operations.json').read_text())
     assert len(actual) == 78

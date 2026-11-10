@@ -101,6 +101,10 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("envai: HTTP %d (%s/%s)", e.Status, e.Type, e.Code)
 }
 
+// ErrAPIKeyManagementUnsupported indicates a session-only administration operation.
+// This bearer/project-key client never sends these requests or capability preflights.
+var ErrAPIKeyManagementUnsupported = errors.New("envai: API key management requires a human session and CSRF; bearer/project-key clients are unsupported")
+
 type ProtocolError struct{ Reason string }
 
 func (e *ProtocolError) Error() string { return "envai: protocol violation: " + e.Reason }
@@ -301,6 +305,9 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	op, ok := c.operations[id]
 	if !ok {
 		return nil, errors.New("envai: unknown operation")
+	}
+	if op.Path == "/api-keys" || strings.HasPrefix(op.Path, "/api-keys/") {
+		return nil, ErrAPIKeyManagementUnsupported
 	}
 	uri, err := c.requestURL(op, params)
 	if err != nil {

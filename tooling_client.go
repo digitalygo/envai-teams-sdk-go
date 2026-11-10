@@ -36,7 +36,7 @@ func (r ClientDefinitionRemote) List(ctx context.Context, kind string) ([]Defini
 	if r.Client == nil {
 		return nil, errors.New("envai: nil definitions client")
 	}
-	operation := map[string]string{"tool": "listUserTools", "agent": "listAgents", "team": "listTeams"}[kind]
+	operation := map[string]string{"tool": "listProjectTools", "agent": "listAgents", "team": "listTeams"}[kind]
 	if operation == "" {
 		return nil, fmt.Errorf("envai: invalid definition type %s", kind)
 	}
@@ -48,7 +48,7 @@ func (r ClientDefinitionRemote) Mutate(ctx context.Context, kind, action, target
 	if r.Client == nil {
 		return nil, errors.New("envai: nil definitions client")
 	}
-	resource := map[string]string{"tool": "UserTool", "agent": "Agent", "team": "Team"}[kind]
+	resource := map[string]string{"tool": "ProjectTool", "agent": "Agent", "team": "Team"}[kind]
 	if resource == "" || (action != "create" && action != "update" && action != "delete") {
 		return nil, errors.New("envai: invalid definitions mutation")
 	}

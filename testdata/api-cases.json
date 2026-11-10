@@ -348,7 +348,9 @@
   {
     "id": "createWorkspace",
     "go_name": "CreateWorkspace",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "Product analytics",
       "metadata": {}
@@ -357,7 +359,8 @@
     "response": {
       "data": {
         "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Product analytics",
         "metadata": {},
         "created_at": "fixture",
@@ -368,7 +371,9 @@
   {
     "id": "listWorkspaces",
     "go_name": "ListWorkspaces",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -386,7 +391,8 @@
     "response": {
       "data": {
         "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Product analytics",
         "metadata": {},
         "created_at": "fixture",
@@ -408,7 +414,8 @@
     "response": {
       "data": {
         "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Product analytics",
         "metadata": {},
         "created_at": "fixture",
@@ -417,9 +424,11 @@
     }
   },
   {
-    "id": "createUserTool",
-    "go_name": "CreateUserTool",
-    "parameters": {},
+    "id": "createProjectTool",
+    "go_name": "CreateProjectTool",
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "send_email",
       "kind": "client",
@@ -464,9 +473,11 @@
     }
   },
   {
-    "id": "listUserTools",
-    "go_name": "ListUserTools",
-    "parameters": {},
+    "id": "listProjectTools",
+    "go_name": "ListProjectTools",
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -474,10 +485,11 @@
     }
   },
   {
-    "id": "getUserTool",
-    "go_name": "GetUserTool",
+    "id": "getProjectTool",
+    "go_name": "GetProjectTool",
     "parameters": {
-      "Name": "send_email"
+      "Name": "send_email",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 200,
@@ -506,10 +518,11 @@
     }
   },
   {
-    "id": "updateUserTool",
-    "go_name": "UpdateUserTool",
+    "id": "updateProjectTool",
+    "go_name": "UpdateProjectTool",
     "parameters": {
-      "Name": "send_email"
+      "Name": "send_email",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": {
       "description": "fixture",
@@ -553,10 +566,11 @@
     }
   },
   {
-    "id": "deleteUserTool",
-    "go_name": "DeleteUserTool",
+    "id": "deleteProjectTool",
+    "go_name": "DeleteProjectTool",
     "parameters": {
-      "Name": "send_email"
+      "Name": "send_email",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 204,
@@ -576,7 +590,8 @@
       "data": {
         "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
         "title": "fixture",
         "created_at": "fixture",
@@ -609,7 +624,8 @@
       "data": {
         "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
         "title": "fixture",
         "created_at": "fixture",
@@ -666,6 +682,8 @@
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
         "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "api_key_id": "key_01j5abcdefghjkmnpqrstvwxyz",
         "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "model_orchestrator": "anthropic/claude-sonnet-4",
         "models_subagents": [
@@ -797,7 +815,9 @@
   {
     "id": "createAgent",
     "go_name": "CreateAgent",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "researcher",
       "description": "fixture",
@@ -815,7 +835,8 @@
     "response": {
       "data": {
         "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "researcher",
         "description": "Research specialist",
         "system_prompt": "fixture",
@@ -835,7 +856,9 @@
   {
     "id": "listAgents",
     "go_name": "ListAgents",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -853,7 +876,8 @@
     "response": {
       "data": {
         "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "researcher",
         "description": "Research specialist",
         "system_prompt": "fixture",
@@ -893,7 +917,8 @@
     "response": {
       "data": {
         "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "researcher",
         "description": "Research specialist",
         "system_prompt": "fixture",
@@ -923,7 +948,9 @@
   {
     "id": "createTeam",
     "go_name": "CreateTeam",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "Research team",
       "description": "fixture",
@@ -934,7 +961,8 @@
     "response": {
       "data": {
         "id": "team_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Research team",
         "description": "fixture",
         "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
@@ -947,7 +975,9 @@
   {
     "id": "listTeams",
     "go_name": "ListTeams",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -965,7 +995,8 @@
     "response": {
       "data": {
         "id": "team_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Research team",
         "description": "fixture",
         "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
@@ -991,7 +1022,8 @@
     "response": {
       "data": {
         "id": "team_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Research team",
         "description": "fixture",
         "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
@@ -1014,7 +1046,9 @@
   {
     "id": "listModels",
     "go_name": "ListModels",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -1029,11 +1063,22 @@
   {
     "id": "createApiKey",
     "go_name": "CreateAPIKey",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "ci-deploy",
       "scopes": [],
-      "expires_at": "30d"
+      "expires_at": "1h",
+      "spend_limit": {
+        "amount": "fixture",
+        "reset": {
+          "unit": "hour",
+          "every": 1,
+          "anchor_at": "fixture",
+          "timezone": "fixture"
+        }
+      }
     },
     "status": 201,
     "response": {
@@ -1043,7 +1088,9 @@
   {
     "id": "listApiKeys",
     "go_name": "ListAPIKeys",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -1054,7 +1101,8 @@
     "id": "deleteApiKey",
     "go_name": "DeleteAPIKey",
     "parameters": {
-      "KeyID": "key_01j5abcdefghjkmnpqrstvwxyz"
+      "KeyID": "key_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 204,
@@ -1080,7 +1128,9 @@
   {
     "id": "createImageGeneration",
     "go_name": "CreateImageGeneration",
-    "parameters": {},
+    "parameters": {
+      "IdempotencyKey": "fixture"
+    },
     "body": {
       "model": "google/nano-banana-2",
       "prompt": "A beautiful sunset over the mountains",
@@ -1138,7 +1188,8 @@
     "id": "getImageGeneration",
     "go_name": "GetImageGeneration",
     "parameters": {
-      "Record": "igr_01j5abcdefghjkmnpqrstvwxyz"
+      "Record": "igr_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 200,
@@ -1192,7 +1243,9 @@
   {
     "id": "uploadImage",
     "go_name": "UploadImage",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 201,
     "response": {
@@ -1209,7 +1262,9 @@
   {
     "id": "listImageModels",
     "go_name": "ListImageModels",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {

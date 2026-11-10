@@ -6,7 +6,7 @@ Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v3, wi
 
 The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
-Includes named, typed methods for all **78 HTTP operations**, **36 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+Includes named, typed methods for the reviewed **78-operation subset** (75 callable operations plus 3 unsupported API-key stubs), **39 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
 
 - [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
 - [Definitions compiler, reconciliation and CLI](docs/definitions.md)
@@ -113,7 +113,7 @@ The server output limit is 128 KiB UTF-8. Strings are sent unchanged; `JSONResul
 - Remote context persistence is best-effort. A restore acknowledgement does not establish durability.
 - Signed artifact downloads require opaque `artifact` and `generation` identifiers, optional `expires`, and `signature`. Preserve these server-supplied values and do not log signed URLs. Legacy `path` parameters are unsupported.
 - Capabilities are positive feature discovery, not an event-type allowlist. A valid unknown event remains accessible through its raw data.
-- Completion responses contain pagination metadata, but this contract does not declare a `page` request parameter; the Go SDK does not invent page traversal.
+- Completion responses contain pagination metadata; use the declared `Page` parameter and existing pagination helpers.
 
 No automatic mutation retries occur. Optional GET retries apply only to JSON operations and retryable statuses, with exponential jitter and `Retry-After`. Stream/binary partial reads are never retried as ordinary GETs. Errors expose status, type, code, details, request ID and retry delay; their string representation and client/config formatting redact sensitive information. `Observer` receives only operation/status/attempt/duration.
 
@@ -160,3 +160,13 @@ unsupported success statuses fail with `ProtocolError`. The default preserves
 existing additive REST hydration; native task and event validation remain active
 in either mode. Binary downloads and SSE retain their dedicated validators.
 Schema compilation is cached; its first use is part of local validation work.
+
+## Project tenancy and authentication
+
+Workspaces, chats, agents and teams replace UserID ownership with ProjectID and nullable CreatedByUserID audit provenance. Completion adds ProjectID and APIKeyID, and UserID is now a nullable *string. Use project ownership checks, never the key creator. Workspace metadata is a json.RawMessage alias supporting objects and lists, including the server default [].
+
+Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
+
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+
+Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

@@ -4,7 +4,7 @@
 
 ## Calling conventions
 
-Every HTTP operation has a method on `*envai.Client`. Pass a `context.Context` and the operation's named `Params` struct. Request/response types are in [models_generated.go](../models_generated.go); exact required fields, nullability, enums, and validation constraints are in the bundled [OpenAPI contract](../contract/openapi.yaml). IDs are opaque strings. Never derive one ID from another or use a local file path as an artifact ID.
+Every reviewed SDK operation has a method on `*envai.Client`. Pass a `context.Context` and the operation's named `Params` struct. Request/response types are in [models_generated.go](../models_generated.go); exact required fields, nullability, enums, and validation constraints are in the bundled [OpenAPI contract](../contract/openapi.yaml). IDs are opaque strings. Never derive one ID from another or use a local file path as an artifact ID.
 
 Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which uses the configured origin-level JWKS URL. Bearer authentication is omitted for public operations and signed artifact downloads. These are primitive operations, not a recommendation to use provider webhooks or image-test endpoints in an ordinary application.
 
@@ -30,11 +30,11 @@ Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which use
 | `ListWorkspaces` | `ListWorkspacesParams` | `([]Workspace, error)` | GET `/workspaces` | Yes |
 | `GetWorkspace` | `GetWorkspaceParams` | `(Workspace, error)` | GET `/workspaces/{workspace_id}` | Yes |
 | `UpdateWorkspace` | `UpdateWorkspaceParams` | `(Workspace, error)` | PUT `/workspaces/{workspace_id}` | Yes |
-| `CreateUserTool` | `CreateUserToolParams` | `(UserTool, error)` | POST `/tools` | Yes |
-| `ListUserTools` | `ListUserToolsParams` | `([]UserTool, error)` | GET `/tools` | Yes |
-| `GetUserTool` | `GetUserToolParams` | `(UserTool, error)` | GET `/tools/{name}` | Yes |
-| `UpdateUserTool` | `UpdateUserToolParams` | `(UserTool, error)` | PUT `/tools/{name}` | Yes |
-| `DeleteUserTool` | `DeleteUserToolParams` | `error` | DELETE `/tools/{name}` | Yes |
+| `CreateProjectTool` | `CreateProjectToolParams` | `(ProjectTool, error)` | POST `/tools` | Yes |
+| `ListProjectTools` | `ListProjectToolsParams` | `([]ProjectTool, error)` | GET `/tools` | Yes |
+| `GetProjectTool` | `GetProjectToolParams` | `(ProjectTool, error)` | GET `/tools/{name}` | Yes |
+| `UpdateProjectTool` | `UpdateProjectToolParams` | `(ProjectTool, error)` | PUT `/tools/{name}` | Yes |
+| `DeleteProjectTool` | `DeleteProjectToolParams` | `error` | DELETE `/tools/{name}` | Yes |
 | `CreateChat` | `CreateChatParams` | `(Chat, error)` | POST `/workspaces/{workspace_id}/chats` | Yes |
 | `ListChats` | `ListChatsParams` | `([]Chat, error)` | GET `/workspaces/{workspace_id}/chats` | Yes |
 | `GetChat` | `GetChatParams` | `(Chat, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}` | Yes |
@@ -57,9 +57,9 @@ Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which use
 | `UpdateTeam` | `UpdateTeamParams` | `(Team, error)` | PUT `/teams/{team_id}` | Yes |
 | `DeleteTeam` | `DeleteTeamParams` | `error` | DELETE `/teams/{team_id}` | Yes |
 | `ListModels` | `ListModelsParams` | `(ModelList, error)` | GET `/models` | Yes |
-| `CreateAPIKey` | `CreateAPIKeyParams` | `(json.RawMessage, error)` | POST `/api-keys` | Yes |
-| `ListAPIKeys` | `ListAPIKeysParams` | `([]APIKey, error)` | GET `/api-keys` | Yes |
-| `DeleteAPIKey` | `DeleteAPIKeyParams` | `error` | DELETE `/api-keys/{key_id}` | Yes |
+| `CreateAPIKey` | `CreateAPIKeyParams` | `(json.RawMessage, error)` | POST `/api-keys` | Unsupported: human session + CSRF |
+| `ListAPIKeys` | `ListAPIKeysParams` | `([]APIKey, error)` | GET `/api-keys` | Unsupported: human session + CSRF |
+| `DeleteAPIKey` | `DeleteAPIKeyParams` | `error` | DELETE `/api-keys/{key_id}` | Unsupported: human session + CSRF |
 | `TestGenerateImage` | `TestGenerateImageParams` | `(TestGenerateImageResult, error)` | POST `/tests/images/generate` | No |
 | `CreateImageGeneration` | `CreateImageGenerationParams` | `(ImageGenerationAcceptedRecord, error)` | POST `/images/generations` | Yes |
 | `GetImageGeneration` | `GetImageGenerationParams` | `(ImageGenerationStatusRecord, error)` | GET `/images/generations/{record}` | Yes |
@@ -103,8 +103,18 @@ See [configuration](getting-started.md#configuration) for defaults and [error ha
 
 ## Event payloads
 
-`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 36 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
+`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 39 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
 
 ## Wiki and negotiated contracts
 
 See [Wiki lifecycle and durable webhook intake](wiki.md) for all source, operation, catalog and JWKS methods, and [contract 3 migration](contract3-migration.md) for default selection, strict legacy reads, nullable costs and compatibility errors.
+
+## Project tenancy and authentication
+
+Workspaces, chats, agents and teams replace UserID ownership with ProjectID and nullable CreatedByUserID audit provenance. Completion adds ProjectID and APIKeyID, and UserID is now a nullable *string. Use project ownership checks, never the key creator. Workspace metadata is a json.RawMessage alias supporting objects and lists, including the server default [].
+
+Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
+
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+
+Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

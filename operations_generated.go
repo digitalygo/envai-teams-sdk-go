@@ -232,23 +232,29 @@ func (c *Client) GetJWKS(ctx context.Context, req GetJWKSParams) (JWKSDocument, 
 }
 
 type CreateWorkspaceParams struct {
-	Body WorkspaceCreateRequest
+	XEnvaiProjectID Optional[string]
+	Body            WorkspaceCreateRequest
 }
 
 func (c *Client) CreateWorkspace(ctx context.Context, req CreateWorkspaceParams) (Workspace, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out Workspace
 	err := c.call(ctx, "createWorkspace", p, req.Body, &out)
 	return out, err
 }
 
 type ListWorkspacesParams struct {
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) ListWorkspaces(ctx context.Context, req ListWorkspacesParams) ([]Workspace, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out []Workspace
 	err := c.call(ctx, "listWorkspaces", p, nil, &out)
 	return out, err
@@ -279,62 +285,120 @@ func (c *Client) UpdateWorkspace(ctx context.Context, req UpdateWorkspaceParams)
 	return out, err
 }
 
-type CreateUserToolParams struct {
-	Body UserToolCreateRequest
+type CreateProjectToolParams struct {
+	XEnvaiProjectID Optional[string]
+	Body            ProjectToolCreateRequest
 }
 
-func (c *Client) CreateUserTool(ctx context.Context, req CreateUserToolParams) (UserTool, error) {
+func (c *Client) CreateProjectTool(ctx context.Context, req CreateProjectToolParams) (ProjectTool, error) {
 	p := map[string]any{}
-
-	var out UserTool
-	err := c.call(ctx, "createUserTool", p, req.Body, &out)
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	var out ProjectTool
+	err := c.call(ctx, "createProjectTool", p, req.Body, &out)
 	return out, err
 }
 
-type ListUserToolsParams struct {
+// Deprecated: use CreateProjectTool. Tools are scoped to the key project, not the user.
+type CreateUserToolParams = CreateProjectToolParams
+
+// Deprecated: use CreateProjectTool. This alias uses project scope.
+func (c *Client) CreateUserTool(ctx context.Context, req CreateUserToolParams) (ProjectTool, error) {
+	return c.CreateProjectTool(ctx, req)
 }
 
-func (c *Client) ListUserTools(ctx context.Context, req ListUserToolsParams) ([]UserTool, error) {
-	p := map[string]any{}
+type ListProjectToolsParams struct {
+	XEnvaiProjectID Optional[string]
+}
 
-	var out []UserTool
-	err := c.call(ctx, "listUserTools", p, nil, &out)
+func (c *Client) ListProjectTools(ctx context.Context, req ListProjectToolsParams) ([]ProjectTool, error) {
+	p := map[string]any{}
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	var out []ProjectTool
+	err := c.call(ctx, "listProjectTools", p, nil, &out)
 	return out, err
 }
 
-type GetUserToolParams struct {
-	Name string
+// Deprecated: use ListProjectTools. Tools are scoped to the key project, not the user.
+type ListUserToolsParams = ListProjectToolsParams
+
+// Deprecated: use ListProjectTools. This alias uses project scope.
+func (c *Client) ListUserTools(ctx context.Context, req ListUserToolsParams) ([]ProjectTool, error) {
+	return c.ListProjectTools(ctx, req)
 }
 
-func (c *Client) GetUserTool(ctx context.Context, req GetUserToolParams) (UserTool, error) {
+type GetProjectToolParams struct {
+	Name            string
+	XEnvaiProjectID Optional[string]
+}
+
+func (c *Client) GetProjectTool(ctx context.Context, req GetProjectToolParams) (ProjectTool, error) {
 	p := map[string]any{}
 	p["name"] = req.Name
-	var out UserTool
-	err := c.call(ctx, "getUserTool", p, nil, &out)
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	var out ProjectTool
+	err := c.call(ctx, "getProjectTool", p, nil, &out)
 	return out, err
 }
 
-type UpdateUserToolParams struct {
-	Name string
-	Body UserToolUpdateRequest
+// Deprecated: use GetProjectTool. Tools are scoped to the key project, not the user.
+type GetUserToolParams = GetProjectToolParams
+
+// Deprecated: use GetProjectTool. This alias uses project scope.
+func (c *Client) GetUserTool(ctx context.Context, req GetUserToolParams) (ProjectTool, error) {
+	return c.GetProjectTool(ctx, req)
 }
 
-func (c *Client) UpdateUserTool(ctx context.Context, req UpdateUserToolParams) (UserTool, error) {
+type UpdateProjectToolParams struct {
+	Name            string
+	XEnvaiProjectID Optional[string]
+	Body            ProjectToolUpdateRequest
+}
+
+func (c *Client) UpdateProjectTool(ctx context.Context, req UpdateProjectToolParams) (ProjectTool, error) {
 	p := map[string]any{}
 	p["name"] = req.Name
-	var out UserTool
-	err := c.call(ctx, "updateUserTool", p, req.Body, &out)
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	var out ProjectTool
+	err := c.call(ctx, "updateProjectTool", p, req.Body, &out)
 	return out, err
 }
 
-type DeleteUserToolParams struct {
-	Name string
+// Deprecated: use UpdateProjectTool. Tools are scoped to the key project, not the user.
+type UpdateUserToolParams = UpdateProjectToolParams
+
+// Deprecated: use UpdateProjectTool. This alias uses project scope.
+func (c *Client) UpdateUserTool(ctx context.Context, req UpdateUserToolParams) (ProjectTool, error) {
+	return c.UpdateProjectTool(ctx, req)
 }
 
+type DeleteProjectToolParams struct {
+	Name            string
+	XEnvaiProjectID Optional[string]
+}
+
+func (c *Client) DeleteProjectTool(ctx context.Context, req DeleteProjectToolParams) error {
+	p := map[string]any{}
+	p["name"] = req.Name
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	return c.call(ctx, "deleteProjectTool", p, nil, nil)
+}
+
+// Deprecated: use DeleteProjectTool. Tools are scoped to the key project, not the user.
+type DeleteUserToolParams = DeleteProjectToolParams
+
+// Deprecated: use DeleteProjectTool. This alias uses project scope.
 func (c *Client) DeleteUserTool(ctx context.Context, req DeleteUserToolParams) error {
-	p := map[string]any{}
-	p["name"] = req.Name
-	return c.call(ctx, "deleteUserTool", p, nil, nil)
+	return c.DeleteProjectTool(ctx, req)
 }
 
 type CreateChatParams struct {
@@ -510,23 +574,29 @@ func (c *Client) ConvertWorkspaceFileToPDF(ctx context.Context, req ConvertWorks
 }
 
 type CreateAgentParams struct {
-	Body AgentCreateRequest
+	XEnvaiProjectID Optional[string]
+	Body            AgentCreateRequest
 }
 
 func (c *Client) CreateAgent(ctx context.Context, req CreateAgentParams) (Agent, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out Agent
 	err := c.call(ctx, "createAgent", p, req.Body, &out)
 	return out, err
 }
 
 type ListAgentsParams struct {
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) ListAgents(ctx context.Context, req ListAgentsParams) ([]Agent, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out []Agent
 	err := c.call(ctx, "listAgents", p, nil, &out)
 	return out, err
@@ -568,23 +638,29 @@ func (c *Client) DeleteAgent(ctx context.Context, req DeleteAgentParams) error {
 }
 
 type CreateTeamParams struct {
-	Body TeamCreateRequest
+	XEnvaiProjectID Optional[string]
+	Body            TeamCreateRequest
 }
 
 func (c *Client) CreateTeam(ctx context.Context, req CreateTeamParams) (Team, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out Team
 	err := c.call(ctx, "createTeam", p, req.Body, &out)
 	return out, err
 }
 
 type ListTeamsParams struct {
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) ListTeams(ctx context.Context, req ListTeamsParams) ([]Team, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out []Team
 	err := c.call(ctx, "listTeams", p, nil, &out)
 	return out, err
@@ -626,46 +702,59 @@ func (c *Client) DeleteTeam(ctx context.Context, req DeleteTeamParams) error {
 }
 
 type ListModelsParams struct {
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) ListModels(ctx context.Context, req ListModelsParams) (ModelList, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out ModelList
 	err := c.call(ctx, "listModels", p, nil, &out)
 	return out, err
 }
 
 type CreateAPIKeyParams struct {
-	Body APIKeyCreate
+	XEnvaiProjectID Optional[string]
+	Body            APIKeyCreate
 }
 
 func (c *Client) CreateAPIKey(ctx context.Context, req CreateAPIKeyParams) (json.RawMessage, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out json.RawMessage
 	err := c.call(ctx, "createApiKey", p, req.Body, &out)
 	return out, err
 }
 
 type ListAPIKeysParams struct {
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) ListAPIKeys(ctx context.Context, req ListAPIKeysParams) ([]APIKey, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out []APIKey
 	err := c.call(ctx, "listApiKeys", p, nil, &out)
 	return out, err
 }
 
 type DeleteAPIKeyParams struct {
-	KeyID string
+	KeyID           string
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) DeleteAPIKey(ctx context.Context, req DeleteAPIKeyParams) error {
 	p := map[string]any{}
 	p["key_id"] = req.KeyID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	return c.call(ctx, "deleteApiKey", p, nil, nil)
 }
 
@@ -682,47 +771,60 @@ func (c *Client) TestGenerateImage(ctx context.Context, req TestGenerateImagePar
 }
 
 type CreateImageGenerationParams struct {
-	Body ImageGenerationRequest
+	IdempotencyKey Optional[string]
+	Body           ImageGenerationRequest
 }
 
 func (c *Client) CreateImageGeneration(ctx context.Context, req CreateImageGenerationParams) (ImageGenerationAcceptedRecord, error) {
 	p := map[string]any{}
-
+	if req.IdempotencyKey.Set {
+		p["Idempotency-Key"] = req.IdempotencyKey.Value
+	}
 	var out ImageGenerationAcceptedRecord
 	err := c.call(ctx, "createImageGeneration", p, req.Body, &out)
 	return out, err
 }
 
 type GetImageGenerationParams struct {
-	Record string
+	Record          string
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) GetImageGeneration(ctx context.Context, req GetImageGenerationParams) (ImageGenerationStatusRecord, error) {
 	p := map[string]any{}
 	p["record"] = req.Record
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out ImageGenerationStatusRecord
 	err := c.call(ctx, "getImageGeneration", p, nil, &out)
 	return out, err
 }
 
 type UploadImageParams struct {
-	Body []MultipartPart
+	XEnvaiProjectID Optional[string]
+	Body            []MultipartPart
 }
 
 func (c *Client) UploadImage(ctx context.Context, req UploadImageParams) (ImageUploadRecord, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out ImageUploadRecord
 	err := c.call(ctx, "uploadImage", p, req.Body, &out)
 	return out, err
 }
 
 type ListImageModelsParams struct {
+	XEnvaiProjectID Optional[string]
 }
 
 func (c *Client) ListImageModels(ctx context.Context, req ListImageModelsParams) ([]ModelCatalogEntry, error) {
 	p := map[string]any{}
-
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
 	var out []ModelCatalogEntry
 	err := c.call(ctx, "listImageModels", p, nil, &out)
 	return out, err

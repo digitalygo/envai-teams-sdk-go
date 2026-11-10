@@ -84,7 +84,7 @@ func TestContractProvenanceAndFrozenV2(t *testing.T) {
 	if err = json.Unmarshal(raw, &provenance); err != nil {
 		t.Fatal(err)
 	}
-	if provenance.Repository != "digitalygo/envai-teams" || provenance.Commit != "18ce9124604874d8d4bac784b521171d2ff9e064" || provenance.Operations != 78 || len(provenance.Sources) != 6 {
+	if provenance.Repository != "digitalygo/envai-teams" || provenance.Commit != "6fc8463470396faba4aeb6acc29c91f8c529a582" || provenance.Operations != 78 || len(provenance.Sources) != 6 {
 		t.Fatal(provenance.Repository, provenance.Commit, provenance.Operations, len(provenance.Sources))
 	}
 	for name, entry := range provenance.Sources {

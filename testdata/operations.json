@@ -132,31 +132,31 @@
     "authenticated": true
   },
   {
-    "id": "createUserTool",
+    "id": "createProjectTool",
     "method": "POST",
     "path": "/tools",
     "authenticated": true
   },
   {
-    "id": "listUserTools",
+    "id": "listProjectTools",
     "method": "GET",
     "path": "/tools",
     "authenticated": true
   },
   {
-    "id": "getUserTool",
+    "id": "getProjectTool",
     "method": "GET",
     "path": "/tools/{name}",
     "authenticated": true
   },
   {
-    "id": "updateUserTool",
+    "id": "updateProjectTool",
     "method": "PUT",
     "path": "/tools/{name}",
     "authenticated": true
   },
   {
-    "id": "deleteUserTool",
+    "id": "deleteProjectTool",
     "method": "DELETE",
     "path": "/tools/{name}",
     "authenticated": true
