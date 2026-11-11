@@ -5,7 +5,7 @@ import pathlib
 import re
 
 # Exact reviewed backend source pin; this does not imply a published release.
-EXPECTED_CONTRACT_COMMIT = '6fc8463470396faba4aeb6acc29c91f8c529a582'
+EXPECTED_CONTRACT_COMMIT = '964c11fe72887329e8d06c2afb483442d643b290'
 
 def verify(root):
     provenance = json.loads((root / 'contract/provenance.json').read_text())

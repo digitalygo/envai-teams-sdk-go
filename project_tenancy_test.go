@@ -155,11 +155,14 @@ func TestOnlyReviewedOperationsHaveClientMethods(t *testing.T) {
 		t.Fatal("unreviewed operation generated")
 	}
 	for _, id := range allowed {
+		if id == "getProjectLogs" {
+			t.Fatal("project logs must remain outside the reviewed public surface")
+		}
 		if _, ok := c.operations[id]; !ok {
 			t.Fatal(id)
 		}
 	}
-	for _, method := range []string{"CreateProject", "ListProjects", "GetInternalBillingAccount", "CreateBillingCheckoutSession"} {
+	for _, method := range []string{"GetProjectLogs", "CreateProject", "ListProjects", "GetInternalBillingAccount", "CreateBillingCheckoutSession"} {
 		if reflect.ValueOf(c).MethodByName(method).IsValid() {
 			t.Fatal("unexpected administration method", method)
 		}
@@ -224,5 +227,15 @@ func TestStrictLegacyCompletionPreservesFrozenOwnership(t *testing.T) {
 		if c.validateStrictResponse(c.operations[operation], 200, raw) == nil {
 			t.Fatal("legacy response accepted under current contract")
 		}
+	}
+}
+
+func TestProjectEventTypeFiltersResourceHydration(t *testing.T) {
+	var resource ProjectEventTypeFiltersResource
+	if err := json.Unmarshal([]byte(`{"data":{"types":["completion.completed","task.started"]}}`), &resource); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(resource.Data.Types, []string{"completion.completed", "task.started"}) {
+		t.Fatal(resource)
 	}
 }

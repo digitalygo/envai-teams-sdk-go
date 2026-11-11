@@ -2211,6 +2211,14 @@ func (v ProjectLogEntry) MarshalJSON() ([]byte, error) {
 	return marshalUnknown(plain(v), v.Extra)
 }
 
+type ProjectEventTypeFilters struct {
+	Types []string `json:"types"`
+}
+
+type ProjectEventTypeFiltersResource struct {
+	Data ProjectEventTypeFilters `json:"data"`
+}
+
 type ProjectLogCollection struct {
 	Data  []ProjectLogEntry          `json:"data"`
 	Links ProjectLogCollectionLinks  `json:"links"`
