@@ -6,9 +6,10 @@ Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v3, wi
 
 The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
-Includes named, typed methods for all **71 HTTP operations**, **29 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+Includes named, typed methods for the reviewed **78-operation subset** (75 callable operations plus 3 unsupported API-key stubs), **39 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
 
 - [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
+- [Definitions compiler, reconciliation and CLI](docs/definitions.md)
 - [HTTP API reference](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/api-reference.md)
 - [Streaming, recovery, and errors](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/streaming.md)
 - [Client-tool safety and deployment](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/client-tools.md)
@@ -95,7 +96,7 @@ runner, err := envai.NewToolRunner(client, registry, store, envai.RunnerOptions{
 
 The runner validates the ATP envelope, expected chat, client-tool kind, Ed25519 signature and RFC 8785 canonical arguments before accessing a handler. JWKS is cached; an unknown key ID refreshes once for that verification. Handlers receive the same canonicalized owned JSON bytes that were verified, including RFC 8785 binary64 number semantics. Integers beyond the safe range may be rounded; use strings when exact large integer values are required. Local JSON Schema validation includes nested constraints and honors declared Draft 4, Draft 6, Draft 7, 2019-09 and 2020-12 schemas (2020-12 by default). External schema references are disabled. Optional `Authorize` adds application policy before execution; handler arguments and outputs are not logged.
 
-A valid signature authenticates `call_id`, tool name, and arguments. It does **not** sign the chat/turn/account envelope or prove freshness. Only feed a runner events from your trusted, authenticated stream. `RunTurn` restricts tool handling to its newly accepted turn. Applications manually replaying historical requests must reconcile their status before execution.
+A valid signature authenticates `call_id`, tool name, and arguments. It does **not** sign the chat/turn/account envelope or prove freshness. Only feed a runner events from your trusted, authenticated stream. `RunTurn` restricts tool handling to the accepted turn and records the entire buffered replay’s result/terminal barriers before executing pending requests. Applications manually replaying historical requests must reconcile their status before execution.
 
 `FileCallStore` atomically claims a call before side effects using a private directory and durable fsync/rename. Existing records, including corrupt/unfinished records, are never automatically reclaimed. Malformed state is rejected before updates, including result/terminal observations; the original bytes are preserved for manual reconciliation. A directory with no state file remains an ambiguous claim and is not repaired automatically. This fails closed after a crash. Keep the directory and its namespace stable across process restarts and API-key rotation. Separate accounts/deployments must use separate namespaces. Do not delete state to recover a stalled call without first reconciling its side effect. The local filesystem must support atomic mkdir/rename and fsync; network filesystems are not supported by this implementation. Multi-host consumers should implement `CallStore` against a shared transactional database. `MemoryCallStore` is explicitly non-durable and intended for tests.
 
@@ -112,7 +113,7 @@ The server output limit is 128 KiB UTF-8. Strings are sent unchanged; `JSONResul
 - Remote context persistence is best-effort. A restore acknowledgement does not establish durability.
 - Signed artifact downloads require opaque `artifact` and `generation` identifiers, optional `expires`, and `signature`. Preserve these server-supplied values and do not log signed URLs. Legacy `path` parameters are unsupported.
 - Capabilities are positive feature discovery, not an event-type allowlist. A valid unknown event remains accessible through its raw data.
-- Completion responses contain pagination metadata, but this contract does not declare a `page` request parameter; the Go SDK does not invent page traversal.
+- Completion responses contain pagination metadata; use the declared `Page` parameter and existing pagination helpers.
 
 No automatic mutation retries occur. Optional GET retries apply only to JSON operations and retryable statuses, with exponential jitter and `Retry-After`. Stream/binary partial reads are never retried as ordinary GETs. Errors expose status, type, code, details, request ID and retry delay; their string representation and client/config formatting redact sensitive information. `Observer` receives only operation/status/attempt/duration.
 
@@ -136,7 +137,36 @@ MIT, Copyright (c) 2026 DigItalyGo. The original repository license is preserved
 
 ### Source provenance
 
-`contract/provenance.json` records the five byte-exact HTTP, current/legacy event, Wiki and terminal snapshot contracts separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
+`contract/provenance.json` records the six byte-exact HTTP, current/legacy event, Wiki, terminal snapshot and native-task contracts separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
 
 
 See [chat attachments](docs/chat-attachments.md) for upload, conversion, retry and streaming with files. This surface is unreleased until the matching backend is deployed.
+
+See [native background tasks](docs/background-tasks.md) for opt-in task sessions, signed post-turn tools, final delegated-job outcomes, cancellation and phase classification. This surface is unreleased.
+
+## Pagination, polling and shared tool persistence
+
+`ListCompletionsParams.Page` selects an explicit page. `CompletionPages(ctx, params)` iterates validated numeric pages on the configured API origin and stops when the consumer breaks. It never follows server-supplied links to another host.
+
+`WaitForSource`, `WaitForWikiOperation` and `WaitForImage` perform read-only polling with positive `PollOptions{Interval, Timeout}`. `GenerateAndWait` admits an image once, then polls using the same overall deadline. Terminal failures/cancellations remain typed results; uncertain admissions are not resubmitted. Source polling never starts conversion retries or indexing. All helpers also honor caller context cancellation.
+
+`PostgresCallStore{DB: db}` shares tool claims and observed barriers across workers. Apply `PostgresCallStoreSchema` as an explicit application migration before using it; constructors perform no DDL and never close your database. Set a stable, account/deployment-specific runner namespace. Atomic claims never reclaim existing work; locked versioned updates preserve observed resolved/ambiguous states against late submissions. Corrupt or conflicting ownership records fail closed. Application side effects still require transactions or call-ID idempotency; this is not an exactly-once execution guarantee.
+
+For canonical HTTP request/response validation, set `Config.StrictValidation: true`.
+This validates parameters and JSON/multipart request shapes before capability
+preflight or mutation admission, and validates JSON success envelopes before
+resource unwrapping. Missing required fields, invalid enums/types/ranges and
+unsupported success statuses fail with `ProtocolError`. The default preserves
+existing additive REST hydration; native task and event validation remain active
+in either mode. Binary downloads and SSE retain their dedicated validators.
+Schema compilation is cached; its first use is part of local validation work.
+
+## Project tenancy and authentication
+
+Workspaces, chats, agents and teams replace UserID ownership with ProjectID and nullable CreatedByUserID audit provenance. Completion adds ProjectID and APIKeyID, and UserID is now a nullable *string. Use project ownership checks, never the key creator. Workspace metadata is a json.RawMessage alias supporting objects and lists, including the server default [].
+
+Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
+
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+
+Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

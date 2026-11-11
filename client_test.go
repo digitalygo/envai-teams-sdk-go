@@ -34,6 +34,9 @@ func testClient(t *testing.T, fn http.HandlerFunc) *Client {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get(ContractHeader) != "" {
 			w.Header().Set(ContractHeader, r.Header.Get(ContractHeader))
+			if r.Header.Get("X-Envai-Extensions") != "" {
+				w.Header().Set("X-Envai-Extensions", r.Header.Get("X-Envai-Extensions"))
+			}
 		}
 		fn(w, r)
 	}))
@@ -59,7 +62,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 		Path          string `json:"path"`
 		Authenticated bool   `json:"authenticated"`
 	}](t, "operations.json")
-	if len(cases) != 71 || len(inventory) != 71 {
+	if len(cases) != 78 || len(inventory) != 78 {
 		t.Fatal("contract inventory changed")
 	}
 	for _, tc := range cases {
@@ -69,9 +72,9 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			client = testClient(t, func(w http.ResponseWriter, r *http.Request) {
 				if strings.HasSuffix(r.URL.Path, "/capabilities") && tc.ID != "getCapabilities" && tc.ID != "getCapabilitiesLegacy" {
 					if strings.Contains(tc.ID, "ChatAttachment") {
-						fmt.Fprint(w, strings.Replace(testCapabilities, `"features":[]`, `"features":["chat_attachments","chat_attachment_originals"]`, 1))
+						fmt.Fprint(w, strings.Replace(testCapabilities, `"features":[]`, `"features":["chat_attachments","chat_attachment_originals","native_deliveries","cross_team_delegation","detached_background","phase_classification","delegated_job_lifecycle","delegation_notify_origin","strict_model"]`, 1))
 					} else {
-						writeCapabilities(w)
+						fmt.Fprint(w, independentCapabilities)
 					}
 					return
 				}
@@ -127,6 +130,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			if !found {
 				t.Fatal("missing contract method")
 			}
+			client.config.NativeTasks = true
 			method := reflect.ValueOf(client).MethodByName(tc.GoName)
 			if !method.IsValid() {
 				t.Fatal("missing named method", tc.GoName)
@@ -161,6 +165,12 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 			}
 			results := method.Call([]reflect.Value{reflect.ValueOf(context.Background()), req})
 			last := results[len(results)-1]
+			if strings.HasPrefix(client.operations[tc.ID].Path, "/api-keys") {
+				if last.IsNil() || !errors.Is(last.Interface().(error), ErrAPIKeyManagementUnsupported) || calls != 0 {
+					t.Fatal("session-only operation must fail before HTTP", last, calls)
+				}
+				return
+			}
 			if tc.Status == 409 {
 				if last.IsNil() {
 					t.Fatal("stub silently succeeded")
@@ -300,10 +310,10 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(c.OperationIDs()) != 71 {
+	if len(c.OperationIDs()) != 78 {
 		t.Fatal("inventory")
 	}
-	if _, err = c.requestURL(c.operations["getUserTool"], map[string]any{"name": "../x"}); err == nil {
+	if _, err = c.requestURL(c.operations["getProjectTool"], map[string]any{"name": "../x"}); err == nil {
 		t.Fatal("traversal")
 	}
 	if _, err = c.requestURL(c.operations["getWorkspace"], nil); err == nil {
@@ -312,7 +322,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if _, err = c.requestURL(c.operations["getWorkspace"], map[string]any{"workspace_id": "id", "extra": 1}); err == nil {
 		t.Fatal("unknown")
 	}
-	u, err := c.requestURL(c.operations["getUserTool"], map[string]any{"name": "a b%"})
+	u, err := c.requestURL(c.operations["getProjectTool"], map[string]any{"name": "a b%"})
 	if err != nil || !strings.HasSuffix(u, "a%20b%25") {
 		t.Fatal(u, err)
 	}

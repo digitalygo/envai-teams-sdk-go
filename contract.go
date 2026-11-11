@@ -9,6 +9,7 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"math"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 )
@@ -42,6 +43,9 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 	if c.config.LegacyReadOnly && op.Method != "GET" {
 		return &CompatibilityError{Reason: "legacy mode is read-only"}
 	}
+	if op.ID == "getDetachedTask" {
+		return c.requireFeatures(ctx, "detached_background")
+	}
 	if !negotiated(op) || op.Method == "GET" {
 		return nil
 	}
@@ -55,6 +59,92 @@ func (c *Client) checkMutation(ctx context.Context, op operation, params map[str
 	capability, err := c.GetCapabilities(ctx, GetCapabilitiesParams{})
 	if err != nil {
 		return &CompatibilityError{Reason: "contract 3 capabilities preflight failed before mutation", Cause: err}
+	}
+
+	if op.ID == "classifyChoice" || op.ID == "startIndependentJob" {
+		data, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+		if op.ID == "classifyChoice" {
+			var input ChoiceClassificationRequest
+			if json.Unmarshal(data, &input) != nil || len(input.Context) == 0 || strings.TrimSpace(string(input.Context)) == "null" {
+				return errors.New("envai: choice context must be non-null JSON")
+			}
+			labels := map[string]bool{}
+			for _, choice := range input.Choices {
+				if labels[choice.Label] {
+					return errors.New("envai: choice labels must be unique")
+				}
+				labels[choice.Label] = true
+			}
+		}
+		definition := map[string]string{"classifyChoice": "ChoiceClassificationRequest", "startIndependentJob": "IndependentJobRequest"}[op.ID]
+		if err := validateDefinition("openapi.json", definition, data); err != nil {
+			return err
+		}
+	}
+	requiredFeatures := []string{}
+	if c.config.NativeTasks && atpOperation(op) {
+		requiredFeatures = append(requiredFeatures, "detached_background")
+	}
+	if (op.ID == "deliverWorkflowResult" || op.ID == "delegateToTeam" || op.ID == "cancelDetachedTask" || op.ID == "classifyPhase" || op.ID == "classifyChoice" || op.ID == "startIndependentJob") && !c.config.NativeTasks {
+		return &CompatibilityError{Reason: "native API requires Config.NativeTasks"}
+	}
+	switch op.ID {
+	case "deliverWorkflowResult":
+		requiredFeatures = append(requiredFeatures, "native_deliveries")
+	case "delegateToTeam":
+		requiredFeatures = append(requiredFeatures, "cross_team_delegation", "delegated_job_lifecycle")
+	case "cancelDetachedTask":
+		requiredFeatures = append(requiredFeatures, "detached_background")
+	case "startIndependentJob":
+		requiredFeatures = append(requiredFeatures, "independent_jobs")
+	case "classifyChoice":
+		requiredFeatures = append(requiredFeatures, "finite_choice_classification")
+	case "classifyPhase":
+		requiredFeatures = append(requiredFeatures, "phase_classification")
+	}
+	if op.ID == "sendChatMessage" || op.ID == "delegateToTeam" || op.ID == "startIndependentJob" || op.ID == "deliverWorkflowResult" {
+		data, err := json.Marshal(body)
+		if err != nil {
+			return err
+		}
+		var flags map[string]json.RawMessage
+		if err = json.Unmarshal(data, &flags); err != nil {
+			return err
+		}
+		if op.ID == "deliverWorkflowResult" {
+			var origin string
+			_ = json.Unmarshal(flags["origin_turn_id"], &origin)
+			if origin == "" {
+				requiredFeatures = append(requiredFeatures, "originless_deliveries")
+			}
+		}
+		if raw, ok := flags["strict_model"]; ok {
+			var enabled bool
+			if json.Unmarshal(raw, &enabled) != nil || string(raw) == "null" {
+				return errors.New("envai: strict_model must be boolean")
+			}
+			if enabled {
+				if !c.config.NativeTasks {
+					return &CompatibilityError{Reason: "strict_model requires Config.NativeTasks"}
+				}
+				requiredFeatures = append(requiredFeatures, "strict_model")
+			}
+		}
+		if raw, ok := flags["notify_origin"]; ok {
+			var enabled bool
+			if json.Unmarshal(raw, &enabled) != nil || string(raw) == "null" {
+				return errors.New("envai: notify_origin must be boolean")
+			}
+			requiredFeatures = append(requiredFeatures, "delegation_notify_origin")
+		}
+	}
+	for _, feature := range requiredFeatures {
+		if !featureAdvertised(capability.Features, feature) {
+			return &CompatibilityError{Reason: "server does not advertise " + feature}
+		}
 	}
 	if op.ID == "uploadChatAttachment" {
 		if !featureAdvertised(capability.Features, "chat_attachments") {
@@ -85,6 +175,12 @@ func (c *Client) checkAcknowledgment(op operation, resp *http.Response) error {
 	if !negotiated(op) {
 		return nil
 	}
+	if c.config.NativeTasks && c.versionFor(op) == "3" && atpOperation(op) {
+		values := resp.Header.Values("X-Envai-Extensions")
+		if len(values) != 1 || values[0] != "native-tasks-v1" {
+			return &CompatibilityError{Reason: "missing or mismatched native-tasks-v1 acknowledgment; mutation outcome may be uncertain, do not automatically retry"}
+		}
+	}
 	values := resp.Header.Values(ContractHeader)
 	// Explicit legacy reads remain usable against old servers that predate negotiation.
 	if (c.config.LegacyReadOnly || strings.HasSuffix(op.ID, "Legacy")) && len(values) == 0 {
@@ -96,6 +192,19 @@ func (c *Client) checkAcknowledgment(op operation, resp *http.Response) error {
 	return nil
 }
 func (c *Client) validateNegotiatedJSON(id string, b []byte) error {
+	definitions := map[string]string{
+		"deliverWorkflowResult": "NativeDeliveryReceipt",
+		"delegateToTeam":        "TeamDelegationReceipt",
+		"getDetachedTask":       "DetachedTaskSnapshot",
+		"classifyPhase":         "PhaseClassificationResult",
+		"classifyChoice":        "ChoiceClassificationResult",
+		"startIndependentJob":   "IndependentJobReceipt",
+	}
+	if definition := definitions[id]; definition != "" {
+		if err := validateDefinition("openapi.json", definition, b); err != nil {
+			return &ProtocolError{Reason: "invalid native response: " + err.Error()}
+		}
+	}
 	if id == "getCapabilitiesLegacy" || (id == "getCapabilities" && c.config.LegacyReadOnly) {
 		var capability struct {
 			Version int `json:"protocol_version"`
@@ -259,13 +368,21 @@ func validateDefinition(file, definition string, b []byte) error {
 	if file == "openapi.json" {
 		fragment = "#/components/schemas/"
 	}
-	key := file + fragment + definition
+	return validateSchema(file, fragment+definition, b)
+}
+func validateSchema(file, fragment string, b []byte) error {
+	key := file + fragment
 	cached, ok := schemaCache.Load(key)
 	if !ok {
 		compiler := jsonschema.NewCompiler()
 		compiler.AssertFormat()
+		// The contract uses the ECMA-262 null escape; Go's RE2 spells it differently.
+		// Adapt this escape only; retain the byte-exact source and constraint semantics.
+		compiler.UseRegexpEngine(func(pattern string) (jsonschema.Regexp, error) {
+			return regexp.Compile(strings.ReplaceAll(pattern, `\u0000`, `\x{0000}`))
+		})
 		compiler.UseLoader(denySchemaLoader{})
-		for _, f := range []string{"events.json", "events-v2.json", "wiki.json", "terminal-snapshot.json", "openapi.json"} {
+		for _, f := range []string{"events.json", "events-v2.json", "wiki.json", "terminal-snapshot.json", "openapi.json", "completion-v2.json"} {
 			raw, err := contracts.ReadFile("contract/" + f)
 			if err != nil {
 				return err
@@ -289,7 +406,7 @@ func validateDefinition(file, definition string, b []byte) error {
 		return &ProtocolError{"invalid JSON"}
 	}
 	if err = cached.(*jsonschema.Schema).Validate(doc); err != nil {
-		return &ProtocolError{fmt.Sprintf("invalid %s representation", definition)}
+		return &ProtocolError{fmt.Sprintf("invalid %s representation", fragment)}
 	}
 	return nil
 }

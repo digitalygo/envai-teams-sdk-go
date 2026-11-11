@@ -1,5 +1,157 @@
 [
   {
+    "id": "deliverWorkflowResult",
+    "go_name": "DeliverWorkflowResult",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "strict_model": true,
+      "workspace_id": "fixture",
+      "event_id": "fixture",
+      "origin_turn_id": "fixture",
+      "task_id": "fixture",
+      "output": "fixture",
+      "status": "completed"
+    },
+    "status": 202,
+    "response": {
+      "event_id": "fixture",
+      "status": "queued",
+      "turn_id": "fixture",
+      "error": "fixture",
+      "duplicate": true
+    }
+  },
+  {
+    "id": "delegateToTeam",
+    "go_name": "DelegateToTeam",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "workspace_id": "fixture",
+      "event_id": "fixture",
+      "origin_turn_id": "fixture",
+      "target_chat_id": "fixture",
+      "prompt": "fixture",
+      "notify_origin": true,
+      "strict_model": true
+    },
+    "status": 202,
+    "response": {
+      "task_id": "fixture",
+      "target_chat_id": "fixture",
+      "turn_id": "fixture"
+    }
+  },
+  {
+    "id": "getDetachedTask",
+    "go_name": "GetDetachedTask",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "TaskID": "fixture"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "task_id": "fixture",
+      "origin_turn_id": "fixture",
+      "parent_task_id": "fixture",
+      "target_chat_id": "fixture",
+      "result_turn_id": "fixture",
+      "output": "fixture",
+      "error": "fixture",
+      "delivery_error": "fixture",
+      "status": "running"
+    }
+  },
+  {
+    "id": "cancelDetachedTask",
+    "go_name": "CancelDetachedTask",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "TaskID": "fixture"
+    },
+    "body": {
+      "subtree": true
+    },
+    "status": 202,
+    "response": {
+      "task_id": "fixture",
+      "status": "cancelled",
+      "subtree": true
+    }
+  },
+  {
+    "id": "classifyPhase",
+    "go_name": "ClassifyPhase",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "request_id": "fixture",
+      "phase_id": "fixture",
+      "final_output": "fixture",
+      "task_context": {},
+      "attempt": 1
+    },
+    "status": 200,
+    "response": {
+      "model": "fixture",
+      "request_id": "fixture",
+      "invocation_id": "fixture",
+      "decision": "BLOCKED"
+    }
+  },
+  {
+    "id": "classifyChoice",
+    "go_name": "ClassifyChoice",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "request_id": "fixture",
+      "context": {},
+      "question": "fixture",
+      "choices": [
+        {
+          "label": "fixture",
+          "description": "First choice"
+        },
+        {
+          "label": "alternative",
+          "description": "Second choice"
+        }
+      ]
+    },
+    "status": 200,
+    "response": {
+      "choice": "fixture",
+      "model": "fixture",
+      "request_id": "fixture",
+      "invocation_id": "fixture"
+    }
+  },
+  {
+    "id": "startIndependentJob",
+    "go_name": "StartIndependentJob",
+    "parameters": {
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "workspace_id": "fixture",
+      "request_id": "fixture",
+      "prompt": "fixture",
+      "strict_model": true
+    },
+    "status": 202,
+    "response": {
+      "task_id": "fixture",
+      "turn_id": "fixture"
+    }
+  },
+  {
     "id": "sendChatMessage",
     "go_name": "SendChatMessage",
     "parameters": {
@@ -8,7 +160,8 @@
     },
     "body": {
       "message": "Summarize the last week of traffic",
-      "attachment_ids": []
+      "attachment_ids": [],
+      "strict_model": true
     },
     "status": 202,
     "response": {
@@ -195,7 +348,9 @@
   {
     "id": "createWorkspace",
     "go_name": "CreateWorkspace",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "Product analytics",
       "metadata": {}
@@ -204,7 +359,8 @@
     "response": {
       "data": {
         "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Product analytics",
         "metadata": {},
         "created_at": "fixture",
@@ -215,7 +371,9 @@
   {
     "id": "listWorkspaces",
     "go_name": "ListWorkspaces",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -233,7 +391,8 @@
     "response": {
       "data": {
         "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Product analytics",
         "metadata": {},
         "created_at": "fixture",
@@ -255,7 +414,8 @@
     "response": {
       "data": {
         "id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Product analytics",
         "metadata": {},
         "created_at": "fixture",
@@ -264,9 +424,11 @@
     }
   },
   {
-    "id": "createUserTool",
-    "go_name": "CreateUserTool",
-    "parameters": {},
+    "id": "createProjectTool",
+    "go_name": "CreateProjectTool",
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "send_email",
       "kind": "client",
@@ -311,9 +473,11 @@
     }
   },
   {
-    "id": "listUserTools",
-    "go_name": "ListUserTools",
-    "parameters": {},
+    "id": "listProjectTools",
+    "go_name": "ListProjectTools",
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -321,10 +485,11 @@
     }
   },
   {
-    "id": "getUserTool",
-    "go_name": "GetUserTool",
+    "id": "getProjectTool",
+    "go_name": "GetProjectTool",
     "parameters": {
-      "Name": "send_email"
+      "Name": "send_email",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 200,
@@ -353,10 +518,11 @@
     }
   },
   {
-    "id": "updateUserTool",
-    "go_name": "UpdateUserTool",
+    "id": "updateProjectTool",
+    "go_name": "UpdateProjectTool",
     "parameters": {
-      "Name": "send_email"
+      "Name": "send_email",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": {
       "description": "fixture",
@@ -400,10 +566,11 @@
     }
   },
   {
-    "id": "deleteUserTool",
-    "go_name": "DeleteUserTool",
+    "id": "deleteProjectTool",
+    "go_name": "DeleteProjectTool",
     "parameters": {
-      "Name": "send_email"
+      "Name": "send_email",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 204,
@@ -423,7 +590,8 @@
       "data": {
         "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
         "title": "fixture",
         "created_at": "fixture",
@@ -456,7 +624,8 @@
       "data": {
         "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
         "title": "fixture",
         "created_at": "fixture",
@@ -474,6 +643,7 @@
       "ModelOrchestrator": "fixture",
       "StartedAtFrom": "fixture",
       "StartedAtTo": "fixture",
+      "Page": 1,
       "PerPage": 1
     },
     "body": null,
@@ -512,6 +682,8 @@
         "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
         "chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
         "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "api_key_id": "key_01j5abcdefghjkmnpqrstvwxyz",
         "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "model_orchestrator": "anthropic/claude-sonnet-4",
         "models_subagents": [
@@ -643,7 +815,9 @@
   {
     "id": "createAgent",
     "go_name": "CreateAgent",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "researcher",
       "description": "fixture",
@@ -661,7 +835,8 @@
     "response": {
       "data": {
         "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "researcher",
         "description": "Research specialist",
         "system_prompt": "fixture",
@@ -681,7 +856,9 @@
   {
     "id": "listAgents",
     "go_name": "ListAgents",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -699,7 +876,8 @@
     "response": {
       "data": {
         "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "researcher",
         "description": "Research specialist",
         "system_prompt": "fixture",
@@ -739,7 +917,8 @@
     "response": {
       "data": {
         "id": "agt_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "researcher",
         "description": "Research specialist",
         "system_prompt": "fixture",
@@ -769,7 +948,9 @@
   {
     "id": "createTeam",
     "go_name": "CreateTeam",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "Research team",
       "description": "fixture",
@@ -780,7 +961,8 @@
     "response": {
       "data": {
         "id": "team_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Research team",
         "description": "fixture",
         "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
@@ -793,7 +975,9 @@
   {
     "id": "listTeams",
     "go_name": "ListTeams",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -811,7 +995,8 @@
     "response": {
       "data": {
         "id": "team_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Research team",
         "description": "fixture",
         "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
@@ -837,7 +1022,8 @@
     "response": {
       "data": {
         "id": "team_01j5abcdefghjkmnpqrstvwxyz",
-        "user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
         "name": "Research team",
         "description": "fixture",
         "orchestrator_id": "agt_01j5abcdefghjkmnpqrstvwxyz",
@@ -860,7 +1046,9 @@
   {
     "id": "listModels",
     "go_name": "ListModels",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -875,11 +1063,22 @@
   {
     "id": "createApiKey",
     "go_name": "CreateAPIKey",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": {
       "name": "ci-deploy",
       "scopes": [],
-      "expires_at": "30d"
+      "expires_at": "1h",
+      "spend_limit": {
+        "amount": "fixture",
+        "reset": {
+          "unit": "hour",
+          "every": 1,
+          "anchor_at": "fixture",
+          "timezone": "fixture"
+        }
+      }
     },
     "status": 201,
     "response": {
@@ -889,7 +1088,9 @@
   {
     "id": "listApiKeys",
     "go_name": "ListAPIKeys",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {
@@ -900,7 +1101,8 @@
     "id": "deleteApiKey",
     "go_name": "DeleteAPIKey",
     "parameters": {
-      "KeyID": "key_01j5abcdefghjkmnpqrstvwxyz"
+      "KeyID": "key_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 204,
@@ -926,7 +1128,9 @@
   {
     "id": "createImageGeneration",
     "go_name": "CreateImageGeneration",
-    "parameters": {},
+    "parameters": {
+      "IdempotencyKey": "fixture"
+    },
     "body": {
       "model": "google/nano-banana-2",
       "prompt": "A beautiful sunset over the mountains",
@@ -984,7 +1188,8 @@
     "id": "getImageGeneration",
     "go_name": "GetImageGeneration",
     "parameters": {
-      "Record": "igr_01j5abcdefghjkmnpqrstvwxyz"
+      "Record": "igr_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
     },
     "body": null,
     "status": 200,
@@ -1038,7 +1243,9 @@
   {
     "id": "uploadImage",
     "go_name": "UploadImage",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 201,
     "response": {
@@ -1055,7 +1262,9 @@
   {
     "id": "listImageModels",
     "go_name": "ListImageModels",
-    "parameters": {},
+    "parameters": {
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
     "body": null,
     "status": 200,
     "response": {

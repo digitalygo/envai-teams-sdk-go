@@ -49,6 +49,39 @@ jobs:
       - if: matrix.go == '1.27.x'
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
 
+  tooling-sql:
+    name: Tooling SQL adapters
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: envai-test-only
+          MYSQL_DATABASE: envai_tooling_test
+          MYSQL_USER: envai
+          MYSQL_PASSWORD: envai-test-only
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -penvai-test-only"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      ENVAI_TEST_MYSQL_DSN: envai:envai-test-only@tcp(127.0.0.1:3306)/envai_tooling_test
+    defaults:
+      run:
+        working-directory: integration/tooling
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: integration/tooling/go.sum
+      - run: go mod download
+      - run: go vet ./...
+      - run: go test -race ./...
+      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
   release-checks:
     name: Release tooling
     runs-on: ubuntu-latest
@@ -66,7 +99,7 @@ jobs:
       - run: npm audit --audit-level=high --prefix .github/release-tools
 
   release:
-    needs: [test, release-checks]
+    needs: [test, tooling-sql, release-checks]
     if: github.event_name == 'push' && contains(fromJSON('["dev", "alpha", "beta", "main"]'), github.ref_name)
     permissions:
       contents: write

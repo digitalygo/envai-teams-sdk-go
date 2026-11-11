@@ -4,32 +4,37 @@
 
 ## Calling conventions
 
-Every HTTP operation has a method on `*envai.Client`. Pass a `context.Context` and the operation's named `Params` struct. Request/response types are in [models_generated.go](../models_generated.go); exact required fields, nullability, enums, and validation constraints are in the bundled [OpenAPI contract](../contract/openapi.yaml). IDs are opaque strings. Never derive one ID from another or use a local file path as an artifact ID.
+Every reviewed SDK operation has a method on `*envai.Client`. Pass a `context.Context` and the operation's named `Params` struct. Request/response types are in [models_generated.go](../models_generated.go); exact required fields, nullability, enums, and validation constraints are in the bundled [OpenAPI contract](../contract/openapi.yaml). IDs are opaque strings. Never derive one ID from another or use a local file path as an artifact ID.
 
 Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which uses the configured origin-level JWKS URL. Bearer authentication is omitted for public operations and signed artifact downloads. These are primitive operations, not a recommendation to use provider webhooks or image-test endpoints in an ordinary application.
 
 | Method | Params | Returns | HTTP path | Bearer |
 | --- | --- | --- | --- | --- |
-| `SendChatMessage` | `SendChatMessageParams` | `(ChatMessageAccepted, error)` | POST `/chats/{chat_id}/messages` | Yes |
-| `StreamChatEvents` | `StreamChatEventsParams` | `(*EventStream, error)` | GET `/chats/{chat_id}/events` | Yes |
-| `CancelChatTurn` | `CancelChatTurnParams` | `(TurnAccepted, error)` | POST `/chats/{chat_id}/cancel` | Yes |
-| `SteerChatTurn` | `SteerChatTurnParams` | `(TurnAccepted, error)` | POST `/chats/{chat_id}/steer` | Yes |
-| `ResolveChatTool` | `ResolveChatToolParams` | `error` | POST `/chats/{chat_id}/tool-output` | Yes |
-| `ResolveChatApproval` | `ResolveChatApprovalParams` | `error` | POST `/chats/{chat_id}/approval` | Yes |
-| `ForkChat` | `ForkChatParams` | `(ChatForked, error)` | POST `/chats/{chat_id}/fork` | Yes |
-| `RestoreChat` | `RestoreChatParams` | `(RestoreChatAccepted, error)` | POST `/chats/{chat_id}/restore` | Yes |
-| `GetCapabilities` | `GetCapabilitiesParams` | `(Capabilities, error)` | GET `/capabilities` | Yes |
+| `DeliverWorkflowResult` | `DeliverWorkflowResultParams` | `(NativeDeliveryReceipt, error)` | POST `/atp/v3/chats/{chat_id}/deliveries` | Yes |
+| `DelegateToTeam` | `DelegateToTeamParams` | `(TeamDelegationReceipt, error)` | POST `/atp/v3/chats/{chat_id}/delegations` | Yes |
+| `GetDetachedTask` | `GetDetachedTaskParams` | `(DetachedTaskSnapshot, error)` | GET `/atp/v3/chats/{chat_id}/tasks/{task_id}` | Yes |
+| `CancelDetachedTask` | `CancelDetachedTaskParams` | `(CancelDetachedTaskResult, error)` | POST `/atp/v3/chats/{chat_id}/tasks/{task_id}/cancel` | Yes |
+| `ClassifyPhase` | `ClassifyPhaseParams` | `(PhaseClassificationResult, error)` | POST `/atp/v3/chats/{chat_id}/classify-phase` | Yes |
+| `SendChatMessage` | `SendChatMessageParams` | `(ChatMessageAccepted, error)` | POST `/atp/v3/chats/{chat_id}/messages` | Yes |
+| `StreamChatEvents` | `StreamChatEventsParams` | `(*EventStream, error)` | GET `/atp/v3/chats/{chat_id}/events` | Yes |
+| `CancelChatTurn` | `CancelChatTurnParams` | `(TurnAccepted, error)` | POST `/atp/v3/chats/{chat_id}/cancel` | Yes |
+| `SteerChatTurn` | `SteerChatTurnParams` | `(TurnAccepted, error)` | POST `/atp/v3/chats/{chat_id}/steer` | Yes |
+| `ResolveChatTool` | `ResolveChatToolParams` | `error` | POST `/atp/v3/chats/{chat_id}/tool-output` | Yes |
+| `ResolveChatApproval` | `ResolveChatApprovalParams` | `error` | POST `/atp/v3/chats/{chat_id}/approval` | Yes |
+| `ForkChat` | `ForkChatParams` | `(ChatForked, error)` | POST `/atp/v3/chats/{chat_id}/fork` | Yes |
+| `RestoreChat` | `RestoreChatParams` | `(RestoreChatAccepted, error)` | POST `/atp/v3/chats/{chat_id}/restore` | Yes |
+| `GetCapabilities` | `GetCapabilitiesParams` | `(Capabilities, error)` | GET `/atp/v3/capabilities` | Yes |
 | `HealthCheck` | `HealthCheckParams` | `(HealthCheckResult, error)` | GET `/up` | No |
 | `GetJWKS` | `GetJWKSParams` | `(JWKSDocument, error)` | GET `/.well-known/jwks.json` | No |
 | `CreateWorkspace` | `CreateWorkspaceParams` | `(Workspace, error)` | POST `/workspaces` | Yes |
 | `ListWorkspaces` | `ListWorkspacesParams` | `([]Workspace, error)` | GET `/workspaces` | Yes |
 | `GetWorkspace` | `GetWorkspaceParams` | `(Workspace, error)` | GET `/workspaces/{workspace_id}` | Yes |
 | `UpdateWorkspace` | `UpdateWorkspaceParams` | `(Workspace, error)` | PUT `/workspaces/{workspace_id}` | Yes |
-| `CreateUserTool` | `CreateUserToolParams` | `(UserTool, error)` | POST `/tools` | Yes |
-| `ListUserTools` | `ListUserToolsParams` | `([]UserTool, error)` | GET `/tools` | Yes |
-| `GetUserTool` | `GetUserToolParams` | `(UserTool, error)` | GET `/tools/{name}` | Yes |
-| `UpdateUserTool` | `UpdateUserToolParams` | `(UserTool, error)` | PUT `/tools/{name}` | Yes |
-| `DeleteUserTool` | `DeleteUserToolParams` | `error` | DELETE `/tools/{name}` | Yes |
+| `CreateProjectTool` | `CreateProjectToolParams` | `(ProjectTool, error)` | POST `/tools` | Yes |
+| `ListProjectTools` | `ListProjectToolsParams` | `([]ProjectTool, error)` | GET `/tools` | Yes |
+| `GetProjectTool` | `GetProjectToolParams` | `(ProjectTool, error)` | GET `/tools/{name}` | Yes |
+| `UpdateProjectTool` | `UpdateProjectToolParams` | `(ProjectTool, error)` | PUT `/tools/{name}` | Yes |
+| `DeleteProjectTool` | `DeleteProjectToolParams` | `error` | DELETE `/tools/{name}` | Yes |
 | `CreateChat` | `CreateChatParams` | `(Chat, error)` | POST `/workspaces/{workspace_id}/chats` | Yes |
 | `ListChats` | `ListChatsParams` | `([]Chat, error)` | GET `/workspaces/{workspace_id}/chats` | Yes |
 | `GetChat` | `GetChatParams` | `(Chat, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}` | Yes |
@@ -52,9 +57,9 @@ Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which use
 | `UpdateTeam` | `UpdateTeamParams` | `(Team, error)` | PUT `/teams/{team_id}` | Yes |
 | `DeleteTeam` | `DeleteTeamParams` | `error` | DELETE `/teams/{team_id}` | Yes |
 | `ListModels` | `ListModelsParams` | `(ModelList, error)` | GET `/models` | Yes |
-| `CreateAPIKey` | `CreateAPIKeyParams` | `(json.RawMessage, error)` | POST `/api-keys` | Yes |
-| `ListAPIKeys` | `ListAPIKeysParams` | `([]APIKey, error)` | GET `/api-keys` | Yes |
-| `DeleteAPIKey` | `DeleteAPIKeyParams` | `error` | DELETE `/api-keys/{key_id}` | Yes |
+| `CreateAPIKey` | `CreateAPIKeyParams` | `(json.RawMessage, error)` | POST `/api-keys` | Unsupported: human session + CSRF |
+| `ListAPIKeys` | `ListAPIKeysParams` | `([]APIKey, error)` | GET `/api-keys` | Unsupported: human session + CSRF |
+| `DeleteAPIKey` | `DeleteAPIKeyParams` | `error` | DELETE `/api-keys/{key_id}` | Unsupported: human session + CSRF |
 | `TestGenerateImage` | `TestGenerateImageParams` | `(TestGenerateImageResult, error)` | POST `/tests/images/generate` | No |
 | `CreateImageGeneration` | `CreateImageGenerationParams` | `(ImageGenerationAcceptedRecord, error)` | POST `/images/generations` | Yes |
 | `GetImageGeneration` | `GetImageGenerationParams` | `(ImageGenerationStatusRecord, error)` | GET `/images/generations/{record}` | Yes |
@@ -62,11 +67,30 @@ Paths below are relative to your `/api/v1` base URL, except `GetJWKS`, which use
 | `ListImageModels` | `ListImageModelsParams` | `([]ModelCatalogEntry, error)` | GET `/images/models` | Yes |
 | `DownloadArtifact` | `DownloadArtifactParams` | `(*Download, error)` | GET `/artifacts/download` | No |
 | `HandleProviderWebhook` | `HandleProviderWebhookParams` | `(WebhookOk, error)` | POST `/webhooks/providers/{provider}` | No |
+| `UploadChatAttachment` | `UploadChatAttachmentParams` | `(ChatAttachment, error)` | POST `/workspaces/{workspace_id}/chats/{chat_id}/attachments` | Yes |
+| `ListChatAttachments` | `ListChatAttachmentsParams` | `(ListChatAttachmentsResult, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}/attachments` | Yes |
+| `GetChatAttachment` | `GetChatAttachmentParams` | `(ChatAttachment, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}` | Yes |
+| `DeleteChatAttachment` | `DeleteChatAttachmentParams` | `(ChatAttachment, error)` | DELETE `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}` | Yes |
+| `RetryChatAttachment` | `RetryChatAttachmentParams` | `(ChatAttachment, error)` | POST `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}/retry` | Yes |
+| `DownloadChatAttachment` | `DownloadChatAttachmentParams` | `(*Download, error)` | GET `/workspaces/{workspace_id}/chats/{chat_id}/attachments/{attachment_id}/download` | Yes |
+| `UploadWikiSource` | `UploadWikiSourceParams` | `(WikiSource, error)` | POST `/workspaces/{workspace_id}/files/sources` | Yes |
+| `GetWikiSource` | `GetWikiSourceParams` | `(WikiSource, error)` | GET `/workspaces/{workspace_id}/files/sources/{file_id}` | Yes |
+| `DownloadWikiSource` | `DownloadWikiSourceParams` | `(*Download, error)` | GET `/workspaces/{workspace_id}/files/sources/{file_id}/download` | Yes |
+| `WithdrawWikiSource` | `WithdrawWikiSourceParams` | `(WikiSource, error)` | POST `/workspaces/{workspace_id}/wiki/outbox/files` | Yes |
+| `CreateWikiInboxRun` | `CreateWikiInboxRunParams` | `(WikiOperation, error)` | POST `/workspaces/{workspace_id}/wiki/inbox/runs` | Yes |
+| `CreateWikiOutboxRun` | `CreateWikiOutboxRunParams` | `(WikiOperation, error)` | POST `/workspaces/{workspace_id}/wiki/outbox/runs` | Yes |
+| `CreateWikiSyncRun` | `CreateWikiSyncRunParams` | `(WikiOperation, error)` | POST `/workspaces/{workspace_id}/wiki/syncs` | Yes |
+| `GetWikiOperation` | `GetWikiOperationParams` | `(WikiOperation, error)` | GET `/workspaces/{workspace_id}/wiki/operations/{operation_id}` | Yes |
+| `ListWikiCategories` | `ListWikiCategoriesParams` | `(Categories, error)` | GET `/workspaces/{workspace_id}/wiki/categories` | Yes |
+| `GetWikiCategoryIndex` | `GetWikiCategoryIndexParams` | `(CategoryIndex, error)` | GET `/workspaces/{workspace_id}/wiki/categories/{category_id}/index` | Yes |
+| `GetWikiWebhookJWKS` | `GetWikiWebhookJWKSParams` | `(JWKSDocument, error)` | GET `/.well-known/wiki-webhook-jwks.json` | No |
+| `StreamChatEventsLegacy` | `StreamChatEventsLegacyParams` | `(*EventStream, error)` | GET `/chats/{chat_id}/events` | Yes |
+| `GetCapabilitiesLegacy` | `GetCapabilitiesLegacyParams` | `(CapabilitiesLegacy, error)` | GET `/capabilities` | Yes |
 
 ## Models, optional fields, and collections
 
 - `envai.Present(value)` includes an optional field. The zero-value `Optional[T]` omits it. `envai.Null[T]()` explicitly sends JSON null; use only when the field's schema allows null.
-- Resource `data` wrappers are unwrapped into typed resources. Completion pages retain `Data`, `Links`, and `Meta`. This contract has no declared completion `page` request parameter; there is no automatic page iterator.
+- Resource `data` wrappers are unwrapped into typed resources. Completion pages retain `Data`, `Links`, and `Meta`. Use `ListCompletionsParams.Page` or `CompletionPages` for numeric traversal on the configured origin.
 - API key creation distinguishes omitted expiry from explicit `"never"`. Treat the plaintext key in the creation response as a secret.
 - Flexible metadata, schema, and union values use `json.RawMessage` or typed JSON maps. Unknown REST response properties are ignored; known fields keep their declared Go types.
 - HTTP 204 methods return only an error. `Download` contains `Body`, `Header`, and `Status`; always call `Close`, including after partial reads. Reading a download is your responsibility and must remain within the request's context deadline.
@@ -79,8 +103,18 @@ See [configuration](getting-started.md#configuration) for defaults and [error ha
 
 ## Event payloads
 
-`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 29 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
+`DecodeEvent` validates ATP v3 and immutable numeric v2 envelopes before hydration. `Event.TypedPayload()` returns the corresponding concrete payload; `Event.Raw` retains original JSON. All 39 declared types are listed in [events_generated.go](../events_generated.go) and described by [events.json](../contract/events.json). Valid future event types remain available as raw data. Capabilities discovery does not restrict which valid event types can be decoded.
 
 ## Wiki and negotiated contracts
 
 See [Wiki lifecycle and durable webhook intake](wiki.md) for all source, operation, catalog and JWKS methods, and [contract 3 migration](contract3-migration.md) for default selection, strict legacy reads, nullable costs and compatibility errors.
+
+## Project tenancy and authentication
+
+Workspaces, chats, agents and teams replace UserID ownership with ProjectID and nullable CreatedByUserID audit provenance. Completion adds ProjectID and APIKeyID, and UserID is now a nullable *string. Use project ownership checks, never the key creator. Workspace metadata is a json.RawMessage alias supporting objects and lists, including the server default [].
+
+Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
+
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+
+Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

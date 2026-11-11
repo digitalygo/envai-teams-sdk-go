@@ -22,3 +22,13 @@ Full Wiki lifecycle, exact reads, webhook verification and atomic PostgreSQL int
 ## Alpha release prediction
 
 A token-free local dry-run of the existing locked Semantic Release tooling, using the verified existing alpha/main topology, published tag and channel note, predicts `v1.0.0-alpha.2` for this breaking change. Its release type is `major`, but Semantic Release continues the unreleased 1.0.0 alpha line. The existing module path and major-version guard remain valid and unchanged. This prediction is not a publication claim; refresh tags before release.
+
+## Project tenancy and authentication
+
+Workspaces, chats, agents and teams replace UserID ownership with ProjectID and nullable CreatedByUserID audit provenance. Completion adds ProjectID and APIKeyID, and UserID is now a nullable *string. Use project ownership checks, never the key creator. Workspace metadata is a json.RawMessage alias supporting objects and lists, including the server default [].
+
+Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
+
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+
+Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

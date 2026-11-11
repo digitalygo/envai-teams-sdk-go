@@ -1,5 +1,127 @@
 [
   {
+    "id": "deliverWorkflowResult",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/deliveries",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "delegateToTeam",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/delegations",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "getDetachedTask",
+    "method": "GET",
+    "path": "/atp/v3/chats/{chat_id}/tasks/{task_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "task_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "cancelDetachedTask",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/tasks/{task_id}/cancel",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      },
+      {
+        "name": "task_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "classifyPhase",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/classify-phase",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "classifyChoice",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/classify-choice",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "startIndependentJob",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/jobs",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true
+      }
+    ]
+  },
+  {
     "id": "sendChatMessage",
     "method": "POST",
     "path": "/atp/v3/chats/{chat_id}/messages",
@@ -175,7 +297,13 @@
     "kind": "json",
     "body": "json",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "listWorkspaces",
@@ -185,7 +313,13 @@
     "kind": "json",
     "body": "",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "getWorkspace",
@@ -220,27 +354,39 @@
     ]
   },
   {
-    "id": "createUserTool",
+    "id": "createProjectTool",
     "method": "POST",
     "path": "/tools",
     "authenticated": true,
     "kind": "json",
     "body": "json",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
-    "id": "listUserTools",
+    "id": "listProjectTools",
     "method": "GET",
     "path": "/tools",
     "authenticated": true,
     "kind": "json",
     "body": "",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
-    "id": "getUserTool",
+    "id": "getProjectTool",
     "method": "GET",
     "path": "/tools/{name}",
     "authenticated": true,
@@ -252,11 +398,16 @@
         "name": "name",
         "in": "path",
         "required": true
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
       }
     ]
   },
   {
-    "id": "updateUserTool",
+    "id": "updateProjectTool",
     "method": "PUT",
     "path": "/tools/{name}",
     "authenticated": true,
@@ -268,11 +419,16 @@
         "name": "name",
         "in": "path",
         "required": true
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
       }
     ]
   },
   {
-    "id": "deleteUserTool",
+    "id": "deleteProjectTool",
     "method": "DELETE",
     "path": "/tools/{name}",
     "authenticated": true,
@@ -284,6 +440,11 @@
         "name": "name",
         "in": "path",
         "required": true
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
       }
     ]
   },
@@ -376,6 +537,11 @@
       },
       {
         "name": "started_at[to]",
+        "in": "query",
+        "required": false
+      },
+      {
+        "name": "page",
         "in": "query",
         "required": false
       },
@@ -536,7 +702,13 @@
     "kind": "json",
     "body": "json",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "listAgents",
@@ -546,7 +718,13 @@
     "kind": "json",
     "body": "",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "getAgent",
@@ -604,7 +782,13 @@
     "kind": "json",
     "body": "json",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "listTeams",
@@ -614,7 +798,13 @@
     "kind": "json",
     "body": "",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "getTeam",
@@ -672,7 +862,13 @@
     "kind": "json",
     "body": "",
     "unwrap": false,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "createApiKey",
@@ -682,7 +878,13 @@
     "kind": "json",
     "body": "json",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "listApiKeys",
@@ -692,7 +894,13 @@
     "kind": "json",
     "body": "",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "deleteApiKey",
@@ -707,6 +915,11 @@
         "name": "key_id",
         "in": "path",
         "required": true
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
       }
     ]
   },
@@ -728,7 +941,13 @@
     "kind": "json",
     "body": "json",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "getImageGeneration",
@@ -743,6 +962,11 @@
         "name": "record",
         "in": "path",
         "required": true
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
       }
     ]
   },
@@ -754,7 +978,13 @@
     "kind": "json",
     "body": "multipart",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "listImageModels",
@@ -764,7 +994,13 @@
     "kind": "json",
     "body": "",
     "unwrap": true,
-    "parameters": []
+    "parameters": [
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false
+      }
+    ]
   },
   {
     "id": "downloadArtifact",

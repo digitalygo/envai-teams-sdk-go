@@ -1,5 +1,47 @@
 [
   {
+    "id": "deliverWorkflowResult",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/deliveries",
+    "authenticated": true
+  },
+  {
+    "id": "delegateToTeam",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/delegations",
+    "authenticated": true
+  },
+  {
+    "id": "getDetachedTask",
+    "method": "GET",
+    "path": "/atp/v3/chats/{chat_id}/tasks/{task_id}",
+    "authenticated": true
+  },
+  {
+    "id": "cancelDetachedTask",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/tasks/{task_id}/cancel",
+    "authenticated": true
+  },
+  {
+    "id": "classifyPhase",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/classify-phase",
+    "authenticated": true
+  },
+  {
+    "id": "classifyChoice",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/classify-choice",
+    "authenticated": true
+  },
+  {
+    "id": "startIndependentJob",
+    "method": "POST",
+    "path": "/atp/v3/chats/{chat_id}/jobs",
+    "authenticated": true
+  },
+  {
     "id": "sendChatMessage",
     "method": "POST",
     "path": "/atp/v3/chats/{chat_id}/messages",
@@ -90,31 +132,31 @@
     "authenticated": true
   },
   {
-    "id": "createUserTool",
+    "id": "createProjectTool",
     "method": "POST",
     "path": "/tools",
     "authenticated": true
   },
   {
-    "id": "listUserTools",
+    "id": "listProjectTools",
     "method": "GET",
     "path": "/tools",
     "authenticated": true
   },
   {
-    "id": "getUserTool",
+    "id": "getProjectTool",
     "method": "GET",
     "path": "/tools/{name}",
     "authenticated": true
   },
   {
-    "id": "updateUserTool",
+    "id": "updateProjectTool",
     "method": "PUT",
     "path": "/tools/{name}",
     "authenticated": true
   },
   {
-    "id": "deleteUserTool",
+    "id": "deleteProjectTool",
     "method": "DELETE",
     "path": "/tools/{name}",
     "authenticated": true
