@@ -65,7 +65,7 @@ func TestStrictValidationRejectsMutationBeforeAnyHTTP(t *testing.T) {
 }
 func TestStrictValidationCanonicalOperationCoverage(t *testing.T) {
 	c := testClient(t, func(http.ResponseWriter, *http.Request) { t.Fatal("schema lookup made network call") })
-	if len(c.operations) != 78 {
+	if len(c.operations) != 92 {
 		t.Fatal(len(c.operations))
 	}
 	for id, op := range c.operations {

@@ -132,6 +132,12 @@
     "authenticated": true
   },
   {
+    "id": "deleteWorkspace",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}",
+    "authenticated": true
+  },
+  {
     "id": "createProjectTool",
     "method": "POST",
     "path": "/tools",
@@ -180,6 +186,18 @@
     "authenticated": true
   },
   {
+    "id": "updateChat",
+    "method": "PUT",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}",
+    "authenticated": true
+  },
+  {
+    "id": "deleteChat",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}",
+    "authenticated": true
+  },
+  {
     "id": "listCompletions",
     "method": "GET",
     "path": "/workspaces/{workspace_id}/chats/{chat_id}/completions",
@@ -189,6 +207,30 @@
     "id": "getCompletion",
     "method": "GET",
     "path": "/workspaces/{workspace_id}/chats/{chat_id}/completions/{completion_id}",
+    "authenticated": true
+  },
+  {
+    "id": "listChatCrons",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/crons",
+    "authenticated": true
+  },
+  {
+    "id": "getChatCron",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/crons/{cron_id}",
+    "authenticated": true
+  },
+  {
+    "id": "updateChatCron",
+    "method": "PATCH",
+    "path": "/workspaces/{workspace_id}/crons/{cron_id}",
+    "authenticated": true
+  },
+  {
+    "id": "deleteChatCron",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}/crons/{cron_id}",
     "authenticated": true
   },
   {
@@ -465,6 +507,48 @@
     "id": "getCapabilitiesLegacy",
     "method": "GET",
     "path": "/capabilities",
+    "authenticated": true
+  },
+  {
+    "id": "listProjectSkills",
+    "method": "GET",
+    "path": "/projects/{project_id}/skills",
+    "authenticated": true
+  },
+  {
+    "id": "createProjectSkill",
+    "method": "POST",
+    "path": "/projects/{project_id}/skills",
+    "authenticated": true
+  },
+  {
+    "id": "getProjectSkill",
+    "method": "GET",
+    "path": "/projects/{project_id}/skills/{skill_id}",
+    "authenticated": true
+  },
+  {
+    "id": "updateProjectSkill",
+    "method": "PUT",
+    "path": "/projects/{project_id}/skills/{skill_id}",
+    "authenticated": true
+  },
+  {
+    "id": "deleteProjectSkill",
+    "method": "DELETE",
+    "path": "/projects/{project_id}/skills/{skill_id}",
+    "authenticated": true
+  },
+  {
+    "id": "getProjectUsage",
+    "method": "GET",
+    "path": "/projects/{project_id}/usage",
+    "authenticated": true
+  },
+  {
+    "id": "getProjectLogs",
+    "method": "GET",
+    "path": "/projects/{project_id}/logs",
     "authenticated": true
   }
 ]

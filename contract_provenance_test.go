@@ -67,10 +67,11 @@ func TestContractProvenanceAndFrozenV2(t *testing.T) {
 		t.Fatal(err)
 	}
 	var provenance struct {
-		Repository string `json:"repository"`
-		Commit     string `json:"commit"`
-		Operations int    `json:"operations"`
-		Sources    map[string]struct {
+		Repository       string `json:"repository"`
+		Commit           string `json:"commit"`
+		Operations       int    `json:"operations"`
+		ServerOperations int    `json:"server_operations"`
+		Sources          map[string]struct {
 			Bytes        int    `json:"bytes"`
 			SHA256       string `json:"sha256"`
 			GitBlobSHA   string `json:"git_blob_sha"`
@@ -84,8 +85,8 @@ func TestContractProvenanceAndFrozenV2(t *testing.T) {
 	if err = json.Unmarshal(raw, &provenance); err != nil {
 		t.Fatal(err)
 	}
-	if provenance.Repository != "digitalygo/envai-teams" || provenance.Commit != "964c11fe72887329e8d06c2afb483442d643b290" || provenance.Operations != 78 || len(provenance.Sources) != 6 {
-		t.Fatal(provenance.Repository, provenance.Commit, provenance.Operations, len(provenance.Sources))
+	if provenance.Repository != "digitalygo/1-1-5-envai-aaas" || provenance.Commit != "ba021aa61e30e379880f809d45f90e5d3564d43e" || provenance.Operations != 92 || provenance.ServerOperations != 146 || len(provenance.Sources) != 6 {
+		t.Fatal(provenance.Repository, provenance.Commit, provenance.Operations, provenance.ServerOperations, len(provenance.Sources))
 	}
 	for name, entry := range provenance.Sources {
 		data, err := os.ReadFile(entry.SnapshotPath)

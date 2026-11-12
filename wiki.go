@@ -130,6 +130,11 @@ func validateChatAttachmentParts(body any) error {
 	return nil
 }
 func (c *Client) validateOperationParams(op operation, params map[string]any) error {
+	if op.ID == "getProjectLogs" {
+		if err := validateProjectLogQuery(op, params); err != nil {
+			return err
+		}
+	}
 	for _, p := range op.Parameters {
 		if p.In == "header" {
 			if value, exists := params[p.Name]; exists {

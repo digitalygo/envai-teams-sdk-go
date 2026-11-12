@@ -285,6 +285,18 @@ func (c *Client) UpdateWorkspace(ctx context.Context, req UpdateWorkspaceParams)
 	return out, err
 }
 
+type DeleteWorkspaceParams struct {
+	WorkspaceID string
+}
+
+func (c *Client) DeleteWorkspace(ctx context.Context, req DeleteWorkspaceParams) (CleanupResult, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	var out CleanupResult
+	err := c.call(ctx, "deleteWorkspace", p, nil, &out)
+	return out, err
+}
+
 type CreateProjectToolParams struct {
 	XEnvaiProjectID Optional[string]
 	Body            ProjectToolCreateRequest
@@ -440,6 +452,35 @@ func (c *Client) GetChat(ctx context.Context, req GetChatParams) (Chat, error) {
 	return out, err
 }
 
+type UpdateChatParams struct {
+	WorkspaceID string
+	ChatID      string
+	Body        ChatUpdateRequest
+}
+
+func (c *Client) UpdateChat(ctx context.Context, req UpdateChatParams) (Chat, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	var out Chat
+	err := c.call(ctx, "updateChat", p, req.Body, &out)
+	return out, err
+}
+
+type DeleteChatParams struct {
+	WorkspaceID string
+	ChatID      string
+}
+
+func (c *Client) DeleteChat(ctx context.Context, req DeleteChatParams) (CleanupResult, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	p["chat_id"] = req.ChatID
+	var out CleanupResult
+	err := c.call(ctx, "deleteChat", p, nil, &out)
+	return out, err
+}
+
 type ListCompletionsParams struct {
 	WorkspaceID       string
 	ChatID            string
@@ -492,6 +533,83 @@ func (c *Client) GetCompletion(ctx context.Context, req GetCompletionParams) (Co
 	var out Completion
 	err := c.call(ctx, "getCompletion", p, nil, &out)
 	return out, err
+}
+
+type ListChatCronsParams struct {
+	WorkspaceID     string
+	XEnvaiProjectID Optional[string]
+	OriginChatID    Optional[string]
+	Status          Optional[string]
+}
+
+func (c *Client) ListChatCrons(ctx context.Context, req ListChatCronsParams) ([]ChatCron, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	if req.OriginChatID.Set {
+		p["origin_chat_id"] = req.OriginChatID.Value
+	}
+	if req.Status.Set {
+		p["status"] = req.Status.Value
+	}
+	var out []ChatCron
+	err := c.call(ctx, "listChatCrons", p, nil, &out)
+	return out, err
+}
+
+type GetChatCronParams struct {
+	WorkspaceID     string
+	XEnvaiProjectID Optional[string]
+	CronID          string
+}
+
+func (c *Client) GetChatCron(ctx context.Context, req GetChatCronParams) (ChatCron, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	p["cron_id"] = req.CronID
+	var out ChatCron
+	err := c.call(ctx, "getChatCron", p, nil, &out)
+	return out, err
+}
+
+type UpdateChatCronParams struct {
+	WorkspaceID     string
+	XEnvaiProjectID Optional[string]
+	CronID          string
+	Body            ChatCronUpdateRequest
+}
+
+func (c *Client) UpdateChatCron(ctx context.Context, req UpdateChatCronParams) (ChatCron, error) {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	p["cron_id"] = req.CronID
+	var out ChatCron
+	err := c.call(ctx, "updateChatCron", p, req.Body, &out)
+	return out, err
+}
+
+type DeleteChatCronParams struct {
+	WorkspaceID     string
+	XEnvaiProjectID Optional[string]
+	CronID          string
+}
+
+func (c *Client) DeleteChatCron(ctx context.Context, req DeleteChatCronParams) error {
+	p := map[string]any{}
+	p["workspace_id"] = req.WorkspaceID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	p["cron_id"] = req.CronID
+	return c.call(ctx, "deleteChatCron", p, nil, nil)
 }
 
 type IndexWorkspaceFilesParams struct {
@@ -1181,5 +1299,167 @@ func (c *Client) GetCapabilitiesLegacy(ctx context.Context, req GetCapabilitiesL
 
 	var out CapabilitiesLegacy
 	err := c.call(ctx, "getCapabilitiesLegacy", p, nil, &out)
+	return out, err
+}
+
+type ListProjectSkillsParams struct {
+	ProjectID string
+}
+
+func (c *Client) ListProjectSkills(ctx context.Context, req ListProjectSkillsParams) ([]ProjectSkill, error) {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	var out []ProjectSkill
+	err := c.call(ctx, "listProjectSkills", p, nil, &out)
+	return out, err
+}
+
+type CreateProjectSkillParams struct {
+	ProjectID string
+	Body      ProjectSkillCreateRequest
+}
+
+func (c *Client) CreateProjectSkill(ctx context.Context, req CreateProjectSkillParams) (ProjectSkill, error) {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	var out ProjectSkill
+	err := c.call(ctx, "createProjectSkill", p, req.Body, &out)
+	return out, err
+}
+
+type GetProjectSkillParams struct {
+	ProjectID string
+	SkillID   string
+}
+
+func (c *Client) GetProjectSkill(ctx context.Context, req GetProjectSkillParams) (ProjectSkill, error) {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	p["skill_id"] = req.SkillID
+	var out ProjectSkill
+	err := c.call(ctx, "getProjectSkill", p, nil, &out)
+	return out, err
+}
+
+type UpdateProjectSkillParams struct {
+	ProjectID string
+	SkillID   string
+	Body      ProjectSkillUpdateRequest
+}
+
+func (c *Client) UpdateProjectSkill(ctx context.Context, req UpdateProjectSkillParams) (ProjectSkill, error) {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	p["skill_id"] = req.SkillID
+	var out ProjectSkill
+	err := c.call(ctx, "updateProjectSkill", p, req.Body, &out)
+	return out, err
+}
+
+type DeleteProjectSkillParams struct {
+	ProjectID string
+	SkillID   string
+}
+
+func (c *Client) DeleteProjectSkill(ctx context.Context, req DeleteProjectSkillParams) error {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	p["skill_id"] = req.SkillID
+	return c.call(ctx, "deleteProjectSkill", p, nil, nil)
+}
+
+type GetProjectUsageParams struct {
+	ProjectID       string
+	XEnvaiProjectID Optional[string]
+	From            Optional[string]
+	To              Optional[string]
+	APIKeyID        Optional[string]
+	Page            Optional[int64]
+	PerPage         Optional[int64]
+}
+
+func (c *Client) GetProjectUsage(ctx context.Context, req GetProjectUsageParams) (UsageReportCollection, error) {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	if req.From.Set {
+		p["from"] = req.From.Value
+	}
+	if req.To.Set {
+		p["to"] = req.To.Value
+	}
+	if req.APIKeyID.Set {
+		p["api_key_id"] = req.APIKeyID.Value
+	}
+	if req.Page.Set {
+		p["page"] = req.Page.Value
+	}
+	if req.PerPage.Set {
+		p["per_page"] = req.PerPage.Value
+	}
+	var out UsageReportCollection
+	err := c.call(ctx, "getProjectUsage", p, nil, &out)
+	return out, err
+}
+
+type GetProjectLogsParams struct {
+	ProjectID       string
+	XEnvaiProjectID Optional[string]
+	View            Optional[string]
+	From            Optional[string]
+	To              Optional[string]
+	APIKeyID        Optional[string]
+	ChatID          Optional[string]
+	Type            Optional[string]
+	Types           Optional[[]string]
+	WorkspaceIDs    Optional[[]string]
+	APIKeyIDs       Optional[[]string]
+	Page            Optional[int64]
+	PerPage         Optional[int64]
+}
+
+func (c *Client) GetProjectLogs(ctx context.Context, req GetProjectLogsParams) (json.RawMessage, error) {
+	p := map[string]any{}
+	p["project_id"] = req.ProjectID
+	if req.XEnvaiProjectID.Set {
+		p["X-Envai-Project-Id"] = req.XEnvaiProjectID.Value
+	}
+	if req.View.Set {
+		p["view"] = req.View.Value
+	}
+	if req.From.Set {
+		p["from"] = req.From.Value
+	}
+	if req.To.Set {
+		p["to"] = req.To.Value
+	}
+	if req.APIKeyID.Set {
+		p["api_key_id"] = req.APIKeyID.Value
+	}
+	if req.ChatID.Set {
+		p["chat_id"] = req.ChatID.Value
+	}
+	if req.Type.Set {
+		p["type"] = req.Type.Value
+	}
+	if req.Types.Set {
+		p["types[]"] = req.Types.Value
+	}
+	if req.WorkspaceIDs.Set {
+		p["workspace_ids[]"] = req.WorkspaceIDs.Value
+	}
+	if req.APIKeyIDs.Set {
+		p["api_key_ids[]"] = req.APIKeyIDs.Value
+	}
+	if req.Page.Set {
+		p["page"] = req.Page.Value
+	}
+	if req.PerPage.Set {
+		p["per_page"] = req.PerPage.Value
+	}
+	var out json.RawMessage
+	err := c.call(ctx, "getProjectLogs", p, nil, &out)
 	return out, err
 }

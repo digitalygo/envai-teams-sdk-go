@@ -69,6 +69,51 @@ func validateStrictValue(op operation, part, pointer string, value any) error {
 	}
 	return nil
 }
+func validateMutableBody(op operation, body any) error {
+	switch op.ID {
+	case "updateChat", "updateChatCron", "createProjectSkill", "updateProjectSkill":
+	default:
+		return nil
+	}
+	pointer := strictOperationPointer(op) + "/requestBody/content/" + pointerToken("application/json") + "/schema"
+	node, err := canonicalNode(pointer)
+	if err != nil {
+		return err
+	}
+	schema, ok := node.(map[string]any)
+	if !ok {
+		return strictContractError(op, "body media type")
+	}
+	if ref, ok := schema["$ref"].(string); ok {
+		pointer = ref
+		node, err = canonicalNode(ref)
+		if err != nil {
+			return err
+		}
+		schema, ok = node.(map[string]any)
+		if !ok {
+			return strictContractError(op, "body")
+		}
+	}
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return strictContractError(op, "body")
+	}
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return strictContractError(op, "body")
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(raw, &fields) != nil {
+		return strictContractError(op, "body")
+	}
+	for name := range fields {
+		if _, ok := properties[name]; !ok {
+			return strictContractError(op, "body")
+		}
+	}
+	return nil
+}
 func (c *Client) validateStrictRequest(op operation, params map[string]any, body any) error {
 	pointer := strictOperationPointer(op)
 	operationSpec, err := canonicalObject(pointer)
@@ -159,6 +204,9 @@ func (c *Client) validateStrictRequest(op operation, params map[string]any, body
 		return err
 	} else if schema == nil {
 		return strictContractError(op, "body media type")
+	}
+	if err := validateMutableBody(op, value); err != nil {
+		return err
 	}
 	return validateStrictValue(op, "request body", schemaPointer, value)
 }

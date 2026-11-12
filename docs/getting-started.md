@@ -1,6 +1,6 @@
-> The new Wiki/contract 3 APIs require a compatible server and a release containing this migration. The older published alpha tag below predates these APIs; see [migration](contract3-migration.md).
-
 # Getting started
+
+> The new Wiki/contract 3 APIs require a compatible server and a release containing this migration. The older published alpha tag below predates these APIs; see [migration](contract3-migration.md). The project resources described under [Project resources](#project-resources-unreleased) are also absent from that tag.
 
 [README](../README.md) · [API reference](api-reference.md) · [Streaming](streaming.md) · [Client tools](client-tools.md)
 
@@ -62,6 +62,33 @@ The SDK itself never reads environment variables. Supply credentials explicitly 
 
 The default transport honors standard proxy environment variables. Review proxy configuration before using secrets. If you inject an HTTP transport, keep TLS verification enabled and honor request cancellation. Redirects are refused.
 
+## Project resources (unreleased)
+
+These methods exist on the `feature/user-company-projects` branch only and are not part of the published `v1.0.0-alpha.1`. To try them, depend on a reviewed commit SHA (`go get github.com/digitalygo/envai-teams-sdk-go@<sha>`). This guide makes no claim about a future tag or version. They require a server that implements the pinned canonical contract (`digitalygo/1-1-5-envai-aaas` at `ba021aa61e30e379880f809d45f90e5d3564d43e`).
+
+Before you start:
+
+- Use a project API key. It selects the project; only set `XEnvaiProjectID` where you also hold a human session, and it must match.
+- Treat deletion as access cut plus pending cleanup. `DeleteWorkspace` and `DeleteChat` return a `CleanupResult` whose intents are usually still `pending`; this is not proof of physical purge. A 409 conflict arises from active turns or active cron protection; active cron protection can persist even after turn cancellation, and cancelling a turn does not guarantee removal of the deletion guard. Inspect the error code and existing cron, occurrence, and turn state, taking explicit operator action where appropriate rather than treating turn cancellation as a generic recipe. The SDK just surfaces 409.
+- Skill bodies are `map[string]json.RawMessage`, so use `json.RawMessage` values and omit keys you do not change.
+- Chat crons can be listed, read, updated and cancelled, but not created through the API.
+- Logs have three views. Use `GetProjectLogsEvents`, `GetProjectLogsAnalytics` and `GetProjectLogsFilterCatalog`; `GetProjectLogs` returns raw JSON. Use `ProjectUsagePages` and `ProjectLogPages` to iterate numeric pages on your configured origin.
+
+```go
+skills, err := client.ListProjectSkills(ctx, envai.ListProjectSkillsParams{ProjectID: projectID})
+if err != nil { return err }
+
+filters, err := client.GetProjectLogsFilterCatalog(ctx, envai.GetProjectLogsParams{
+    ProjectID: projectID,
+    From:      envai.Present("2026-11-01"),
+    To:        envai.Present("2026-11-07"),
+})
+if err != nil { return err }
+_, _ = skills, filters.Types
+```
+
+See the [API reference](api-reference.md#project-resources-deletion-and-observability) for every field, constraint and error.
+
 ## Application lifecycle
 
 Reuse a client across operations. Pass contexts with bounded deadlines; close event streams and downloads. Local cancellation stops this client's I/O and cooperative handlers. To cancel remote work, explicitly call `CancelChatTurn` and observe `turn.cancelled`.
@@ -70,5 +97,4 @@ Start with turn helpers for new messages. Use low-level streams when you need a 
 
 ## Offline checks
 
-Tests use mocks and public signature vectors; they require no Envai credentials. Durable receipt/outbox integration tests additionally use a disposable PostgreSQL database selected by `ENVAI_TEST_POSTGRES_DSN`; CI provisions it automatically. `go test ./...` compiles examples and executes the quickstart against a local mock server. The README includes the full generator, provenance, race, vet, and coverage commands. Passing these checks demonstrates client behavior against the bundled contracts, not availability or configuration of your API deployment.
-
+Tests use mocks and public signature vectors; they require no Envai credentials. Durable receipt/outbox integration tests additionally use a disposable PostgreSQL database selected by `ENVAI_TEST_POSTGRES_DSN`; CI provisions it automatically. `go test ./...` compiles examples and executes the quickstart against a local mock server. The README includes the full generator, provenance, race, vet, and coverage commands. CI also runs `govulncheck`. A past local run on Go 1.27.1 reported standard-library advisories; use a patched Go release (CI resolves the latest 1.27 patch) and do not run production workloads on an unpatched runtime. Passing these checks demonstrates client behavior against the bundled contracts, not availability or configuration of your API deployment.

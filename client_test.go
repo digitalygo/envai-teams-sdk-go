@@ -62,7 +62,7 @@ func TestGeneratedOperationInventoryAndTypedMethods(t *testing.T) {
 		Path          string `json:"path"`
 		Authenticated bool   `json:"authenticated"`
 	}](t, "operations.json")
-	if len(cases) != 78 || len(inventory) != 78 {
+	if len(cases) != 92 || len(inventory) != 92 {
 		t.Fatal("contract inventory changed")
 	}
 	for _, tc := range cases {
@@ -310,7 +310,7 @@ func TestConfigurationAndEncoding(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(c.OperationIDs()) != 78 {
+	if len(c.OperationIDs()) != 92 {
 		t.Fatal("inventory")
 	}
 	if _, err = c.requestURL(c.operations["getProjectTool"], map[string]any{"name": "../x"}); err == nil {
