@@ -31,6 +31,11 @@ func TestMessageModelValidationAndWire(t *testing.T) {
 					if tc.name == "valid" && string(body["model"]) != `"Vendor/模型"` {
 						t.Error(string(body["model"]))
 					}
+					if tc.name == "absent" {
+						if _, exists := body["model"]; exists {
+							t.Error("zero optional model was sent", body)
+						}
+					}
 					w.WriteHeader(202)
 					fmt.Fprint(w, `{"status":"accepted","turn_id":"cmpl_01j5abcdefghjkmnpqrstvwxyz"}`)
 				})
@@ -44,6 +49,62 @@ func TestMessageModelValidationAndWire(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestModelSchemaPaddingAndWire(t *testing.T) {
+	spaces := []rune{'\u0009', '\u000a', '\u000b', '\u000c', '\u000d', '\u0020', '\u0085', '\u00a0', '\u1680', '\u2000', '\u2001', '\u2002', '\u2003', '\u2004', '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f', '\u3000'}
+	pointer := "#/components/schemas/ChatMessageRequest"
+	check := func(t *testing.T, model string, valid bool) {
+		t.Helper()
+		raw, err := json.Marshal(map[string]string{"message": "hello", "model": model})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := validateSchema("openapi.json", pointer, raw); (err == nil) != valid {
+			t.Fatalf("schema model %q: valid=%t err=%v", model, valid, err)
+		}
+		for _, strict := range []bool{false, true} {
+			for _, rawExtra := range []bool{false, true} {
+				posts := 0
+				c := negotiatedTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+					posts++
+					var body map[string]json.RawMessage
+					if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+						t.Error(err)
+					}
+					var got string
+					if err := json.Unmarshal(body["model"], &got); err != nil || got != model {
+						t.Errorf("model=%q err=%v", got, err)
+					}
+					w.WriteHeader(202)
+					fmt.Fprint(w, `{"status":"accepted","turn_id":"cmpl_01j5abcdefghjkmnpqrstvwxyz"}`)
+				})
+				c.config.StrictValidation = strict
+				body := ChatMessageRequest{Message: "hello"}
+				if rawExtra {
+					encoded, _ := json.Marshal(model)
+					body.Extra = map[string]json.RawMessage{"model": encoded}
+				} else {
+					body.Model = Present(model)
+				}
+				_, err := c.SendChatMessage(context.Background(), SendChatMessageParams{ChatID: "cht_01j5abcdefghjkmnpqrstvwxyz", Body: body})
+				if valid && (err != nil || posts != 1) || !valid && (err == nil || posts != 0) {
+					t.Fatalf("model=%q strict=%t raw=%t err=%v posts=%d", model, strict, rawExtra, err, posts)
+				}
+			}
+		}
+	}
+	for _, space := range spaces {
+		for _, model := range []string{string(space) + "vendor/model", "vendor/model" + string(space)} {
+			t.Run(fmt.Sprintf("%U/%q", space, model), func(t *testing.T) { check(t, model, false) })
+		}
+	}
+	for _, model := range []string{"\r\nvendor/model", "vendor/model\r\n"} {
+		t.Run(fmt.Sprintf("CRLF/%q", model), func(t *testing.T) { check(t, model, false) })
+	}
+	for _, model := range []string{"Vendor/模型", "vendor/Model", "vendor/模型 x", "vendor/\nmodel", "\ufeffmodel\ufeff", "\u001cmodel\u001f", "\u001dmodel\u001e"} {
+		t.Run(fmt.Sprintf("valid/%q", model), func(t *testing.T) { check(t, model, true) })
 	}
 }
 

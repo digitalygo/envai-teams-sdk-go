@@ -64,7 +64,7 @@ The default transport honors standard proxy environment variables. Review proxy 
 
 ## Project resources (unreleased)
 
-These methods exist on the `feature/user-company-projects` branch only and are not part of the published `v1.0.0-alpha.1`. To try them, depend on a reviewed commit SHA (`go get github.com/digitalygo/envai-teams-sdk-go@<sha>`). This guide makes no claim about a future tag or version. They require a server that implements the pinned canonical contract (`digitalygo/envai-teams` at `7f4085dbfdd3f208b82716119cff1860fbd502bb`).
+These methods exist on the `feature/user-company-projects` branch only and are not part of the published `v1.0.0-alpha.1`. To try them, depend on a reviewed commit SHA (`go get github.com/digitalygo/envai-teams-sdk-go@<sha>`). This guide makes no claim about a future tag or version. They require a server that implements the pinned canonical contract (`digitalygo/envai-teams` at `f970714c0a358ff94b14f15eabde197c55861e74`).
 
 Before you start:
 

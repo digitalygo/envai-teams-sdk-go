@@ -1,7 +1,7 @@
 ---
 status: completed
 created_at: 2026-11-12
-updated_at: 2026-11-13
+updated_at: 2026-11-14
 files_edited:
   - contract/events.json
   - docs/model-selection.md
@@ -39,6 +39,7 @@ rationale:
   - Expose the backend's existing project-key resource and reporting operations through the Go SDK.
   - Preserve generated API compatibility, precise accounting values and safe pagination.
   - Preserve exact per-turn model selection through typed requests and RunTurn.
+  - Pin the reviewed model-only server commit and reject boundary Unicode White_Space in model values, with no adoption of unrelated server API changes.
 supporting_docs:
   - https://github.com/digitalygo/envai-teams/tree/7f4085dbfdd3f208b82716119cff1860fbd502bb
   - ../../../docs/model-selection.md
@@ -47,6 +48,7 @@ supporting_docs:
   - ../../../docs/contract3-migration.md
   - ../../../contract/provenance.json
   - https://github.com/digitalygo/1-1-5-envai-aaas/tree/ba021aa61e30e379880f809d45f90e5d3564d43e
+  - https://github.com/digitalygo/envai-teams/commit/f970714c0a358ff94b14f15eabde197c55861e74
 ---
 
 # Project-resource SDK alignment
@@ -180,3 +182,28 @@ or release verification is implied. Evidence remains under
 `/tmp/envai-model-sdk-verify/leader-go*`; task containers, their volumes and
 private connection files were removed after verification. Unrelated resources
 remain intact.
+
+## Update: 2026-11-14 model input validation follow-up
+
+### Follow-up summary of changes
+
+A minor finding on the model input was corrected. The four SDK OpenAPI copies and the six source provenance and current-docs assertions were synced to the reviewed server commit [f970714c0a35](https://github.com/digitalygo/envai-teams/commit/f970714c0a358ff94b14f15eabde197c55861e74), which holds only the canonical `not.pattern` that forbids the 25 exact Go Unicode `White_Space` code points at the start or end of `model`. The Go contract checker pin and provenance were updated; the SDK runtime is unchanged.
+
+### Follow-up technical reasoning
+
+The server runtime was already correct and is unchanged; the published schema is now as strict. The rule uses a YAML-decoded Unicode positive class, so it avoids Python final line feed and ECMAScript NEL escape differences. The string type, `minLength`, optional omission and non-null wire behavior are unchanged, and nothing is coerced, trimmed, normalized or case-folded. Valid Unicode IDs, interior whitespace and the `FEFF` and `001C` to `001F` code points that Go does not treat as space stay accepted. Null and omission semantics of other DTO types are not tightened globally.
+
+The server working `alpha` branch has also merged unrelated Wiki PR 60 and image PR 61. The SDKs intentionally pin the reviewed model-only commit instead of adopting those unrelated API features. The pin commit exists locally and its push is pending; it will be a public `alpha` ancestor before any SDK push, and publication is not claimed yet. The user explicitly approved pushing server `alpha` and the four SDK `feature/user-company-projects` branches, with repo-admin team membership and bypass verified by the leader and no policy change.
+
+### Follow-up impact assessment
+
+No package version, dependency, CI, endpoint, count, authentication, billing, provider, hold or restart change was made, and no deployment, paid or live provider test, or new release is claimed. No runtime change.
+
+### Follow-up validation steps
+
+- Go 1.27.4: root and tooling `go vet` and uncached race tests with SQL passed. Root coverage was 91.28% (6319/6923). The contract checkers and unit tests passed. `govulncheck` v1.9.0 passed in both modules with zero reachable vulnerabilities; the unchanged required-module advisories were not live called and are not part of this delta.
+- The changed checker pin lines 9 and 59 are covered at 100% through Python coverage. No production runtime source changed.
+- Documentation-only record update on 2026-11-14. Checked that the five operation records are the only files written by this step and that the reviewed source files remain identical to the manifest at `/tmp/envai-sdk-model-minor-20261113/review/manifest.json` (50 changed paths across the five repositories; trace records are excluded from the gate).
+- Quality judgment `PASS` and security review `PASS` over combined source and test snapshot `cb56581c5f2e5c9f947901e63a56521d126a3bdee4a025afc48339952e902e60` (lexically sorted repository name and path, NUL, bytes, NUL). All 50 paths were read and their diffs matched. Security review found no authentication, payer, provider or retry change and verified the six pinned sources.
+- This is local completion of the code task. Commit and push are pending, so green remote CI and remote publication are not claimed. Python 3.11 and 3.12, Go 1.24 and 1.26, other PHP editions, Laravel 11 and 12, and Node 22 were not run locally; the remote CI matrices run after commit and push. `git diff --check` passed in every repository.
+- Test resources were limited to task-named isolated Podman PostgreSQL and MySQL containers; `envai-netbird-demo-*` resources were not touched. Cleanup stays pending until the publication tests complete, and the leader owns removal at closure.

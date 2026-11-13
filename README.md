@@ -160,7 +160,7 @@ See [native background tasks](docs/background-tasks.md) for opt-in task sessions
 
 ## Project resources, deletion and observability
 
-Unreleased. Pinned canonical contract: `digitalygo/envai-teams` at `7f4085dbfdd3f208b82716119cff1860fbd502bb`. Of the 146 server operations, the reviewed subset now has 92 (89 callable plus 3 API-key stubs). Fourteen operations are new relative to the previous subset:
+Unreleased. Pinned canonical contract: `digitalygo/envai-teams` at `f970714c0a358ff94b14f15eabde197c55861e74`. Of the 146 server operations, the reviewed subset now has 92 (89 callable plus 3 API-key stubs). Fourteen operations are new relative to the previous subset:
 
 | Group | Methods | Count |
 | --- | --- | --- |

@@ -6,7 +6,7 @@ import re
 
 # Exact reviewed backend source pin; this does not imply a published release.
 EXPECTED_CONTRACT_REPOSITORY = 'digitalygo/envai-teams'
-EXPECTED_CONTRACT_COMMIT = '7f4085dbfdd3f208b82716119cff1860fbd502bb'
+EXPECTED_CONTRACT_COMMIT = 'f970714c0a358ff94b14f15eabde197c55861e74'
 REQUIRED_OPERATIONS = {
     'deleteWorkspace', 'updateChat', 'deleteChat', 'listChatCrons', 'getChatCron',
     'updateChatCron', 'deleteChatCron', 'listProjectSkills', 'createProjectSkill',
@@ -56,7 +56,7 @@ def verify(root):
         assert len(data) == entry['bytes'], name + ' byte count'
         assert hashlib.sha256(data).hexdigest() == entry['sha256'], name + ' SHA256'
         assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == entry['git_blob_sha'], name + ' Git blob'
-    assert sources['openapi.yaml']['git_blob_sha'] == 'fa965e896047f94084ddc7160a5a3cbf9633b986'
+    assert sources['openapi.yaml']['git_blob_sha'] == '388995332129814273560703eb16a36cb51e4d73'
     # Original numeric v2 is immutable, independently of the new source pin.
     assert sources['events-v2.json']['git_blob_sha'] == '02b13b23cd06eacd81059d1ed99e0027769d75e4'
     fixtures = provenance['generated_fixtures']
