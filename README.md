@@ -79,6 +79,16 @@ Low-level methods remain available: `Events`, `Next`, `Cursor`, `Close`, `SendCh
 
 A stream rejects simultaneous readers. Its cursor is safe to inspect concurrently. `ping` has sequence zero and does not move the cursor. Replay duplicates are skipped; an upward sequence gap triggers bounded recovery and an unrecoverable gap raises `ReplayGapError`. Reconnect is opt-in through `MaxReconnects`; the budget applies to the stream's lifetime. `After` checkpoints are only best-effort within the same resident server runtime.
 
+## Per-turn model selection
+
+Set `TurnOptions.Model` (or `ChatMessageRequest.Model` for `SendChatMessage`) with `envai.Present("<id>")` to pin the root model for that turn only. Use an exact, case-sensitive `id` from `GET /models`; leave it unset for the normal cascade. `Selectable == false` is guidance, not a client-side gate. See [per-turn model selection](docs/model-selection.md) for errors, idempotency and limits.
+
+```go
+result, err := client.RunTurn(ctx, chat.ID, "Summarize the project", envai.TurnOptions{
+    Model: envai.Present("vendor/model-id"),
+})
+```
+
 ## Client tools
 
 1. Implement handlers in your application and register them explicitly with `NewRegistry`.
@@ -150,7 +160,7 @@ See [native background tasks](docs/background-tasks.md) for opt-in task sessions
 
 ## Project resources, deletion and observability
 
-Unreleased. Pinned canonical contract: `digitalygo/1-1-5-envai-aaas` at `ba021aa61e30e379880f809d45f90e5d3564d43e`. Of the 146 server operations, the reviewed subset now has 92 (89 callable plus 3 API-key stubs). Fourteen operations are new relative to the previous subset:
+Unreleased. Pinned canonical contract: `digitalygo/envai-teams` at `7f4085dbfdd3f208b82716119cff1860fbd502bb`. Of the 146 server operations, the reviewed subset now has 92 (89 callable plus 3 API-key stubs). Fourteen operations are new relative to the previous subset:
 
 | Group | Methods | Count |
 | --- | --- | --- |

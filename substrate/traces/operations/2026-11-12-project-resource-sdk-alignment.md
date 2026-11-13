@@ -1,7 +1,13 @@
 ---
 status: completed
 created_at: 2026-11-12
+updated_at: 2026-11-13
 files_edited:
+  - contract/events.json
+  - docs/model-selection.md
+  - model_turn_test.go
+  - models_generated.go
+  - stream.go
   - README.md
   - client.go
   - client_test.go
@@ -32,7 +38,10 @@ files_edited:
 rationale:
   - Expose the backend's existing project-key resource and reporting operations through the Go SDK.
   - Preserve generated API compatibility, precise accounting values and safe pagination.
+  - Preserve exact per-turn model selection through typed requests and RunTurn.
 supporting_docs:
+  - https://github.com/digitalygo/envai-teams/tree/7f4085dbfdd3f208b82716119cff1860fbd502bb
+  - ../../../docs/model-selection.md
   - ../../../AGENTS.md
   - ../../../docs/api-reference.md
   - ../../../docs/contract3-migration.md
@@ -130,3 +139,44 @@ The backend advanced independently during verification without changing the
 pinned contracts, request/resource definitions or routes. Temporary databases
 were isolated per SDK, and their containers and private connection files are
 removed at task closure.
+
+## Update: 2026-11-13 per-turn model selection
+
+### Summary and reasoning
+
+Starting from SDK `791db34` on `feature/user-company-projects`, refreshed the
+current contracts to backend `7f4085dbfdd3f208b82716119cff1860fbd502bb`, which
+already included the requested `alpha` merge after pull. Backend PR 58 was
+current and push reported no further changes. GitHub metadata now resolves
+the backend to `digitalygo/envai-teams`; prior source names above are historical.
+
+Added `Optional[string]` model fields to `ChatMessageRequest` and `TurnOptions`.
+`RunTurn` copies the option into its fresh request. Invalid explicit null,
+non-string, empty and padded model values fail before message submission,
+without normalization or paid retry. The override does not become a default,
+change the team, require native tasks, prefetch a catalog or authorize routing.
+Generated `LLMModelEntry.Selectable` remains guidance, not a filter or gate.
+
+### Impact and verification
+
+No dependency, workflow, version, endpoint or backend source change was added.
+All six source snapshots match the backend pin; frozen v2 and historical
+captures are unchanged. The new guide covers optional values, idempotency,
+model errors, event identities and resident-only replay.
+
+Independent contract checks and checker tests, repeated generation, formatting,
+vet and full uncached race tests passed with Go 1.27.4. Root tests used an
+isolated PostgreSQL 18 database; tooling tests passed vet and race checks with
+isolated MySQL 8.4. Final overall statement coverage was 91.28%, with 17/17
+statements in changed executable blocks covered, including generated decoding.
+Both `govulncheck@v1.9.0` scans passed with zero reachable vulnerabilities;
+two root-module and three tooling-module advisories affected required modules
+but no imported vulnerable package or called vulnerable symbol.
+
+Quality judgment and security review returned PASS for non-trace snapshot
+`30ecabf7a0131b5932d946328191777dc94abe3ffea6bb07d7b4166d758b86e0`.
+Go 1.24/1.26 and actionlint were not run locally. No live provider, deployment
+or release verification is implied. Evidence remains under
+`/tmp/envai-model-sdk-verify/leader-go*`; task containers, their volumes and
+private connection files were removed after verification. Unrelated resources
+remain intact.

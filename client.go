@@ -339,6 +339,22 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	if err = validateWikiBody(op, body); err != nil {
 		return nil, err
 	}
+	if op.ID == "sendChatMessage" {
+		data, marshalErr := json.Marshal(body)
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+		var fields map[string]json.RawMessage
+		if json.Unmarshal(data, &fields) != nil {
+			return nil, errors.New("envai: invalid message body")
+		}
+		if raw, exists := fields["model"]; exists {
+			var model string
+			if string(raw) == "null" || json.Unmarshal(raw, &model) != nil || model == "" || strings.TrimSpace(model) != model {
+				return nil, errors.New("envai: model must be a nonempty unpadded string")
+			}
+		}
+	}
 	if c.config.StrictValidation {
 		if err = c.validateStrictRequest(op, params, body); err != nil {
 			return nil, err

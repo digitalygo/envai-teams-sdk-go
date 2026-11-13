@@ -117,7 +117,7 @@ The 14 rows for `DeleteWorkspace`, `UpdateChat`, `DeleteChat`, the four chat cro
 
 ## Project resources, deletion and observability
 
-Unreleased on `feature/user-company-projects`; the published `v1.0.0-alpha.1` does not include these methods, and this page makes no claim about a future version. The canonical source is `digitalygo/1-1-5-envai-aaas` at `ba021aa61e30e379880f809d45f90e5d3564d43e` (146 server operations, 92 in the reviewed SDK subset, 89 callable, 3 API-key stubs). Project and workspace IDs are opaque; pass the values the server returned.
+Unreleased on `feature/user-company-projects`; the published `v1.0.0-alpha.1` does not include these methods, and this page makes no claim about a future version. The canonical source is `digitalygo/envai-teams` at `7f4085dbfdd3f208b82716119cff1860fbd502bb` (146 server operations, 92 in the reviewed SDK subset, 89 callable, 3 API-key stubs). Project and workspace IDs are opaque; pass the values the server returned.
 
 `X-Envai-Project-Id` is exposed as `XEnvaiProjectID Optional[string]` on cron, usage and log params. A project API key derives its project from the credential; a header that differs from it is rejected by the server with 403.
 

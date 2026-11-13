@@ -161,6 +161,7 @@
     "body": {
       "message": "Summarize the last week of traffic",
       "attachment_ids": [],
+      "model": "vendor/not-in-client-list",
       "strict_model": true
     },
     "status": 202,
