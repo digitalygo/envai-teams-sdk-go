@@ -61,6 +61,7 @@ type parameter struct {
 	Name     string `json:"name"`
 	In       string `json:"in"`
 	Required bool   `json:"required"`
+	Repeated bool   `json:"repeated"`
 }
 type Client struct {
 	config     Config
@@ -217,7 +218,13 @@ func (c *Client) requestURL(op operation, params map[string]any) (string, error)
 		if p.Required && (!exists || v == nil || fmt.Sprint(v) == "") {
 			return "", fmt.Errorf("envai: required parameter %s missing", p.Name)
 		}
-		if !exists || v == nil {
+		if !exists {
+			continue
+		}
+		if v == nil {
+			if p.Repeated {
+				return "", fmt.Errorf("envai: parameter %s must be a string list", p.Name)
+			}
 			continue
 		}
 		value := fmt.Sprint(v)
@@ -227,7 +234,17 @@ func (c *Client) requestURL(op operation, params map[string]any) (string, error)
 			}
 			path = strings.ReplaceAll(path, "{"+p.Name+"}", url.PathEscape(value))
 		} else if p.In == "query" {
-			q.Set(p.Name, value)
+			if p.Repeated {
+				values, ok := v.([]string)
+				if !ok || len(values) == 0 {
+					return "", fmt.Errorf("envai: parameter %s must be a nonempty string list", p.Name)
+				}
+				for _, item := range values {
+					q.Add(p.Name, item)
+				}
+			} else {
+				q.Set(p.Name, value)
+			}
 		}
 	}
 	for k := range params {
@@ -321,6 +338,22 @@ func (c *Client) do(ctx context.Context, id string, params map[string]any, body 
 	}
 	if err = validateWikiBody(op, body); err != nil {
 		return nil, err
+	}
+	if op.ID == "sendChatMessage" {
+		data, marshalErr := json.Marshal(body)
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+		var fields map[string]json.RawMessage
+		if json.Unmarshal(data, &fields) != nil {
+			return nil, errors.New("envai: invalid message body")
+		}
+		if raw, exists := fields["model"]; exists {
+			var model string
+			if string(raw) == "null" || json.Unmarshal(raw, &model) != nil || model == "" || strings.TrimSpace(model) != model {
+				return nil, errors.New("envai: model must be a nonempty unpadded string")
+			}
+		}
 	}
 	if c.config.StrictValidation {
 		if err = c.validateStrictRequest(op, params, body); err != nil {
@@ -487,6 +520,12 @@ func (c *Client) call(ctx context.Context, id string, params map[string]any, bod
 	}
 	if int64(len(b)) > c.config.MaxResponseBytes {
 		return errors.New("envai: response exceeds configured limit")
+	}
+	if id == "getProjectLogs" {
+		b, err = normalizeProjectLogEntryMetadata(b)
+		if err != nil {
+			return err
+		}
 	}
 	if c.config.StrictValidation {
 		if err = c.validateStrictResponse(c.operations[id], resp.StatusCode, b); err != nil {

@@ -11,7 +11,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -27,7 +28,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -43,12 +45,14 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "task_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -64,12 +68,14 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "task_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -85,7 +91,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -101,7 +108,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -117,7 +125,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -133,12 +142,14 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -154,12 +165,14 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "after",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -175,7 +188,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -191,7 +205,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -207,7 +222,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -223,7 +239,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -239,7 +256,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -255,7 +273,8 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -301,7 +320,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -317,7 +337,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -333,7 +354,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -349,7 +371,25 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "deleteWorkspace",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -365,7 +405,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -381,7 +422,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -397,12 +439,14 @@
       {
         "name": "name",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -418,12 +462,14 @@
       {
         "name": "name",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -439,12 +485,14 @@
       {
         "name": "name",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -460,7 +508,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -476,7 +525,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -492,12 +542,60 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "updateChat",
+    "method": "PUT",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "deleteChat",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}/chats/{chat_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "chat_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -513,42 +611,50 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "status",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "model_orchestrator",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "started_at[from]",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "started_at[to]",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "page",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "per_page",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -564,17 +670,142 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "completion_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "listChatCrons",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/crons",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "origin_chat_id",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "getChatCron",
+    "method": "GET",
+    "path": "/workspaces/{workspace_id}/crons/{cron_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "cron_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "updateChatCron",
+    "method": "PATCH",
+    "path": "/workspaces/{workspace_id}/crons/{cron_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "cron_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "deleteChatCron",
+    "method": "DELETE",
+    "path": "/workspaces/{workspace_id}/crons/{cron_id}",
+    "authenticated": true,
+    "kind": "empty",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "workspace_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "cron_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -590,12 +821,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "path",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -611,7 +844,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -627,7 +861,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -643,17 +878,20 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "path",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "recursive",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -669,12 +907,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "path",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -690,7 +930,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -706,7 +947,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -722,7 +964,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -738,7 +981,8 @@
       {
         "name": "agent_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -754,7 +998,8 @@
       {
         "name": "agent_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -770,7 +1015,8 @@
       {
         "name": "agent_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -786,7 +1032,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -802,7 +1049,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -818,7 +1066,8 @@
       {
         "name": "team_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -834,7 +1083,8 @@
       {
         "name": "team_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -850,7 +1100,8 @@
       {
         "name": "team_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -866,7 +1117,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -882,7 +1134,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -898,7 +1151,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -914,12 +1168,14 @@
       {
         "name": "key_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -945,7 +1201,8 @@
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -961,12 +1218,14 @@
       {
         "name": "record",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -982,7 +1241,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -998,7 +1258,8 @@
       {
         "name": "X-Envai-Project-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -1014,22 +1275,26 @@
       {
         "name": "generation",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "artifact",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "expires",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "signature",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1045,52 +1310,62 @@
       {
         "name": "provider",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "callback_token",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "webhook-id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "webhook-timestamp",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "webhook-signature",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "X-Fal-Webhook-Request-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "X-Fal-Webhook-User-Id",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "X-Fal-Webhook-Timestamp",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "X-Fal-Webhook-Signature",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "X-BFL-Signature",
         "in": "header",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -1106,17 +1381,20 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1132,12 +1410,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1153,17 +1433,20 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "attachment_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1179,17 +1462,20 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "attachment_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1205,22 +1491,26 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "attachment_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1236,22 +1526,26 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "attachment_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "kind",
         "in": "query",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1267,12 +1561,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1288,12 +1584,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "file_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1309,12 +1607,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "file_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1330,7 +1630,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1346,12 +1647,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1367,12 +1670,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1388,12 +1693,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "Idempotency-Key",
         "in": "header",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1409,12 +1716,14 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "operation_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1430,7 +1739,8 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       }
     ]
   },
@@ -1446,37 +1756,44 @@
       {
         "name": "workspace_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "category_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "from",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "to",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "all",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "type",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       },
       {
         "name": "catalog_revision",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -1502,12 +1819,14 @@
       {
         "name": "chat_id",
         "in": "path",
-        "required": true
+        "required": true,
+        "repeated": false
       },
       {
         "name": "after",
         "in": "query",
-        "required": false
+        "required": false,
+        "repeated": false
       }
     ]
   },
@@ -1520,5 +1839,250 @@
     "body": "",
     "unwrap": false,
     "parameters": []
+  },
+  {
+    "id": "listProjectSkills",
+    "method": "GET",
+    "path": "/projects/{project_id}/skills",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "createProjectSkill",
+    "method": "POST",
+    "path": "/projects/{project_id}/skills",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "getProjectSkill",
+    "method": "GET",
+    "path": "/projects/{project_id}/skills/{skill_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "skill_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "updateProjectSkill",
+    "method": "PUT",
+    "path": "/projects/{project_id}/skills/{skill_id}",
+    "authenticated": true,
+    "kind": "json",
+    "body": "json",
+    "unwrap": true,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "skill_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "deleteProjectSkill",
+    "method": "DELETE",
+    "path": "/projects/{project_id}/skills/{skill_id}",
+    "authenticated": true,
+    "kind": "empty",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "skill_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "getProjectUsage",
+    "method": "GET",
+    "path": "/projects/{project_id}/usage",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "from",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "to",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "api_key_id",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "per_page",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      }
+    ]
+  },
+  {
+    "id": "getProjectLogs",
+    "method": "GET",
+    "path": "/projects/{project_id}/logs",
+    "authenticated": true,
+    "kind": "json",
+    "body": "",
+    "unwrap": false,
+    "parameters": [
+      {
+        "name": "project_id",
+        "in": "path",
+        "required": true,
+        "repeated": false
+      },
+      {
+        "name": "X-Envai-Project-Id",
+        "in": "header",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "view",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "from",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "to",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "api_key_id",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "chat_id",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "type",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "types[]",
+        "in": "query",
+        "required": false,
+        "repeated": true
+      },
+      {
+        "name": "workspace_ids[]",
+        "in": "query",
+        "required": false,
+        "repeated": true
+      },
+      {
+        "name": "api_key_ids[]",
+        "in": "query",
+        "required": false,
+        "repeated": true
+      },
+      {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      },
+      {
+        "name": "per_page",
+        "in": "query",
+        "required": false,
+        "repeated": false
+      }
+    ]
   }
 ]

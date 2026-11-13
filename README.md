@@ -1,16 +1,19 @@
-> Contract 3 migration: ATP and Wiki/source requests now negotiate version 3 automatically. Cost fields are nullable pointers; old-server mutations fail closed. See [migration](docs/contract3-migration.md) and [Wiki lifecycle and durable webhooks](docs/wiki.md).
-
 # Envai Teams Go SDK
+
+> Contract 3 migration: ATP and Wiki/source requests now negotiate version 3 automatically. Cost fields are nullable pointers; old-server mutations fail closed. See [migration](docs/contract3-migration.md) and [Wiki lifecycle and durable webhooks](docs/wiki.md).
 
 Typed Go client for the Envai Teams HTTP API and Agent Team Protocol (ATP v3, with strict historical v2 replay). Requires Go 1.24 or newer. Use a supported, security-patched Go release in production.
 
 The published **alpha prerelease** is [`v1.0.0-alpha.1`](https://github.com/digitalygo/envai-teams-sdk-go/releases/tag/v1.0.0-alpha.1). Pin this version for reproducible use. Prerelease APIs may change; review upgrades before production use.
 
-Includes named, typed methods for the reviewed **78-operation subset** (75 callable operations plus 3 unsupported API-key stubs), **39 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+Includes named, typed methods for the reviewed **92-operation subset** (89 callable operations plus 3 unsupported API-key stubs), **39 typed ATP events**, SSE streaming, turn helpers, and opt-in signed client tools. No local filesystem or shell handlers are installed.
+
+> [!note]
+> The 14 project-scoped operations described in [Project resources, deletion and observability](#project-resources-deletion-and-observability) are **unreleased**. They exist on the `feature/user-company-projects` branch only. The published `v1.0.0-alpha.1` does not contain them, and this documentation makes no claim about a future tag, publication or version. Select a reviewed commit SHA to use them.
 
 - [Getting started and configuration](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/getting-started.md)
 - [Definitions compiler, reconciliation and CLI](docs/definitions.md)
-- [HTTP API reference](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/api-reference.md)
+- [HTTP API reference](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/api-reference.md) (the repository copy, [docs/api-reference.md](docs/api-reference.md), also covers the unreleased project operations)
 - [Streaming, recovery, and errors](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/streaming.md)
 - [Client-tool safety and deployment](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/docs/client-tools.md)
 - [Runnable quickstart](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/quickstart/main.go) and [echo handler](https://github.com/digitalygo/envai-teams-sdk-go/blob/alpha/examples/echo/main.go)
@@ -70,11 +73,21 @@ result, err := client.RunTurn(ctx, chat.ID, "Summarize the project", envai.TurnO
 })
 ```
 
-`RunTurn` opens SSE, waits for a live `ping`, sends the message, correlates the returned turn ID and requires `turn.completed`, `turn.cancelled`, or `turn.failed`. It returns the terminal event, orchestrator text and last sequence. A failed or cancelled terminal is returned as that terminal; inspect `result.Terminal.Type`. Transport termination without a terminal is an error. `OnEvent` receives events of the accepted turn only. Typed payloads cover all 28 declared types, with raw preservation for future types.
+`RunTurn` opens SSE, waits for a live `ping`, sends the message, correlates the returned turn ID and requires `turn.completed`, `turn.cancelled`, or `turn.failed`. It returns the terminal event, orchestrator text and last sequence. A failed or cancelled terminal is returned as that terminal; inspect `result.Terminal.Type`. Transport termination without a terminal is an error. `OnEvent` receives events of the accepted turn only. Typed payloads cover all 39 declared types, with raw preservation for future types.
 
 Low-level methods remain available: `Events`, `Next`, `Cursor`, `Close`, `SendChatMessage`, and `CancelChatTurn`. Closing a local stream cancels its local network I/O; it does not cancel the remote turn. Remote cancellation requires `CancelChatTurn`, followed by observing `turn.cancelled`.
 
 A stream rejects simultaneous readers. Its cursor is safe to inspect concurrently. `ping` has sequence zero and does not move the cursor. Replay duplicates are skipped; an upward sequence gap triggers bounded recovery and an unrecoverable gap raises `ReplayGapError`. Reconnect is opt-in through `MaxReconnects`; the budget applies to the stream's lifetime. `After` checkpoints are only best-effort within the same resident server runtime.
+
+## Per-turn model selection
+
+Set `TurnOptions.Model` (or `ChatMessageRequest.Model` for `SendChatMessage`) with `envai.Present("<id>")` to pin the root model for that turn only. Use an exact, case-sensitive `id` from `GET /models`; leave it unset for the normal cascade. `Selectable == false` is guidance, not a client-side gate. See [per-turn model selection](docs/model-selection.md) for errors, idempotency and limits.
+
+```go
+result, err := client.RunTurn(ctx, chat.ID, "Summarize the project", envai.TurnOptions{
+    Model: envai.Present("vendor/model-id"),
+})
+```
 
 ## Client tools
 
@@ -129,6 +142,8 @@ go vet ./...
 python3 scripts/check_coverage.py coverage.out
 ```
 
+CI runs `govulncheck` on the latest Go 1.27 patch release. Past measurement for this branch: a local run on Go 1.27.1 reported standard-library advisories, while a run scoped to that one job with `GOTOOLCHAIN=go1.27.4` passed. Use a patched toolchain for builds. Do not recommend or ship an unpatched Go runtime in production.
+
 The generator creates models, named operations and event payloads; transport, replay and tool execution are handwritten. CI verifies generated outputs are reproducible and the pinned contract hashes are unchanged, then runs unit/integration mocks, the race detector, static checks and a coverage floor. The shared event, SSE, and signature fixtures test cross-language wire compatibility. Language-specific helpers and storage adapters differ; use this repository’s API reference for Go behavior.
 
 ## License
@@ -139,14 +154,60 @@ MIT, Copyright (c) 2026 DigItalyGo. The original repository license is preserved
 
 `contract/provenance.json` records the six byte-exact HTTP, current/legacy event, Wiki, terminal snapshot and native-task contracts separately from SDK-authored/generated fixtures. Source entries preserve the original commit, source path, byte count, SHA-256 and Git blob identity. Public guides in `docs/` are SDK documentation, not copied source contracts. `python scripts/check_contracts.py` verifies every retained entry; `python scripts/test_check_contracts.py` checks that snapshot drift is rejected. The contracts are bundled, so reading or building this SDK does not require access to another repository.
 
-
 See [chat attachments](docs/chat-attachments.md) for upload, conversion, retry and streaming with files. This surface is unreleased until the matching backend is deployed.
 
 See [native background tasks](docs/background-tasks.md) for opt-in task sessions, signed post-turn tools, final delegated-job outcomes, cancellation and phase classification. This surface is unreleased.
 
+## Project resources, deletion and observability
+
+Unreleased. Pinned canonical contract: `digitalygo/envai-teams` at `f970714c0a358ff94b14f15eabde197c55861e74`. Of the 146 server operations, the reviewed subset now has 92 (89 callable plus 3 API-key stubs). Fourteen operations are new relative to the previous subset:
+
+| Group | Methods | Count |
+| --- | --- | --- |
+| Workspace deletion | `DeleteWorkspace` | 1 |
+| Chat update and deletion | `UpdateChat`, `DeleteChat` | 2 |
+| Chat crons | `ListChatCrons`, `GetChatCron`, `UpdateChatCron`, `DeleteChatCron` | 4 |
+| Project skills | `ListProjectSkills`, `CreateProjectSkill`, `GetProjectSkill`, `UpdateProjectSkill`, `DeleteProjectSkill` | 5 |
+| Project reports | `GetProjectUsage`, `GetProjectLogs` | 2 |
+
+Cron creation has no public endpoint and no SDK method; schedules are created only by the server's native cron tool during an active turn. The signatures, request fields and error behavior are in the [API reference](docs/api-reference.md#project-resources-deletion-and-observability).
+
+Key behavior:
+
+- **Deletion is a cut, not a purge.** `DeleteWorkspace` and `DeleteChat` return HTTP 200 with a `CleanupResult`. Its `Cleanup` intents are typically `pending` or `processing`: access is cut and content removal is still outstanding. A 200 does not mean content was physically purged. Accounting rows and completion metadata are retained. Cron cancellation and skill deletion return 204 with no body.
+- **No automatic cancellation or retry.** A delete refused with HTTP 409 is returned as `*APIError`; the SDK just surfaces 409. Conflicts arise from active turns or active cron protection, and backend active cron protection can persist even after turn cancellation without guaranteeing that cancellation removes the guard. Inspect the error code and existing cron, occurrence, and turn state, taking explicit operator action where appropriate rather than treating destructive turn cancellation as a generic recipe.
+- **No mutation retries.** Failures such as 402 (billing refusal) or 503 (for example the new `provider_configuration_error` on image generation) surface as `*APIError` with the server `Status`, `Type` and `Code` preserved. The SDK does not retry mutations.
+- **Logs have three views.** The low-level `GetProjectLogs` returns the `json.RawMessage` body unchanged. Use `GetProjectLogsEvents` (paginated `ProjectLogCollection`), `GetProjectLogsAnalytics` and `GetProjectLogsFilterCatalog`, which set the matching `view` and unwrap the actual response shape.
+- **Numeric page iterators.** `ProjectUsagePages` and `ProjectLogPages` are `iter.Seq2` helpers like `CompletionPages`. They use the numeric `page` filter and the local origin, honor context cancellation and `break`, and never follow an external `next` URL.
+- **Skill request maps stay maps.** `ProjectSkillCreateRequest` and `ProjectSkillUpdateRequest` are `map[string]json.RawMessage`, not structs. Omit a key to leave it unchanged; pass `json.RawMessage("null")` only for `description`, which is nullable.
+
+```go
+skill, err := client.CreateProjectSkill(ctx, envai.CreateProjectSkillParams{
+    ProjectID: projectID,
+    Body: envai.ProjectSkillCreateRequest{
+        "name":    json.RawMessage(`"incident_response"`),
+        "content": json.RawMessage(`"# Incident response\n"`),
+    },
+})
+if err != nil { return err }
+
+for page, err := range client.ProjectUsagePages(ctx, envai.GetProjectUsageParams{
+    ProjectID: projectID,
+    From:      envai.Present("2026-11-01"),
+    To:        envai.Present("2026-11-07"),
+}) {
+    if err != nil { return err }
+    for _, day := range page.Data {
+        _ = day.Totals // decimal strings per currency; never sum across currencies
+    }
+}
+```
+
+No new ATP event types were added: the 39 typed events and the opt-in native task surface are unchanged. `chat.cron.wakeup`, `chat.title.updated`, `billing.limit_reached` and `billing.credit_exhausted` were already typed. Billing events may have a null `turn_id` before admission or a real `turn_id` midturn, and are never turn terminals. Contract 2 (v2) remains frozen. This SDK exposes no human administration or financial surface, and the three API-key operations remain local stubs.
+
 ## Pagination, polling and shared tool persistence
 
-`ListCompletionsParams.Page` selects an explicit page. `CompletionPages(ctx, params)` iterates validated numeric pages on the configured API origin and stops when the consumer breaks. It never follows server-supplied links to another host.
+`ListCompletionsParams.Page` selects an explicit page. `CompletionPages(ctx, params)`, `ProjectUsagePages(ctx, params)` and `ProjectLogPages(ctx, params)` iterate validated numeric pages on the configured API origin and stop when the consumer breaks. They never follow server-supplied links to another host.
 
 `WaitForSource`, `WaitForWikiOperation` and `WaitForImage` perform read-only polling with positive `PollOptions{Interval, Timeout}`. `GenerateAndWait` admits an image once, then polls using the same overall deadline. Terminal failures/cancellations remain typed results; uncertain admissions are not resubmitted. Source polling never starts conversion retries or indexing. All helpers also honor caller context cancellation.
 
@@ -167,6 +228,6 @@ Workspaces, chats, agents and teams replace UserID ownership with ProjectID and 
 
 Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
 
-The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 92-operation subset, not entire-server parity: 89 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. Human financial and administration operations are not generated.
 
 Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

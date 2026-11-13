@@ -161,6 +161,7 @@
     "body": {
       "message": "Summarize the last week of traffic",
       "attachment_ids": [],
+      "model": "vendor/not-in-client-list",
       "strict_model": true
     },
     "status": 202,
@@ -424,6 +425,22 @@
     }
   },
   {
+    "id": "deleteWorkspace",
+    "go_name": "DeleteWorkspace",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "resource_type": "workspace",
+        "resource_id": "fixture",
+        "cleanup": []
+      }
+    }
+  },
+  {
     "id": "createProjectTool",
     "go_name": "CreateProjectTool",
     "parameters": {
@@ -634,6 +651,47 @@
     }
   },
   {
+    "id": "updateChat",
+    "go_name": "UpdateChat",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "title": "Q3 rollout plan"
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "title": "fixture",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "deleteChat",
+    "go_name": "DeleteChat",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "resource_type": "workspace",
+        "resource_id": "fixture",
+        "cleanup": []
+      }
+    }
+  },
+  {
     "id": "listCompletions",
     "go_name": "ListCompletions",
     "parameters": {
@@ -706,6 +764,110 @@
         "updated_at": "fixture"
       }
     }
+  },
+  {
+    "id": "listChatCrons",
+    "go_name": "ListChatCrons",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "OriginChatID": "fixture",
+      "Status": "active"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "getChatCron",
+    "go_name": "GetChatCron",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "CronID": "cron_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "cron_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "origin_chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "target_mode": "same_chat",
+        "prompt": "fixture",
+        "interval_minutes": 1,
+        "daily_at": "fixture",
+        "timezone": "fixture",
+        "start_at": "fixture",
+        "repeat_count": 1,
+        "until": "fixture",
+        "status": "active",
+        "scheduled_count": 1,
+        "delivery_count": 1,
+        "next_due_at": "fixture",
+        "max_until": "fixture",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "updateChatCron",
+    "go_name": "UpdateChatCron",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "CronID": "cron_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "target_mode": "same_chat",
+      "prompt": "fixture",
+      "interval_minutes": 1,
+      "daily_at": "fixture",
+      "timezone": "fixture",
+      "start_at": "fixture",
+      "repeat_count": 1,
+      "until": "fixture"
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "cron_01j5abcdefghjkmnpqrstvwxyz",
+        "workspace_id": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+        "origin_chat_id": "cht_01j5abcdefghjkmnpqrstvwxyz",
+        "team_id": "team_01j5abcdefghjkmnpqrstvwxyz",
+        "target_mode": "same_chat",
+        "prompt": "fixture",
+        "interval_minutes": 1,
+        "daily_at": "fixture",
+        "timezone": "fixture",
+        "start_at": "fixture",
+        "repeat_count": 1,
+        "until": "fixture",
+        "status": "active",
+        "scheduled_count": 1,
+        "delivery_count": 1,
+        "next_due_at": "fixture",
+        "max_until": "fixture",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "deleteChatCron",
+    "go_name": "DeleteChatCron",
+    "parameters": {
+      "WorkspaceID": "wsp_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "CronID": "cron_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 204,
+    "response": null
   },
   {
     "id": "indexWorkspaceFiles",
@@ -2081,5 +2243,176 @@
       "tool_kinds": [],
       "features": []
     }
+  },
+  {
+    "id": "listProjectSkills",
+    "go_name": "ListProjectSkills",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": []
+    }
+  },
+  {
+    "id": "createProjectSkill",
+    "go_name": "CreateProjectSkill",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "name": "incident_response",
+      "description": "Safe incident handling",
+      "content": "# Incident response\n\nEscalate after triage.\n"
+    },
+    "status": 201,
+    "response": {
+      "data": {
+        "id": "psk_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "incident_response",
+        "description": "fixture",
+        "content": "# Incident response\n\nEscalate after triage.\n",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "getProjectSkill",
+    "go_name": "GetProjectSkill",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "SkillID": "psk_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "psk_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "incident_response",
+        "description": "fixture",
+        "content": "# Incident response\n\nEscalate after triage.\n",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "updateProjectSkill",
+    "go_name": "UpdateProjectSkill",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "SkillID": "psk_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": {
+      "name": "fixture",
+      "description": "fixture",
+      "content": "fixture"
+    },
+    "status": 200,
+    "response": {
+      "data": {
+        "id": "psk_01j5abcdefghjkmnpqrstvwxyz",
+        "project_id": "prj_01j5abcdefghjkmnpqrstvwxyz",
+        "created_by_user_id": "usr_01j5abcdefghjkmnpqrstvwxyz",
+        "name": "incident_response",
+        "description": "fixture",
+        "content": "# Incident response\n\nEscalate after triage.\n",
+        "created_at": "fixture",
+        "updated_at": "fixture"
+      }
+    }
+  },
+  {
+    "id": "deleteProjectSkill",
+    "go_name": "DeleteProjectSkill",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "SkillID": "psk_01j5abcdefghjkmnpqrstvwxyz"
+    },
+    "body": null,
+    "status": 204,
+    "response": null
+  },
+  {
+    "id": "getProjectUsage",
+    "go_name": "GetProjectUsage",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "From": "2026-09-01",
+      "To": "2026-09-30",
+      "APIKeyID": "key_01j5abcdefghjkmnpqrstvwxyz",
+      "Page": 1,
+      "PerPage": 1
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": [],
+      "links": {
+        "first": "fixture",
+        "last": "fixture",
+        "prev": "fixture",
+        "next": "fixture"
+      },
+      "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 1,
+        "to": 1,
+        "total": 1
+      }
+    }
+  },
+  {
+    "id": "getProjectLogs",
+    "go_name": "GetProjectLogs",
+    "parameters": {
+      "ProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "XEnvaiProjectID": "prj_01j5abcdefghjkmnpqrstvwxyz",
+      "View": "events",
+      "From": "2026-09-01",
+      "To": "2026-09-30",
+      "ChatID": "cht_01j5abcdefghjkmnpqrstvwxyz",
+      "Types": [
+        "fixture"
+      ],
+      "WorkspaceIDs": [
+        "fixture"
+      ],
+      "APIKeyIDs": [
+        "fixture"
+      ],
+      "Page": 1,
+      "PerPage": 1
+    },
+    "body": null,
+    "status": 200,
+    "response": {
+      "data": [],
+      "links": {
+        "first": "fixture",
+        "last": "fixture",
+        "prev": "fixture",
+        "next": "fixture"
+      },
+      "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 1,
+        "per_page": 1,
+        "to": 1,
+        "total": 1
+      }
+    },
+    "response_view": "events"
   }
 ]

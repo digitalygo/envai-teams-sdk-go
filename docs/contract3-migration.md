@@ -21,7 +21,18 @@ Full Wiki lifecycle, exact reads, webhook verification and atomic PostgreSQL int
 
 ## Alpha release prediction
 
-A token-free local dry-run of the existing locked Semantic Release tooling, using the verified existing alpha/main topology, published tag and channel note, predicts `v1.0.0-alpha.2` for this breaking change. Its release type is `major`, but Semantic Release continues the unreleased 1.0.0 alpha line. The existing module path and major-version guard remain valid and unchanged. This prediction is not a publication claim; refresh tags before release.
+A token-free local dry-run of the existing locked Semantic Release tooling, using the verified existing alpha/main topology, published tag and channel note, predicts `v1.0.0-alpha.2` for this breaking change. Its release type is `major`, but Semantic Release continues the unreleased 1.0.0 alpha line. The existing module path and major-version guard remain valid and unchanged. This prediction is a past measurement for the earlier breaking change, not a publication claim; refresh tags before release. The project operations listed below are unreleased, and this guide asserts no tag, publication or version for them.
+
+## Project operations (unreleased, additive)
+
+On `feature/user-company-projects` the reviewed subset grew from 78 to 92 operations (75 to 89 callable, 3 unchanged API-key stubs) against the pinned canonical `digitalygo/envai-teams` commit `f970714c0a358ff94b14f15eabde197c55861e74` (146 server operations). The published `v1.0.0-alpha.1` does not contain the 14 additions: `DeleteWorkspace`, `UpdateChat`, `DeleteChat`, `ListChatCrons`, `GetChatCron`, `UpdateChatCron`, `DeleteChatCron`, `ListProjectSkills`, `CreateProjectSkill`, `GetProjectSkill`, `UpdateProjectSkill`, `DeleteProjectSkill`, `GetProjectUsage` and `GetProjectLogs`. They add no required migration for existing callers:
+
+- No ATP event types changed. The 39 typed events stay as they are (`chat.cron.wakeup`, `chat.title.updated`, `billing.limit_reached` and `billing.credit_exhausted` were already typed); billing events may have a null `turn_id` before admission or a real `turn_id` midturn and are not turn terminals, a null terminal cost is still unknown, v2 remains frozen, and native tasks stay opt-in.
+- Deletion returns a `CleanupResult` with pending cleanup, not a physical purge. 409 conflicts (such as `turn_in_progress` or active cron protection) and 402 or 503 failures return `*APIError` with the server `Status`, `Type` and `Code`; mutations are never auto-cancelled or retried. Active cron protection can persist even after turn cancellation without guaranteeing removal of the deletion guard; inspect the error code and existing cron, occurrence, and turn state to take explicit operator action rather than using destructive turn cancellation as a generic recipe. The new 503 `provider_configuration_error` applies to image generation.
+- `ProjectSkillCreateRequest` and `ProjectSkillUpdateRequest` remain maps of `json.RawMessage`; they are not structs.
+- Human administration, financial and API-key management operations remain unsupported.
+
+Details and samples are in the [API reference](api-reference.md#project-resources-deletion-and-observability).
 
 ## Project tenancy and authentication
 
@@ -29,6 +40,6 @@ Workspaces, chats, agents and teams replace UserID ownership with ProjectID and 
 
 Tool registration is project-wide, not user-wide. Use ProjectTool methods and models. Deprecated UserTool aliases forward to project-scoped operations; they do not retain user-wide visibility. A project key selects its project, and any supplied project header must match it. Definition normalization ignores server-owned identity and audit metadata.
 
-The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 78-operation subset, not entire-server parity: 75 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. New human-session, internal and billing operations are not generated.
+The byte-exact server snapshot contains 146 operations. The explicit scripts/sdk-operations.json allowlist retains a reviewed 92-operation subset, not entire-server parity: 89 callable operations plus 3 discoverable API-key administration stubs. API-key list/create/delete fail locally before HTTP or capability discovery with ErrAPIKeyManagementUnsupported (errors.Is supported). The server requires a human session and CSRF for /api/v1/api-keys; use its authenticated application flow. This client never bypasses that boundary. Human financial and administration operations are not generated.
 
 Explicit historical legacy completion reads retain their frozen numeric/owner contract; current strict response validation still requires project ownership fields.

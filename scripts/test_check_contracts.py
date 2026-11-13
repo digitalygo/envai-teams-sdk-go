@@ -16,6 +16,7 @@ class ProvenanceTests(unittest.TestCase):
             copy = pathlib.Path(directory)
             shutil.copytree(root / 'contract', copy / 'contract')
             shutil.copytree(root / 'testdata', copy / 'testdata')
+            shutil.copytree(root / 'scripts', copy / 'scripts')
             verify(copy)
             provenance = json.loads((copy / 'contract/provenance.json').read_text())
             for section in ('sources', 'generated_fixtures', 'shared_fixtures'):
@@ -34,6 +35,7 @@ class ProvenanceTests(unittest.TestCase):
             copy = pathlib.Path(directory)
             shutil.copytree(root / 'contract', copy / 'contract')
             shutil.copytree(root / 'testdata', copy / 'testdata')
+            shutil.copytree(root / 'scripts', copy / 'scripts')
             path = copy / 'contract/provenance.json'
             provenance = json.loads(path.read_text())
             provenance['sources']['openapi.yaml']['git_blob_sha'] = '0' * 40

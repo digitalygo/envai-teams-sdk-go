@@ -91,7 +91,7 @@ for path,items in api['paths'].items():
    rs=rc['application/json']['schema'];resolved=schemas.get(rs.get('$ref','').rsplit('/',1)[-1],rs)
    if set(resolved.get('properties',{}))=={'data'}:rs=resolved['properties']['data'];unwrap=True
    rt=typ(rs,n+'Result')
-  ops.append({'id':oid,'method':method.upper(),'path':path,'authenticated':auth,'kind':kind,'body':bodykind,'unwrap':unwrap,'parameters':[{'name':p['name'],'in':p['in'],'required':p.get('required',False)} for p in pars]})
+  ops.append({'id':oid,'method':method.upper(),'path':path,'authenticated':auth,'kind':kind,'body':bodykind,'unwrap':unwrap,'parameters':[{'name':p['name'],'in':p['in'],'required':p.get('required',False),'repeated':p.get('schema',{}).get('type')=='array'} for p in pars]})
   fields=[];calls=[]
   for p in pars:
    t=typ(p['schema'],n+name(p['name'])); f=name(p['name'])
@@ -121,6 +121,7 @@ while extra:
 (root/'models_generated.go').write_text('package envai\n\nimport "encoding/json"\n\n'+'\n'.join(models))
 (root/'operations_generated.go').write_text('package envai\n\nimport ("context";"encoding/json")\n\n'+'\n'.join(wrappers))
 (root/'contract/operations.json').write_text(json.dumps(ops,indent=2)+'\n')
+(root/'testdata/operations.json').write_text(json.dumps([{k:op[k] for k in ['id','method','path','authenticated']} for op in ops],indent=2)+'\n')
 print(len(schemas),'models;',len(ops),'operations')
 def sample(s,depth=0):
  if depth>15:return None
@@ -146,7 +147,10 @@ for path,methods in api['paths'].items():
   oid=op['operationId'];entry={'id':oid,'go_name':name(oid),'parameters':{},'body':None,'status':204,'response':None}
   for pp in op.get('parameters',[]):
    p=api['components']['parameters'][pp['$ref'].rsplit('/',1)[-1]] if '$ref' in pp else pp
-   if p['name'] not in {'X-Envai-Contract-Version','X-Envai-Extensions'}:entry['parameters'][name(p['name'])]=sample(p['schema'])
+   if p['name'] not in {'X-Envai-Contract-Version','X-Envai-Extensions'}:
+    value=sample(p['schema'])
+    if oid=='getProjectLogs' and p['name'] in {'types[]','workspace_ids[]','api_key_ids[]'}:value=['fixture']
+    entry['parameters'][name(p['name'])]=value
   content=op.get('requestBody',{}).get('content',{})
   if 'application/json' in content:entry['body']=sample(content['application/json']['schema'])
   for status,r in op.get('responses',{}).items():
@@ -155,6 +159,11 @@ for path,methods in api['paths'].items():
     if 'application/json' in r.get('content',{}):entry['response']=sample(r['content']['application/json']['schema'])
     break
   if oid=='resolveChatApproval':entry['status']=409;entry['response']={'error':{'type':'conflict','message':'approval unavailable'}}
+  if oid=='getProjectLogs':
+   entry['parameters'].pop('Type',None)
+   entry['parameters'].pop('APIKeyID',None)
+   entry['response']=sample(schemas['ProjectLogCollection'])
+   entry['response_view']='events'
   cases.append(entry)
 for entry in cases:
  if entry['id']=='classifyChoice':entry['body']['choices']=[{'label':'fixture','description':'First choice'},{'label':'alternative','description':'Second choice'}]

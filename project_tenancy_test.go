@@ -147,7 +147,7 @@ func TestOnlyReviewedOperationsHaveClientMethods(t *testing.T) {
 		t.Fatal(err)
 	}
 	var allowed []string
-	if json.Unmarshal(raw, &allowed) != nil || len(allowed) != 78 {
+	if json.Unmarshal(raw, &allowed) != nil || len(allowed) != 92 {
 		t.Fatal("invalid reviewed inventory")
 	}
 	c := testClient(t, func(http.ResponseWriter, *http.Request) { t.Fatal("unexpected network") })
@@ -155,16 +155,16 @@ func TestOnlyReviewedOperationsHaveClientMethods(t *testing.T) {
 		t.Fatal("unreviewed operation generated")
 	}
 	for _, id := range allowed {
-		if id == "getProjectLogs" {
-			t.Fatal("project logs must remain outside the reviewed public surface")
-		}
 		if _, ok := c.operations[id]; !ok {
 			t.Fatal(id)
 		}
 	}
-	for _, method := range []string{"GetProjectLogs", "CreateProject", "ListProjects", "GetInternalBillingAccount", "CreateBillingCheckoutSession"} {
+	if _, ok := c.operations["getProjectLogs"]; !ok {
+		t.Fatal("project logs missing from reviewed public surface")
+	}
+	for _, method := range []string{"CreateProject", "ListCompanyProjects", "GetCompanyBillingWallet", "CreateCompanyBillingTopup", "UpdateProjectSpendLimit", "GetInternalBillingAccount", "CreateBillingCheckoutSession", "CreateChatCron"} {
 		if reflect.ValueOf(c).MethodByName(method).IsValid() {
-			t.Fatal("unexpected administration method", method)
+			t.Fatal("unexpected human administration method", method)
 		}
 	}
 }

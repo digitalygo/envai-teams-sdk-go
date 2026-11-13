@@ -2763,6 +2763,7 @@ type ChatAttachmentUploadRequest struct {
 type ChatMessageRequest struct {
 	Message       string                     `json:"message"`
 	AttachmentIDs Optional[[]string]         `json:"attachment_ids,omitzero"`
+	Model         Optional[string]           `json:"model,omitzero"`
 	StrictModel   Optional[bool]             `json:"strict_model,omitzero"`
 	Extra         map[string]json.RawMessage `json:"-"`
 }
@@ -2773,7 +2774,7 @@ func (v *ChatMessageRequest) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"message", "attachment_ids", "strict_model"})
+	extra, err := unknownFields(b, []string{"message", "attachment_ids", "model", "strict_model"})
 	if err != nil {
 		return err
 	}
@@ -4250,6 +4251,7 @@ type LLMModelEntry struct {
 	OwnedBy                string                               `json:"owned_by"`
 	Type                   string                               `json:"type"`
 	Deprecated             bool                                 `json:"deprecated"`
+	Selectable             bool                                 `json:"selectable"`
 	SunsetAt               *string                              `json:"sunset_at"`
 	DisplayName            Optional[string]                     `json:"display_name,omitzero"`
 	Description            Optional[string]                     `json:"description,omitzero"`
@@ -4276,7 +4278,7 @@ func (v *LLMModelEntry) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &out); err != nil {
 		return err
 	}
-	extra, err := unknownFields(b, []string{"id", "object", "created", "owned_by", "type", "deprecated", "sunset_at", "display_name", "description", "canonical_slug", "hugging_face_id", "context_length", "max_completion_tokens", "pricing", "architecture", "supported_parameters", "default_parameters", "reasoning", "knowledge_cutoff", "upstream_expiration_date", "alias_target", "is_moderated", "synced_at"})
+	extra, err := unknownFields(b, []string{"id", "object", "created", "owned_by", "type", "deprecated", "selectable", "sunset_at", "display_name", "description", "canonical_slug", "hugging_face_id", "context_length", "max_completion_tokens", "pricing", "architecture", "supported_parameters", "default_parameters", "reasoning", "knowledge_cutoff", "upstream_expiration_date", "alias_target", "is_moderated", "synced_at"})
 	if err != nil {
 		return err
 	}
